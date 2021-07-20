@@ -1,0 +1,8 @@
+service:
+  full_name: "Amazon Simple Notification Service"
+  short_name: "SNS"
+  link: "https://aws.amazon.com/sns/"
+  documentation: "https://docs.aws.amazon.com/sns/latest/dg/index.html"
+api_versions:
+  - api_version: v1alpha1
+    status: available
