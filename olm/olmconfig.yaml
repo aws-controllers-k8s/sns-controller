@@ -1,0 +1,35 @@
+---
+annotations:
+  capabilityLevel: Basic Install
+  shortDescription: AWS SNS controller is a service controller for managing SNS resources
+    in Kubernetes
+displayName: AWS Controllers for Kubernetes - Amazon SNS
+description: |-
+  Manage Simple Notification Service (SNS) resources in AWS from within your Kubernetes cluster.
+
+
+  **About Amazon SNS**
+
+
+  Amazon Simple Notification Service (Amazon SNS) is a managed service that provides message delivery from publishers to subscribers (also known as producers and consumers). Publishers communicate asynchronously with subscribers by sending messages to a topic, which is a logical access point and communication channel. Clients can subscribe to the SNS topic and receive published messages using a supported endpoint type, such as Amazon Kinesis Data Firehose, Amazon SQS, AWS Lambda, HTTP, email, mobile push notifications, and mobile text messages (SMS).
+
+
+  **About the AWS Controllers for Kubernetes**
+
+
+  This controller is a component of the [AWS Controller for Kubernetes](https://github.com/aws/aws-controllers-k8s)
+  project. This project is currently in **developer preview**.
+
+
+  **Pre-Installation Steps**
+
+
+  Please follow the following link: [Red Hat OpenShift](https://aws-controllers-k8s.github.io/community/docs/user-docs/openshift/)
+samples:
+
+maintainers:
+- name: "sns maintainer team"
+  email: "ack-maintainers@amazon.com"
+links:
+- name: Amazon SNS Developer Resources
+  url: https://aws.amazon.com/sns/resources/
