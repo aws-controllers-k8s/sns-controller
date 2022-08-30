@@ -8,5 +8,5 @@ roleRef:
   name: ack-sns-controller
 subjects:
 - kind: ServiceAccount
-  name: default
+  name: ack-sns-controller
   namespace: ack-system
