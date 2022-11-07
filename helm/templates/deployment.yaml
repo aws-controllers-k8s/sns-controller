@@ -58,4 +58,22 @@ spec:
               fieldPath: metadata.namespace
         - name: AWS_REGION
           value: {{ .Values.aws.region }}
+        - name: AWS_ENDPOINT_URL
+          value: {{ .Values.aws.endpoint_url | quote }}
+        {{- if .Values.aws.credentials.secretName }}
+        - name: AWS_SHARED_CREDENTIALS_FILE
+          value: {{ include "aws.credentials.path" . }}
+        - name: AWS_PROFILE
+          value: {{ .Values.aws.credentials.profile }}
+        volumeMounts:
+          - name: {{ .Values.aws.credentials.secretName }}
+            mountPath: {{ include "aws.credentials.secret_mount_path" . }}
+            readOnly: true
+        {{- end }}
       terminationGracePeriodSeconds: 10
+     {{ if .Values.aws.credentials.secretName -}}
+      volumes:
+        - name: {{ .Values.aws.credentials.secretName }}
+          secret:
+            secretName: {{ .Values.aws.credentials.secretName }}
+      {{ end -}}
