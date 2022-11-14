@@ -26,6 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{/* The mount path for the shared credentials file */}}
+{{- define "aws.credentials.secret_mount_path" -}}
+{{- "/var/run/secrets/aws" -}}
+{{- end -}}
+
+{{/* The path the shared credentials file is mounted */}}
+{{- define "aws.credentials.path" -}}
+{{- printf "%s/%s" (include "aws.credentials.secret_mount_path" .) .Values.aws.credentials.secretKey -}}
+{{- end -}}
+
 {{/* The name of the service account to use */}}
 {{- define "service-account.name" -}}
     {{ default "default" .Values.serviceAccount.name }}

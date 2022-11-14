@@ -71,9 +71,9 @@ spec:
             readOnly: true
         {{- end }}
       terminationGracePeriodSeconds: 10
-     {{ if .Values.aws.credentials.secretName -}}
+      {{- if .Values.aws.credentials.secretName }}
       volumes:
         - name: {{ .Values.aws.credentials.secretName }}
           secret:
             secretName: {{ .Values.aws.credentials.secretName }}
-      {{ end -}}
+      {{- end }}
