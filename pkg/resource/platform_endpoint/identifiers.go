@@ -16,7 +16,7 @@
 package platform_endpoint
 
 import (
-	ackv1alpha1 "github.com/aws/aws-controllers-k8s/apis/core/v1alpha1"
+	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
 )
 
 // resourceIdentifiers implements the
@@ -41,6 +41,15 @@ func (ri *resourceIdentifiers) ARN() *ackv1alpha1.AWSResourceName {
 func (ri *resourceIdentifiers) OwnerAccountID() *ackv1alpha1.AWSAccountID {
 	if ri.meta != nil {
 		return ri.meta.OwnerAccountID
+	}
+	return nil
+}
+
+// Region returns the AWS region in which the resource exists, or
+// nil if this information is not known.
+func (ri *resourceIdentifiers) Region() *ackv1alpha1.AWSRegion {
+	if ri.meta != nil {
+		return ri.meta.Region
 	}
 	return nil
 }
