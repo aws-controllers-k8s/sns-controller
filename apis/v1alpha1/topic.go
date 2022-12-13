@@ -25,6 +25,7 @@ import (
 // A wrapper type for the topic's Amazon Resource Name (ARN). To retrieve a
 // topic's attributes, use GetTopicAttributes.
 type TopicSpec struct {
+
 	// The body of the policy document you want to use for this topic.
 	//
 	// You can only add one policy per topic.

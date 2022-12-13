@@ -48,11 +48,39 @@ func newResourceDelta(
 			delta.Add("Spec.DataProtectionPolicy", a.ko.Spec.DataProtectionPolicy, b.ko.Spec.DataProtectionPolicy)
 		}
 	}
+	if ackcompare.HasNilDifference(a.ko.Spec.DeliveryPolicy, b.ko.Spec.DeliveryPolicy) {
+		delta.Add("Spec.DeliveryPolicy", a.ko.Spec.DeliveryPolicy, b.ko.Spec.DeliveryPolicy)
+	} else if a.ko.Spec.DeliveryPolicy != nil && b.ko.Spec.DeliveryPolicy != nil {
+		if *a.ko.Spec.DeliveryPolicy != *b.ko.Spec.DeliveryPolicy {
+			delta.Add("Spec.DeliveryPolicy", a.ko.Spec.DeliveryPolicy, b.ko.Spec.DeliveryPolicy)
+		}
+	}
+	if ackcompare.HasNilDifference(a.ko.Spec.DisplayName, b.ko.Spec.DisplayName) {
+		delta.Add("Spec.DisplayName", a.ko.Spec.DisplayName, b.ko.Spec.DisplayName)
+	} else if a.ko.Spec.DisplayName != nil && b.ko.Spec.DisplayName != nil {
+		if *a.ko.Spec.DisplayName != *b.ko.Spec.DisplayName {
+			delta.Add("Spec.DisplayName", a.ko.Spec.DisplayName, b.ko.Spec.DisplayName)
+		}
+	}
+	if ackcompare.HasNilDifference(a.ko.Spec.KMSMasterKeyID, b.ko.Spec.KMSMasterKeyID) {
+		delta.Add("Spec.KMSMasterKeyID", a.ko.Spec.KMSMasterKeyID, b.ko.Spec.KMSMasterKeyID)
+	} else if a.ko.Spec.KMSMasterKeyID != nil && b.ko.Spec.KMSMasterKeyID != nil {
+		if *a.ko.Spec.KMSMasterKeyID != *b.ko.Spec.KMSMasterKeyID {
+			delta.Add("Spec.KMSMasterKeyID", a.ko.Spec.KMSMasterKeyID, b.ko.Spec.KMSMasterKeyID)
+		}
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.Name, b.ko.Spec.Name) {
 		delta.Add("Spec.Name", a.ko.Spec.Name, b.ko.Spec.Name)
 	} else if a.ko.Spec.Name != nil && b.ko.Spec.Name != nil {
 		if *a.ko.Spec.Name != *b.ko.Spec.Name {
 			delta.Add("Spec.Name", a.ko.Spec.Name, b.ko.Spec.Name)
+		}
+	}
+	if ackcompare.HasNilDifference(a.ko.Spec.Policy, b.ko.Spec.Policy) {
+		delta.Add("Spec.Policy", a.ko.Spec.Policy, b.ko.Spec.Policy)
+	} else if a.ko.Spec.Policy != nil && b.ko.Spec.Policy != nil {
+		if *a.ko.Spec.Policy != *b.ko.Spec.Policy {
+			delta.Add("Spec.Policy", a.ko.Spec.Policy, b.ko.Spec.Policy)
 		}
 	}
 

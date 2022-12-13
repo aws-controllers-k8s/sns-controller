@@ -41,11 +41,32 @@ func newResourceDelta(
 		return delta
 	}
 
+	if ackcompare.HasNilDifference(a.ko.Spec.CustomUserData, b.ko.Spec.CustomUserData) {
+		delta.Add("Spec.CustomUserData", a.ko.Spec.CustomUserData, b.ko.Spec.CustomUserData)
+	} else if a.ko.Spec.CustomUserData != nil && b.ko.Spec.CustomUserData != nil {
+		if *a.ko.Spec.CustomUserData != *b.ko.Spec.CustomUserData {
+			delta.Add("Spec.CustomUserData", a.ko.Spec.CustomUserData, b.ko.Spec.CustomUserData)
+		}
+	}
+	if ackcompare.HasNilDifference(a.ko.Spec.Enabled, b.ko.Spec.Enabled) {
+		delta.Add("Spec.Enabled", a.ko.Spec.Enabled, b.ko.Spec.Enabled)
+	} else if a.ko.Spec.Enabled != nil && b.ko.Spec.Enabled != nil {
+		if *a.ko.Spec.Enabled != *b.ko.Spec.Enabled {
+			delta.Add("Spec.Enabled", a.ko.Spec.Enabled, b.ko.Spec.Enabled)
+		}
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.PlatformApplicationARN, b.ko.Spec.PlatformApplicationARN) {
 		delta.Add("Spec.PlatformApplicationARN", a.ko.Spec.PlatformApplicationARN, b.ko.Spec.PlatformApplicationARN)
 	} else if a.ko.Spec.PlatformApplicationARN != nil && b.ko.Spec.PlatformApplicationARN != nil {
 		if *a.ko.Spec.PlatformApplicationARN != *b.ko.Spec.PlatformApplicationARN {
 			delta.Add("Spec.PlatformApplicationARN", a.ko.Spec.PlatformApplicationARN, b.ko.Spec.PlatformApplicationARN)
+		}
+	}
+	if ackcompare.HasNilDifference(a.ko.Spec.Token, b.ko.Spec.Token) {
+		delta.Add("Spec.Token", a.ko.Spec.Token, b.ko.Spec.Token)
+	} else if a.ko.Spec.Token != nil && b.ko.Spec.Token != nil {
+		if *a.ko.Spec.Token != *b.ko.Spec.Token {
+			delta.Add("Spec.Token", a.ko.Spec.Token, b.ko.Spec.Token)
 		}
 	}
 

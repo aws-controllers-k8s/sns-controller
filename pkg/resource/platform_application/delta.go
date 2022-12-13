@@ -41,6 +41,41 @@ func newResourceDelta(
 		return delta
 	}
 
+	if ackcompare.HasNilDifference(a.ko.Spec.EventDeliveryFailure, b.ko.Spec.EventDeliveryFailure) {
+		delta.Add("Spec.EventDeliveryFailure", a.ko.Spec.EventDeliveryFailure, b.ko.Spec.EventDeliveryFailure)
+	} else if a.ko.Spec.EventDeliveryFailure != nil && b.ko.Spec.EventDeliveryFailure != nil {
+		if *a.ko.Spec.EventDeliveryFailure != *b.ko.Spec.EventDeliveryFailure {
+			delta.Add("Spec.EventDeliveryFailure", a.ko.Spec.EventDeliveryFailure, b.ko.Spec.EventDeliveryFailure)
+		}
+	}
+	if ackcompare.HasNilDifference(a.ko.Spec.EventEndpointCreated, b.ko.Spec.EventEndpointCreated) {
+		delta.Add("Spec.EventEndpointCreated", a.ko.Spec.EventEndpointCreated, b.ko.Spec.EventEndpointCreated)
+	} else if a.ko.Spec.EventEndpointCreated != nil && b.ko.Spec.EventEndpointCreated != nil {
+		if *a.ko.Spec.EventEndpointCreated != *b.ko.Spec.EventEndpointCreated {
+			delta.Add("Spec.EventEndpointCreated", a.ko.Spec.EventEndpointCreated, b.ko.Spec.EventEndpointCreated)
+		}
+	}
+	if ackcompare.HasNilDifference(a.ko.Spec.EventEndpointDeleted, b.ko.Spec.EventEndpointDeleted) {
+		delta.Add("Spec.EventEndpointDeleted", a.ko.Spec.EventEndpointDeleted, b.ko.Spec.EventEndpointDeleted)
+	} else if a.ko.Spec.EventEndpointDeleted != nil && b.ko.Spec.EventEndpointDeleted != nil {
+		if *a.ko.Spec.EventEndpointDeleted != *b.ko.Spec.EventEndpointDeleted {
+			delta.Add("Spec.EventEndpointDeleted", a.ko.Spec.EventEndpointDeleted, b.ko.Spec.EventEndpointDeleted)
+		}
+	}
+	if ackcompare.HasNilDifference(a.ko.Spec.EventEndpointUpdated, b.ko.Spec.EventEndpointUpdated) {
+		delta.Add("Spec.EventEndpointUpdated", a.ko.Spec.EventEndpointUpdated, b.ko.Spec.EventEndpointUpdated)
+	} else if a.ko.Spec.EventEndpointUpdated != nil && b.ko.Spec.EventEndpointUpdated != nil {
+		if *a.ko.Spec.EventEndpointUpdated != *b.ko.Spec.EventEndpointUpdated {
+			delta.Add("Spec.EventEndpointUpdated", a.ko.Spec.EventEndpointUpdated, b.ko.Spec.EventEndpointUpdated)
+		}
+	}
+	if ackcompare.HasNilDifference(a.ko.Spec.FailureFeedbackRoleARN, b.ko.Spec.FailureFeedbackRoleARN) {
+		delta.Add("Spec.FailureFeedbackRoleARN", a.ko.Spec.FailureFeedbackRoleARN, b.ko.Spec.FailureFeedbackRoleARN)
+	} else if a.ko.Spec.FailureFeedbackRoleARN != nil && b.ko.Spec.FailureFeedbackRoleARN != nil {
+		if *a.ko.Spec.FailureFeedbackRoleARN != *b.ko.Spec.FailureFeedbackRoleARN {
+			delta.Add("Spec.FailureFeedbackRoleARN", a.ko.Spec.FailureFeedbackRoleARN, b.ko.Spec.FailureFeedbackRoleARN)
+		}
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.Name, b.ko.Spec.Name) {
 		delta.Add("Spec.Name", a.ko.Spec.Name, b.ko.Spec.Name)
 	} else if a.ko.Spec.Name != nil && b.ko.Spec.Name != nil {
@@ -53,6 +88,34 @@ func newResourceDelta(
 	} else if a.ko.Spec.Platform != nil && b.ko.Spec.Platform != nil {
 		if *a.ko.Spec.Platform != *b.ko.Spec.Platform {
 			delta.Add("Spec.Platform", a.ko.Spec.Platform, b.ko.Spec.Platform)
+		}
+	}
+	if ackcompare.HasNilDifference(a.ko.Spec.PlatformCredential, b.ko.Spec.PlatformCredential) {
+		delta.Add("Spec.PlatformCredential", a.ko.Spec.PlatformCredential, b.ko.Spec.PlatformCredential)
+	} else if a.ko.Spec.PlatformCredential != nil && b.ko.Spec.PlatformCredential != nil {
+		if *a.ko.Spec.PlatformCredential != *b.ko.Spec.PlatformCredential {
+			delta.Add("Spec.PlatformCredential", a.ko.Spec.PlatformCredential, b.ko.Spec.PlatformCredential)
+		}
+	}
+	if ackcompare.HasNilDifference(a.ko.Spec.PlatformPrincipal, b.ko.Spec.PlatformPrincipal) {
+		delta.Add("Spec.PlatformPrincipal", a.ko.Spec.PlatformPrincipal, b.ko.Spec.PlatformPrincipal)
+	} else if a.ko.Spec.PlatformPrincipal != nil && b.ko.Spec.PlatformPrincipal != nil {
+		if *a.ko.Spec.PlatformPrincipal != *b.ko.Spec.PlatformPrincipal {
+			delta.Add("Spec.PlatformPrincipal", a.ko.Spec.PlatformPrincipal, b.ko.Spec.PlatformPrincipal)
+		}
+	}
+	if ackcompare.HasNilDifference(a.ko.Spec.SuccessFeedbackRoleARN, b.ko.Spec.SuccessFeedbackRoleARN) {
+		delta.Add("Spec.SuccessFeedbackRoleARN", a.ko.Spec.SuccessFeedbackRoleARN, b.ko.Spec.SuccessFeedbackRoleARN)
+	} else if a.ko.Spec.SuccessFeedbackRoleARN != nil && b.ko.Spec.SuccessFeedbackRoleARN != nil {
+		if *a.ko.Spec.SuccessFeedbackRoleARN != *b.ko.Spec.SuccessFeedbackRoleARN {
+			delta.Add("Spec.SuccessFeedbackRoleARN", a.ko.Spec.SuccessFeedbackRoleARN, b.ko.Spec.SuccessFeedbackRoleARN)
+		}
+	}
+	if ackcompare.HasNilDifference(a.ko.Spec.SuccessFeedbackSampleRate, b.ko.Spec.SuccessFeedbackSampleRate) {
+		delta.Add("Spec.SuccessFeedbackSampleRate", a.ko.Spec.SuccessFeedbackSampleRate, b.ko.Spec.SuccessFeedbackSampleRate)
+	} else if a.ko.Spec.SuccessFeedbackSampleRate != nil && b.ko.Spec.SuccessFeedbackSampleRate != nil {
+		if *a.ko.Spec.SuccessFeedbackSampleRate != *b.ko.Spec.SuccessFeedbackSampleRate {
+			delta.Add("Spec.SuccessFeedbackSampleRate", a.ko.Spec.SuccessFeedbackSampleRate, b.ko.Spec.SuccessFeedbackSampleRate)
 		}
 	}
 
