@@ -26,7 +26,12 @@ description: |-
 
   Please follow the following link: [Red Hat OpenShift](https://aws-controllers-k8s.github.io/community/docs/user-docs/openshift/)
 samples:
-
+- kind: PlatformApplication
+  spec: '{}'
+- kind: PlatformEndpoint
+  spec: '{}'
+- kind: Topic
+  spec: '{}'
 maintainers:
 - name: "sns maintainer team"
   email: "ack-maintainers@amazon.com"
