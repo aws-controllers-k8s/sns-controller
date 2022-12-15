@@ -16,19 +16,42 @@
 package v1alpha1
 
 import (
-	ackv1alpha1 "github.com/aws/aws-controllers-k8s/apis/core/v1alpha1"
+	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// TopicSpec defines the desired state of Topic
+// TopicSpec defines the desired state of Topic.
+//
+// A wrapper type for the topic's Amazon Resource Name (ARN). To retrieve a
+// topic's attributes, use GetTopicAttributes.
 type TopicSpec struct {
-	DeliveryPolicy *string `json:"deliveryPolicy,omitempty"`
-	DisplayName    *string `json:"displayName,omitempty"`
-	KMSMasterKeyID *string `json:"kmsMasterKeyID,omitempty"`
+
+	// The body of the policy document you want to use for this topic.
+	//
+	// You can only add one policy per topic.
+	//
+	// The policy must be in JSON string format.
+	//
+	// Length Constraints: Maximum length of 30,720.
+	DataProtectionPolicy *string `json:"dataProtectionPolicy,omitempty"`
+	DeliveryPolicy       *string `json:"deliveryPolicy,omitempty"`
+	DisplayName          *string `json:"displayName,omitempty"`
+	KMSMasterKeyID       *string `json:"kmsMasterKeyID,omitempty"`
+	// The name of the topic you want to create.
+	//
+	// Constraints: Topic names must be made up of only uppercase and lowercase
+	// ASCII letters, numbers, underscores, and hyphens, and must be between 1 and
+	// 256 characters long.
+	//
+	// For a FIFO (first-in-first-out) topic, the name must end with the .fifo suffix.
 	// +kubebuilder:validation:Required
 	Name   *string `json:"name"`
 	Policy *string `json:"policy,omitempty"`
-	Tags   []*Tag  `json:"tags,omitempty"`
+	// The list of tags to add to a new topic.
+	//
+	// To be able to tag a topic on creation, you must have the sns:CreateTopic
+	// and sns:TagResource permissions.
+	Tags []*Tag `json:"tags,omitempty"`
 }
 
 // TopicStatus defines the observed state of Topic
@@ -36,14 +59,18 @@ type TopicStatus struct {
 	// All CRs managed by ACK have a common `Status.ACKResourceMetadata` member
 	// that is used to contain resource sync state, account ownership,
 	// constructed ARN for the resource
+	// +kubebuilder:validation:Optional
 	ACKResourceMetadata *ackv1alpha1.ResourceMetadata `json:"ackResourceMetadata"`
 	// All CRS managed by ACK have a common `Status.Conditions` member that
 	// contains a collection of `ackv1alpha1.Condition` objects that describe
 	// the various terminal states of the CR and its backend AWS service API
 	// resource
-	Conditions              []*ackv1alpha1.Condition `json:"conditions"`
-	EffectiveDeliveryPolicy *string                  `json:"effectiveDeliveryPolicy,omitempty"`
-	Owner                   *string                  `json:"owner,omitempty"`
+	// +kubebuilder:validation:Optional
+	Conditions []*ackv1alpha1.Condition `json:"conditions"`
+	// +kubebuilder:validation:Optional
+	EffectiveDeliveryPolicy *string `json:"effectiveDeliveryPolicy,omitempty"`
+	// +kubebuilder:validation:Optional
+	Owner *string `json:"owner,omitempty"`
 }
 
 // Topic is the Schema for the Topics API

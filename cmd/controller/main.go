@@ -18,8 +18,13 @@ package main
 import (
 	"os"
 
-	ackcfg "github.com/aws/aws-controllers-k8s/pkg/config"
-	ackrt "github.com/aws/aws-controllers-k8s/pkg/runtime"
+	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
+	ackcfg "github.com/aws-controllers-k8s/runtime/pkg/config"
+	ackrt "github.com/aws-controllers-k8s/runtime/pkg/runtime"
+	acktypes "github.com/aws-controllers-k8s/runtime/pkg/types"
+	ackrtutil "github.com/aws-controllers-k8s/runtime/pkg/util"
+	ackrtwebhook "github.com/aws-controllers-k8s/runtime/pkg/webhook"
+	svcsdk "github.com/aws/aws-sdk-go/service/sns"
 	flag "github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -32,18 +37,23 @@ import (
 	_ "github.com/aws-controllers-k8s/sns-controller/pkg/resource/platform_application"
 	_ "github.com/aws-controllers-k8s/sns-controller/pkg/resource/platform_endpoint"
 	_ "github.com/aws-controllers-k8s/sns-controller/pkg/resource/topic"
+
+	"github.com/aws-controllers-k8s/sns-controller/pkg/version"
 )
 
 var (
-	awsServiceAPIGroup = "sns.services.k8s.aws"
-	awsServiceAlias    = "sns"
-	scheme             = runtime.NewScheme()
-	setupLog           = ctrlrt.Log.WithName("setup")
+	awsServiceAPIGroup    = "sns.services.k8s.aws"
+	awsServiceAlias       = "sns"
+	awsServiceEndpointsID = svcsdk.EndpointsID
+	scheme                = runtime.NewScheme()
+	setupLog              = ctrlrt.Log.WithName("setup")
 )
 
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
+
 	_ = svctypes.AddToScheme(scheme)
+	_ = ackv1alpha1.AddToScheme(scheme)
 }
 
 func main() {
@@ -60,12 +70,23 @@ func main() {
 		os.Exit(1)
 	}
 
+	host, port, err := ackrtutil.GetHostPort(ackCfg.WebhookServerAddr)
+	if err != nil {
+		setupLog.Error(
+			err, "Unable to parse webhook server address.",
+			"aws.service", awsServiceAlias,
+		)
+		os.Exit(1)
+	}
+
 	mgr, err := ctrlrt.NewManager(ctrlrt.GetConfigOrDie(), ctrlrt.Options{
 		Scheme:             scheme,
-		Port:               ackCfg.BindPort,
+		Port:               port,
+		Host:               host,
 		MetricsBindAddress: ackCfg.MetricsAddr,
 		LeaderElection:     ackCfg.EnableLeaderElection,
 		LeaderElectionID:   awsServiceAPIGroup,
+		Namespace:          ackCfg.WatchNamespace,
 	})
 	if err != nil {
 		setupLog.Error(
@@ -82,7 +103,12 @@ func main() {
 		"aws.service", awsServiceAlias,
 	)
 	sc := ackrt.NewServiceController(
-		awsServiceAlias, awsServiceAPIGroup,
+		awsServiceAlias, awsServiceAPIGroup, awsServiceEndpointsID,
+		acktypes.VersionInfo{
+			version.GitCommit,
+			version.GitVersion,
+			version.BuildDate,
+		},
 	).WithLogger(
 		ctrlrt.Log,
 	).WithResourceManagerFactories(
@@ -90,6 +116,20 @@ func main() {
 	).WithPrometheusRegistry(
 		ctrlrtmetrics.Registry,
 	)
+
+	if ackCfg.EnableWebhookServer {
+		webhooks := ackrtwebhook.GetWebhooks()
+		for _, webhook := range webhooks {
+			if err := webhook.Setup(mgr); err != nil {
+				setupLog.Error(
+					err, "unable to register webhook "+webhook.UID(),
+					"aws.service", awsServiceAlias,
+				)
+
+			}
+		}
+	}
+
 	if err = sc.BindControllerManager(mgr, ackCfg); err != nil {
 		setupLog.Error(
 			err, "unable bind to controller manager to service controller",

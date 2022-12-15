@@ -15,30 +15,87 @@
 
 package v1alpha1
 
+import (
+	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
+	"github.com/aws/aws-sdk-go/aws"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// Hack to avoid import errors during build...
+var (
+	_ = &metav1.Time{}
+	_ = &aws.JSONValue{}
+	_ = ackv1alpha1.AWSAccountID("")
+)
+
+// Gives a detailed description of failed messages in the batch.
+type BatchResultErrorEntry struct {
+	Code    *string `json:"code,omitempty"`
+	ID      *string `json:"id,omitempty"`
+	Message *string `json:"message,omitempty"`
+}
+
+// The endpoint for mobile app and device.
 type Endpoint struct {
 	Attributes  map[string]*string `json:"attributes,omitempty"`
 	EndpointARN *string            `json:"endpointARN,omitempty"`
 }
 
+// The user-specified message attribute value. For string data types, the value
+// attribute has the same restrictions on the content as the message body. For
+// more information, see Publish (https://docs.aws.amazon.com/sns/latest/api/API_Publish.html).
+//
+// Name, type, and value must not be empty or null. In addition, the message
+// body should not be empty or null. All parts of the message attribute, including
+// name, type, and value, are included in the message size restriction, which
+// is currently 256 KB (262,144 bytes). For more information, see Amazon SNS
+// message attributes (https://docs.aws.amazon.com/sns/latest/dg/SNSMessageAttributes.html)
+// and Publishing to a mobile phone (https://docs.aws.amazon.com/sns/latest/dg/sms_publish-to-phone.html)
+// in the Amazon SNS Developer Guide.
 type MessageAttributeValue struct {
 	DataType    *string `json:"dataType,omitempty"`
 	StringValue *string `json:"stringValue,omitempty"`
 }
 
+// A list of phone numbers and their metadata.
+type PhoneNumberInformation struct {
+	PhoneNumber *string `json:"phoneNumber,omitempty"`
+	Status      *string `json:"status,omitempty"`
+}
+
+// Platform application object.
 type PlatformApplication_SDK struct {
 	Attributes             map[string]*string `json:"attributes,omitempty"`
 	PlatformApplicationARN *string            `json:"platformApplicationARN,omitempty"`
 }
 
+// Contains the details of a single Amazon SNS message along with an Id that
+// identifies a message within the batch.
+type PublishBatchRequestEntry struct {
+	ID                     *string `json:"id,omitempty"`
+	MessageDeduplicationID *string `json:"messageDeduplicationID,omitempty"`
+	MessageGroupID         *string `json:"messageGroupID,omitempty"`
+}
+
+// Encloses data related to a successful message in a batch request for topic.
+type PublishBatchResultEntry struct {
+	ID             *string `json:"id,omitempty"`
+	SequenceNumber *string `json:"sequenceNumber,omitempty"`
+}
+
+// A wrapper type for the attributes of an Amazon SNS subscription.
 type Subscription struct {
 	TopicARN *string `json:"topicARN,omitempty"`
 }
 
+// The list of tags to be added to the specified topic.
 type Tag struct {
 	Key   *string `json:"key,omitempty"`
 	Value *string `json:"value,omitempty"`
 }
 
+// A wrapper type for the topic's Amazon Resource Name (ARN). To retrieve a
+// topic's attributes, use GetTopicAttributes.
 type Topic_SDK struct {
 	TopicARN *string `json:"topicARN,omitempty"`
 }

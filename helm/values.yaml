@@ -3,8 +3,8 @@
 # Declare variables to be passed into your templates.
 
 image:
-  repository: public.ecr.aws/aws-controllers-k8s/controller
-  tag: sns-v0.0.2
+  repository: public.ecr.aws/aws-controllers-k8s/sns-controller
+  tag: v0.0.0-non-release-version
   pullPolicy: IfNotPresent
   pullSecrets: []
 
@@ -15,6 +15,32 @@ deployment:
   annotations: {}
   labels: {}
   containerPort: 8080
+  # Which nodeSelector to set?
+  # See: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  nodeSelector:
+    kubernetes.io/os: linux
+  # Which tolerations to set?
+  # See: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+  tolerations: []
+  # What affinity to set?
+  # See: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+  affinity: {}
+  # Which priorityClassName to set?
+  # See: https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority
+  priorityClassName: ""
+
+# If "installScope: cluster" then these labels will be applied to ClusterRole
+role:
+ labels: {}
+  
+metrics:
+  service:
+    # Set to true to automatically create a Kubernetes Service resource for the
+    # Prometheus metrics server endpoint in controller
+    create: false
+    # Which Type to use for the Kubernetes Service?
+    # See: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+    type: "ClusterIP"
 
 resources:
   requests:
@@ -34,7 +60,23 @@ aws:
     # Secret stringData key that contains the credentials
     secretKey: "credentials"
     # Profile used for AWS credentials
-    profile: "default"
+    profile: "default"  
+
+# log level for the controller
+log:
+  enable_development_logging: false
+  level: info
+
+# Set to "namespace" to install the controller in a namespaced scope, will only
+# watch for object creation in the namespace. By default installScope is
+# cluster wide.
+installScope: cluster
+
+resourceTags:
+  # Configures the ACK service controller to always set key/value pairs tags on
+  # resources that it manages.
+  - services.k8s.aws/controller-version=%CONTROLLER_SERVICE%-%CONTROLLER_VERSION%
+  - services.k8s.aws/namespace=%K8S_NAMESPACE%
 
 serviceAccount:
   # Specifies whether a service account should be created

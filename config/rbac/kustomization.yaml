@@ -4,3 +4,4 @@ resources:
 - role-reader.yaml
 - role-writer.yaml
 - service-account.yaml
+

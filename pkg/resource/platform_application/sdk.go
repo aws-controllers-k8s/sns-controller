@@ -17,11 +17,17 @@ package platform_application
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"reflect"
 	"strings"
 
-	ackv1alpha1 "github.com/aws/aws-controllers-k8s/apis/core/v1alpha1"
-	ackcompare "github.com/aws/aws-controllers-k8s/pkg/compare"
-	ackerr "github.com/aws/aws-controllers-k8s/pkg/errors"
+	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
+	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
+	ackcondition "github.com/aws-controllers-k8s/runtime/pkg/condition"
+	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
+	ackrequeue "github.com/aws-controllers-k8s/runtime/pkg/requeue"
+	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
 	"github.com/aws/aws-sdk-go/aws"
 	svcsdk "github.com/aws/aws-sdk-go/service/sns"
 	corev1 "k8s.io/api/core/v1"
@@ -39,13 +45,22 @@ var (
 	_ = &svcapitypes.PlatformApplication{}
 	_ = ackv1alpha1.AWSAccountID("")
 	_ = &ackerr.NotFound
+	_ = &ackcondition.NotManagedMessage
+	_ = &reflect.Value{}
+	_ = fmt.Sprintf("")
+	_ = &ackrequeue.NoRequeue{}
 )
 
 // sdkFind returns SDK-specific information about a supplied resource
 func (rm *resourceManager) sdkFind(
 	ctx context.Context,
 	r *resource,
-) (*resource, error) {
+) (latest *resource, err error) {
+	rlog := ackrtlog.FromContext(ctx)
+	exit := rlog.Trace("rm.sdkFind")
+	defer func() {
+		exit(err)
+	}()
 	// If any required fields in the input shape are missing, AWS resource is
 	// not created yet. Return NotFound here to indicate to callers that the
 	// resource isn't yet created.
@@ -57,19 +72,29 @@ func (rm *resourceManager) sdkFind(
 	if err != nil {
 		return nil, err
 	}
-
-	_, respErr := rm.sdkapi.GetPlatformApplicationAttributesWithContext(ctx, input)
-	rm.metrics.RecordAPICall("GET_ATTRIBUTES", "GetPlatformApplicationAttributes", respErr)
-	if respErr != nil {
-		if awsErr, ok := ackerr.AWSError(respErr); ok && awsErr.Code() == "NotFound" {
+	var resp *svcsdk.GetPlatformApplicationAttributesOutput
+	resp, err = rm.sdkapi.GetPlatformApplicationAttributesWithContext(ctx, input)
+	rm.metrics.RecordAPICall("GET_ATTRIBUTES", "GetPlatformApplicationAttributes", err)
+	if err != nil {
+		if awsErr, ok := ackerr.AWSError(err); ok && awsErr.Code() == "NotFound" {
 			return nil, ackerr.NotFound
 		}
-		return nil, respErr
+		return nil, err
 	}
 
 	// Merge in the information we read from the API call above to the copy of
 	// the original Kubernetes object we passed to the function
 	ko := r.ko.DeepCopy()
+
+	ko.Spec.EventDeliveryFailure = resp.Attributes["EventDeliveryFailure"]
+	ko.Spec.EventEndpointCreated = resp.Attributes["EventEndpointCreated"]
+	ko.Spec.EventEndpointDeleted = resp.Attributes["EventEndpointDeleted"]
+	ko.Spec.EventEndpointUpdated = resp.Attributes["EventEndpointUpdated"]
+	ko.Spec.FailureFeedbackRoleARN = resp.Attributes["FailureFeedbackRoleArn"]
+	ko.Spec.PlatformCredential = resp.Attributes["PlatformCredential"]
+	ko.Spec.PlatformPrincipal = resp.Attributes["PlatformPrincipal"]
+	ko.Spec.SuccessFeedbackRoleARN = resp.Attributes["SuccessFeedbackRoleArn"]
+	ko.Spec.SuccessFeedbackSampleRate = resp.Attributes["SuccessFeedbackSampleRate"]
 
 	rm.setStatusDefaults(ko)
 	return &resource{ko}, nil
@@ -102,24 +127,32 @@ func (rm *resourceManager) newGetAttributesRequestPayload(
 }
 
 // sdkCreate creates the supplied resource in the backend AWS service API and
-// returns a new resource with any fields in the Status field filled in
+// returns a copy of the resource with resource fields (in both Spec and
+// Status) filled in with values from the CREATE API operation's Output shape.
 func (rm *resourceManager) sdkCreate(
 	ctx context.Context,
-	r *resource,
-) (*resource, error) {
-	input, err := rm.newCreateRequestPayload(r)
+	desired *resource,
+) (created *resource, err error) {
+	rlog := ackrtlog.FromContext(ctx)
+	exit := rlog.Trace("rm.sdkCreate")
+	defer func() {
+		exit(err)
+	}()
+	input, err := rm.newCreateRequestPayload(ctx, desired)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, respErr := rm.sdkapi.CreatePlatformApplicationWithContext(ctx, input)
-	rm.metrics.RecordAPICall("CREATE", "CreatePlatformApplication", respErr)
-	if respErr != nil {
-		return nil, respErr
+	var resp *svcsdk.CreatePlatformApplicationOutput
+	_ = resp
+	resp, err = rm.sdkapi.CreatePlatformApplicationWithContext(ctx, input)
+	rm.metrics.RecordAPICall("CREATE", "CreatePlatformApplication", err)
+	if err != nil {
+		return nil, err
 	}
 	// Merge in the information we read from the API call above to the copy of
 	// the original Kubernetes object we passed to the function
-	ko := r.ko.DeepCopy()
+	ko := desired.ko.DeepCopy()
 
 	if ko.Status.ACKResourceMetadata == nil {
 		ko.Status.ACKResourceMetadata = &ackv1alpha1.ResourceMetadata{}
@@ -130,13 +163,13 @@ func (rm *resourceManager) sdkCreate(
 	}
 
 	rm.setStatusDefaults(ko)
-
 	return &resource{ko}, nil
 }
 
 // newCreateRequestPayload returns an SDK-specific struct for the HTTP request
 // payload of the Create API call for the resource
 func (rm *resourceManager) newCreateRequestPayload(
+	ctx context.Context,
 	r *resource,
 ) (*svcsdk.CreatePlatformApplicationInput, error) {
 	res := &svcsdk.CreatePlatformApplicationInput{}
@@ -186,8 +219,15 @@ func (rm *resourceManager) sdkUpdate(
 	ctx context.Context,
 	desired *resource,
 	latest *resource,
-	diffReporter *ackcompare.Reporter,
+	delta *ackcompare.Delta,
 ) (*resource, error) {
+	var err error
+	rlog := ackrtlog.FromContext(ctx)
+	exit := rlog.Trace("rm.sdkUpdate")
+	defer func() {
+		exit(err)
+	}()
+
 	// If any required fields in the input shape are missing, AWS resource is
 	// not created yet. And sdkUpdate should never be called if this is the
 	// case, and it's an error in the generated code if it is...
@@ -281,14 +321,21 @@ func (rm *resourceManager) newSetAttributesRequestPayload(
 func (rm *resourceManager) sdkDelete(
 	ctx context.Context,
 	r *resource,
-) error {
+) (latest *resource, err error) {
+	rlog := ackrtlog.FromContext(ctx)
+	exit := rlog.Trace("rm.sdkDelete")
+	defer func() {
+		exit(err)
+	}()
 	input, err := rm.newDeleteRequestPayload(r)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	_, respErr := rm.sdkapi.DeletePlatformApplicationWithContext(ctx, input)
-	rm.metrics.RecordAPICall("DELETE", "DeletePlatformApplication", respErr)
-	return respErr
+	var resp *svcsdk.DeletePlatformApplicationOutput
+	_ = resp
+	resp, err = rm.sdkapi.DeletePlatformApplicationWithContext(ctx, input)
+	rm.metrics.RecordAPICall("DELETE", "DeletePlatformApplication", err)
+	return nil, err
 }
 
 // newDeleteRequestPayload returns an SDK-specific struct for the HTTP request
@@ -300,8 +347,6 @@ func (rm *resourceManager) newDeleteRequestPayload(
 
 	if r.ko.Status.ACKResourceMetadata != nil && r.ko.Status.ACKResourceMetadata.ARN != nil {
 		res.SetPlatformApplicationArn(string(*r.ko.Status.ACKResourceMetadata.ARN))
-	} else {
-		res.SetPlatformApplicationArn(rm.ARNFromName(*r.ko.Spec.Name))
 	}
 
 	return res, nil
@@ -313,6 +358,9 @@ func (rm *resourceManager) setStatusDefaults(
 ) {
 	if ko.Status.ACKResourceMetadata == nil {
 		ko.Status.ACKResourceMetadata = &ackv1alpha1.ResourceMetadata{}
+	}
+	if ko.Status.ACKResourceMetadata.Region == nil {
+		ko.Status.ACKResourceMetadata.Region = &rm.awsRegion
 	}
 	if ko.Status.ACKResourceMetadata.OwnerAccountID == nil {
 		ko.Status.ACKResourceMetadata.OwnerAccountID = &rm.awsAccountID
@@ -326,6 +374,7 @@ func (rm *resourceManager) setStatusDefaults(
 // else it returns nil, false
 func (rm *resourceManager) updateConditions(
 	r *resource,
+	onSuccess bool,
 	err error,
 ) (*resource, bool) {
 	ko := r.ko.DeepCopy()
@@ -333,29 +382,66 @@ func (rm *resourceManager) updateConditions(
 
 	// Terminal condition
 	var terminalCondition *ackv1alpha1.Condition = nil
+	var recoverableCondition *ackv1alpha1.Condition = nil
+	var syncCondition *ackv1alpha1.Condition = nil
 	for _, condition := range ko.Status.Conditions {
 		if condition.Type == ackv1alpha1.ConditionTypeTerminal {
 			terminalCondition = condition
-			break
+		}
+		if condition.Type == ackv1alpha1.ConditionTypeRecoverable {
+			recoverableCondition = condition
+		}
+		if condition.Type == ackv1alpha1.ConditionTypeResourceSynced {
+			syncCondition = condition
 		}
 	}
-
-	if rm.terminalAWSError(err) {
+	var termError *ackerr.TerminalError
+	if rm.terminalAWSError(err) || err == ackerr.SecretTypeNotSupported || err == ackerr.SecretNotFound || errors.As(err, &termError) {
 		if terminalCondition == nil {
 			terminalCondition = &ackv1alpha1.Condition{
 				Type: ackv1alpha1.ConditionTypeTerminal,
 			}
 			ko.Status.Conditions = append(ko.Status.Conditions, terminalCondition)
 		}
+		var errorMessage = ""
+		if err == ackerr.SecretTypeNotSupported || err == ackerr.SecretNotFound || errors.As(err, &termError) {
+			errorMessage = err.Error()
+		} else {
+			awsErr, _ := ackerr.AWSError(err)
+			errorMessage = awsErr.Error()
+		}
 		terminalCondition.Status = corev1.ConditionTrue
-		awsErr, _ := ackerr.AWSError(err)
-		errorMessage := awsErr.Message()
 		terminalCondition.Message = &errorMessage
-	} else if terminalCondition != nil {
-		terminalCondition.Status = corev1.ConditionFalse
-		terminalCondition.Message = nil
+	} else {
+		// Clear the terminal condition if no longer present
+		if terminalCondition != nil {
+			terminalCondition.Status = corev1.ConditionFalse
+			terminalCondition.Message = nil
+		}
+		// Handling Recoverable Conditions
+		if err != nil {
+			if recoverableCondition == nil {
+				// Add a new Condition containing a non-terminal error
+				recoverableCondition = &ackv1alpha1.Condition{
+					Type: ackv1alpha1.ConditionTypeRecoverable,
+				}
+				ko.Status.Conditions = append(ko.Status.Conditions, recoverableCondition)
+			}
+			recoverableCondition.Status = corev1.ConditionTrue
+			awsErr, _ := ackerr.AWSError(err)
+			errorMessage := err.Error()
+			if awsErr != nil {
+				errorMessage = awsErr.Error()
+			}
+			recoverableCondition.Message = &errorMessage
+		} else if recoverableCondition != nil {
+			recoverableCondition.Status = corev1.ConditionFalse
+			recoverableCondition.Message = nil
+		}
 	}
-	if terminalCondition != nil {
+	// Required to avoid the "declared but not used" error in the default case
+	_ = syncCondition
+	if terminalCondition != nil || recoverableCondition != nil || syncCondition != nil {
 		return &resource{ko}, true // updated
 	}
 	return nil, false // not updated

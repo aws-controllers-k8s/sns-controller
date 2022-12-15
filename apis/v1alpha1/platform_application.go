@@ -16,19 +16,27 @@
 package v1alpha1
 
 import (
-	ackv1alpha1 "github.com/aws/aws-controllers-k8s/apis/core/v1alpha1"
+	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// PlatformApplicationSpec defines the desired state of PlatformApplication
+// PlatformApplicationSpec defines the desired state of PlatformApplication.
+//
+// Platform application object.
 type PlatformApplicationSpec struct {
 	EventDeliveryFailure   *string `json:"eventDeliveryFailure,omitempty"`
 	EventEndpointCreated   *string `json:"eventEndpointCreated,omitempty"`
 	EventEndpointDeleted   *string `json:"eventEndpointDeleted,omitempty"`
 	EventEndpointUpdated   *string `json:"eventEndpointUpdated,omitempty"`
 	FailureFeedbackRoleARN *string `json:"failureFeedbackRoleARN,omitempty"`
+	// Application names must be made up of only uppercase and lowercase ASCII letters,
+	// numbers, underscores, hyphens, and periods, and must be between 1 and 256
+	// characters long.
 	// +kubebuilder:validation:Required
 	Name *string `json:"name"`
+	// The following platforms are supported: ADM (Amazon Device Messaging), APNS
+	// (Apple Push Notification Service), APNS_SANDBOX, and GCM (Firebase Cloud
+	// Messaging).
 	// +kubebuilder:validation:Required
 	Platform                  *string `json:"platform"`
 	PlatformCredential        *string `json:"platformCredential,omitempty"`
@@ -42,11 +50,13 @@ type PlatformApplicationStatus struct {
 	// All CRs managed by ACK have a common `Status.ACKResourceMetadata` member
 	// that is used to contain resource sync state, account ownership,
 	// constructed ARN for the resource
+	// +kubebuilder:validation:Optional
 	ACKResourceMetadata *ackv1alpha1.ResourceMetadata `json:"ackResourceMetadata"`
 	// All CRS managed by ACK have a common `Status.Conditions` member that
 	// contains a collection of `ackv1alpha1.Condition` objects that describe
 	// the various terminal states of the CR and its backend AWS service API
 	// resource
+	// +kubebuilder:validation:Optional
 	Conditions []*ackv1alpha1.Condition `json:"conditions"`
 }
 

@@ -16,18 +16,19 @@
 package v1alpha1
 
 import (
-	ackv1alpha1 "github.com/aws/aws-controllers-k8s/apis/core/v1alpha1"
+	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// PlatformEndpointSpec defines the desired state of PlatformEndpoint
+// PlatformEndpointSpec defines the desired state of PlatformEndpoint.
 type PlatformEndpointSpec struct {
-	Attributes     map[string]*string `json:"attributes,omitempty"`
-	CustomUserData *string            `json:"customUserData,omitempty"`
+	CustomUserData *string `json:"customUserData,omitempty"`
+	Enabled        *string `json:"enabled,omitempty"`
+	// PlatformApplicationArn returned from CreatePlatformApplication is used to
+	// create a an endpoint.
 	// +kubebuilder:validation:Required
 	PlatformApplicationARN *string `json:"platformApplicationARN"`
-	// +kubebuilder:validation:Required
-	Token *string `json:"token"`
+	Token                  *string `json:"token,omitempty"`
 }
 
 // PlatformEndpointStatus defines the observed state of PlatformEndpoint
@@ -35,13 +36,17 @@ type PlatformEndpointStatus struct {
 	// All CRs managed by ACK have a common `Status.ACKResourceMetadata` member
 	// that is used to contain resource sync state, account ownership,
 	// constructed ARN for the resource
+	// +kubebuilder:validation:Optional
 	ACKResourceMetadata *ackv1alpha1.ResourceMetadata `json:"ackResourceMetadata"`
 	// All CRS managed by ACK have a common `Status.Conditions` member that
 	// contains a collection of `ackv1alpha1.Condition` objects that describe
 	// the various terminal states of the CR and its backend AWS service API
 	// resource
-	Conditions  []*ackv1alpha1.Condition `json:"conditions"`
-	EndpointARN *string                  `json:"endpointARN,omitempty"`
+	// +kubebuilder:validation:Optional
+	Conditions []*ackv1alpha1.Condition `json:"conditions"`
+	// EndpointArn returned from CreateEndpoint action.
+	// +kubebuilder:validation:Optional
+	EndpointARN *string `json:"endpointARN,omitempty"`
 }
 
 // PlatformEndpoint is the Schema for the PlatformEndpoints API
