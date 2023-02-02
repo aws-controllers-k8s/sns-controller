@@ -47,6 +47,7 @@ spec:
                 type: string
             required:
             - platformApplicationARN
+            - token
             type: object
           status:
             description: PlatformEndpointStatus defines the observed state of PlatformEndpoint
