@@ -28,7 +28,8 @@ type PlatformEndpointSpec struct {
 	// create a an endpoint.
 	// +kubebuilder:validation:Required
 	PlatformApplicationARN *string `json:"platformApplicationARN"`
-	Token                  *string `json:"token,omitempty"`
+	// +kubebuilder:validation:Required
+	Token *string `json:"token"`
 }
 
 // PlatformEndpointStatus defines the observed state of PlatformEndpoint
