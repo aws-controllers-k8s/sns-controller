@@ -1,0 +1,1 @@
+    input.SetReturnSubscriptionArn(true)

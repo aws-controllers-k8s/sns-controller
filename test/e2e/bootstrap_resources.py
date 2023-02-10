@@ -16,12 +16,15 @@ for them.
 """
 
 from dataclasses import dataclass
+from acktest.bootstrapping.sqs import Queue
+from acktest.bootstrapping.sns import Topic
 from acktest.bootstrapping import Resources
 from e2e import bootstrap_directory
 
 @dataclass
 class BootstrapResources(Resources):
-    pass
+    Topic: Topic
+    Queue: Queue
 
 _bootstrap_resources = None
 

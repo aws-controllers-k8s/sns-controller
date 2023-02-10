@@ -13,6 +13,8 @@ rules:
 
   - platformendpoints
 
+  - subscriptions
+
   - topics
 
   verbs:
@@ -28,6 +30,7 @@ rules:
   resources:
   - platformapplications
   - platformendpoints
+  - subscriptions
   - topics
   verbs:
   - get
