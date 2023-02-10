@@ -1,0 +1,12 @@
+apiVersion: sns.services.k8s.aws/v1alpha1
+kind: Topic
+metadata:
+  name: $TOPIC_NAME
+spec:
+  displayName: $DISPLAY_NAME
+  name: $TOPIC_NAME
+  fifoTopic: "true"
+  contentBasedDeduplication: "true"
+  tags:
+    - key: tag1
+      value: val1

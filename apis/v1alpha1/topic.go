@@ -25,7 +25,7 @@ import (
 // A wrapper type for the topic's Amazon Resource Name (ARN). To retrieve a
 // topic's attributes, use GetTopicAttributes.
 type TopicSpec struct {
-
+	ContentBasedDeduplication *string `json:"contentBasedDeduplication,omitempty"`
 	// The body of the policy document you want to use for this topic.
 	//
 	// You can only add one policy per topic.
@@ -36,6 +36,7 @@ type TopicSpec struct {
 	DataProtectionPolicy *string `json:"dataProtectionPolicy,omitempty"`
 	DeliveryPolicy       *string `json:"deliveryPolicy,omitempty"`
 	DisplayName          *string `json:"displayName,omitempty"`
+	FIFOTopic            *string `json:"fifoTopic,omitempty"`
 	KMSMasterKeyID       *string `json:"kmsMasterKeyID,omitempty"`
 	// The name of the topic you want to create.
 	//
@@ -51,7 +52,8 @@ type TopicSpec struct {
 	//
 	// To be able to tag a topic on creation, you must have the sns:CreateTopic
 	// and sns:TagResource permissions.
-	Tags []*Tag `json:"tags,omitempty"`
+	Tags          []*Tag  `json:"tags,omitempty"`
+	TracingConfig *string `json:"tracingConfig,omitempty"`
 }
 
 // TopicStatus defines the observed state of Topic

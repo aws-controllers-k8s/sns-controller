@@ -37,6 +37,8 @@ spec:
               type for the topic's Amazon Resource Name (ARN). To retrieve a topic's
               attributes, use GetTopicAttributes."
             properties:
+              contentBasedDeduplication:
+                type: string
               dataProtectionPolicy:
                 description: "The body of the policy document you want to use for
                   this topic. \n You can only add one policy per topic. \n The policy
@@ -46,6 +48,8 @@ spec:
               deliveryPolicy:
                 type: string
               displayName:
+                type: string
+              fifoTopic:
                 type: string
               kmsMasterKeyID:
                 type: string
@@ -71,6 +75,8 @@ spec:
                       type: string
                   type: object
                 type: array
+              tracingConfig:
+                type: string
             required:
             - name
             type: object

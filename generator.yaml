@@ -14,7 +14,16 @@ resources:
   Topic:
     unpack_attributes_map:
       set_attributes_single_attribute: true
+    exceptions:
+      terminal_codes:
+        - InvalidParameter
     fields:
+      FifoTopic:
+        is_attribute: true
+      ContentBasedDeduplication:
+        is_attribute: true
+      TracingConfig:
+        is_attribute: true
       DeliveryPolicy:
         is_attribute: true
       DisplayName:
