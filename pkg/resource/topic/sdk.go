@@ -86,9 +86,11 @@ func (rm *resourceManager) sdkFind(
 	// the original Kubernetes object we passed to the function
 	ko := r.ko.DeepCopy()
 
+	ko.Spec.ContentBasedDeduplication = resp.Attributes["ContentBasedDeduplication"]
 	ko.Spec.DeliveryPolicy = resp.Attributes["DeliveryPolicy"]
 	ko.Spec.DisplayName = resp.Attributes["DisplayName"]
 	ko.Status.EffectiveDeliveryPolicy = resp.Attributes["EffectiveDeliveryPolicy"]
+	ko.Spec.FIFOTopic = resp.Attributes["FifoTopic"]
 	ko.Spec.KMSMasterKeyID = resp.Attributes["KmsMasterKeyId"]
 	if ko.Status.ACKResourceMetadata == nil {
 		ko.Status.ACKResourceMetadata = &ackv1alpha1.ResourceMetadata{}
@@ -98,6 +100,7 @@ func (rm *resourceManager) sdkFind(
 	ko.Spec.Policy = resp.Attributes["Policy"]
 	tmpARN := ackv1alpha1.AWSResourceName(*resp.Attributes["TopicArn"])
 	ko.Status.ACKResourceMetadata.ARN = &tmpARN
+	ko.Spec.TracingConfig = resp.Attributes["TracingConfig"]
 
 	rm.setStatusDefaults(ko)
 	return &resource{ko}, nil
@@ -178,17 +181,26 @@ func (rm *resourceManager) newCreateRequestPayload(
 	res := &svcsdk.CreateTopicInput{}
 
 	attrMap := map[string]*string{}
+	if r.ko.Spec.ContentBasedDeduplication != nil {
+		attrMap["ContentBasedDeduplication"] = r.ko.Spec.ContentBasedDeduplication
+	}
 	if r.ko.Spec.DeliveryPolicy != nil {
 		attrMap["DeliveryPolicy"] = r.ko.Spec.DeliveryPolicy
 	}
 	if r.ko.Spec.DisplayName != nil {
 		attrMap["DisplayName"] = r.ko.Spec.DisplayName
 	}
+	if r.ko.Spec.FIFOTopic != nil {
+		attrMap["FifoTopic"] = r.ko.Spec.FIFOTopic
+	}
 	if r.ko.Spec.KMSMasterKeyID != nil {
 		attrMap["KmsMasterKeyId"] = r.ko.Spec.KMSMasterKeyID
 	}
 	if r.ko.Spec.Policy != nil {
 		attrMap["Policy"] = r.ko.Spec.Policy
+	}
+	if r.ko.Spec.TracingConfig != nil {
+		attrMap["TracingConfig"] = r.ko.Spec.TracingConfig
 	}
 	res.SetAttributes(attrMap)
 	if r.ko.Spec.DataProtectionPolicy != nil {
@@ -418,6 +430,17 @@ func (rm *resourceManager) updateConditions(
 // and if the exception indicates that it is a Terminal exception
 // 'Terminal' exception are specified in generator configuration
 func (rm *resourceManager) terminalAWSError(err error) bool {
-	// No terminal_errors specified for this resource in generator config
-	return false
+	if err == nil {
+		return false
+	}
+	awsErr, ok := ackerr.AWSError(err)
+	if !ok {
+		return false
+	}
+	switch awsErr.Code() {
+	case "InvalidParameter":
+		return true
+	default:
+		return false
+	}
 }

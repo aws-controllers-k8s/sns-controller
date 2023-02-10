@@ -43,6 +43,13 @@ func newResourceDelta(
 		return delta
 	}
 
+	if ackcompare.HasNilDifference(a.ko.Spec.ContentBasedDeduplication, b.ko.Spec.ContentBasedDeduplication) {
+		delta.Add("Spec.ContentBasedDeduplication", a.ko.Spec.ContentBasedDeduplication, b.ko.Spec.ContentBasedDeduplication)
+	} else if a.ko.Spec.ContentBasedDeduplication != nil && b.ko.Spec.ContentBasedDeduplication != nil {
+		if *a.ko.Spec.ContentBasedDeduplication != *b.ko.Spec.ContentBasedDeduplication {
+			delta.Add("Spec.ContentBasedDeduplication", a.ko.Spec.ContentBasedDeduplication, b.ko.Spec.ContentBasedDeduplication)
+		}
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.DataProtectionPolicy, b.ko.Spec.DataProtectionPolicy) {
 		delta.Add("Spec.DataProtectionPolicy", a.ko.Spec.DataProtectionPolicy, b.ko.Spec.DataProtectionPolicy)
 	} else if a.ko.Spec.DataProtectionPolicy != nil && b.ko.Spec.DataProtectionPolicy != nil {
@@ -64,6 +71,13 @@ func newResourceDelta(
 			delta.Add("Spec.DisplayName", a.ko.Spec.DisplayName, b.ko.Spec.DisplayName)
 		}
 	}
+	if ackcompare.HasNilDifference(a.ko.Spec.FIFOTopic, b.ko.Spec.FIFOTopic) {
+		delta.Add("Spec.FIFOTopic", a.ko.Spec.FIFOTopic, b.ko.Spec.FIFOTopic)
+	} else if a.ko.Spec.FIFOTopic != nil && b.ko.Spec.FIFOTopic != nil {
+		if *a.ko.Spec.FIFOTopic != *b.ko.Spec.FIFOTopic {
+			delta.Add("Spec.FIFOTopic", a.ko.Spec.FIFOTopic, b.ko.Spec.FIFOTopic)
+		}
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.KMSMasterKeyID, b.ko.Spec.KMSMasterKeyID) {
 		delta.Add("Spec.KMSMasterKeyID", a.ko.Spec.KMSMasterKeyID, b.ko.Spec.KMSMasterKeyID)
 	} else if a.ko.Spec.KMSMasterKeyID != nil && b.ko.Spec.KMSMasterKeyID != nil {
@@ -83,6 +97,13 @@ func newResourceDelta(
 	} else if a.ko.Spec.Policy != nil && b.ko.Spec.Policy != nil {
 		if *a.ko.Spec.Policy != *b.ko.Spec.Policy {
 			delta.Add("Spec.Policy", a.ko.Spec.Policy, b.ko.Spec.Policy)
+		}
+	}
+	if ackcompare.HasNilDifference(a.ko.Spec.TracingConfig, b.ko.Spec.TracingConfig) {
+		delta.Add("Spec.TracingConfig", a.ko.Spec.TracingConfig, b.ko.Spec.TracingConfig)
+	} else if a.ko.Spec.TracingConfig != nil && b.ko.Spec.TracingConfig != nil {
+		if *a.ko.Spec.TracingConfig != *b.ko.Spec.TracingConfig {
+			delta.Add("Spec.TracingConfig", a.ko.Spec.TracingConfig, b.ko.Spec.TracingConfig)
 		}
 	}
 

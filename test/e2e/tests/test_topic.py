@@ -63,6 +63,41 @@ def simple_topic():
     assert deleted
 
 
+@pytest.fixture(scope="module")
+def fifo_topic():
+    topic_name = random_suffix_name("my-fifo-topic", 16)
+    # NOTE(jaypipes): FIFO Topics must have a name that ends in ".fifo"
+    topic_name += ".fifo"
+    display_name  = "a fifo topic"
+
+    replacements = REPLACEMENT_VALUES.copy()
+    replacements['TOPIC_NAME'] = topic_name
+    replacements['DISPLAY_NAME'] = display_name
+
+    resource_data = load_resource(
+        "topic_fifo",
+        additional_replacements=replacements,
+    )
+
+    ref = k8s.CustomResourceReference(
+        CRD_GROUP, CRD_VERSION, TOPIC_RESOURCE_PLURAL,
+        topic_name, namespace="default",
+    )
+    k8s.create_custom_resource(ref, resource_data)
+    cr = k8s.wait_resource_consumed_by_controller(ref)
+
+    assert cr is not None
+    assert k8s.get_resource_exists(ref)
+
+    yield (ref, cr)
+
+    _, deleted = k8s.delete_custom_resource(
+        ref,
+        period_length=DELETE_WAIT_AFTER_SECONDS,
+    )
+    assert deleted
+
+
 @service_marker
 @pytest.mark.canary
 class TestTopic:
@@ -136,3 +171,34 @@ class TestTopic:
 #        ]
 #        latest_tags = role.get_tags(role_name)
 #        assert tag.cleaned(latest_tags) == after_update_expected_tags
+
+    def test_crud_fifo(self, fifo_topic):
+        ref, res = fifo_topic
+
+        condition.assert_synced(ref)
+
+        # Before we update the Topic CR below, let's check to see that the
+        # DisplayName field in the CR is still what we set in the original
+        # Create call.
+        cr = k8s.get_resource(ref)
+        assert cr is not None
+        assert 'spec' in cr
+        assert 'displayName' in cr['spec']
+        assert cr['spec']['displayName'] == "a fifo topic"
+        assert 'fifoTopic' in cr['spec']
+        assert bool(cr['spec']['fifoTopic']) == True
+        assert bool(cr['spec']['contentBasedDeduplication']) == True
+
+        assert 'status' in cr
+        assert 'ackResourceMetadata' in cr['status']
+        assert 'arn' in cr['status']['ackResourceMetadata']
+        topic_arn = cr['status']['ackResourceMetadata']['arn']
+
+        attrs = topic.get_attributes(topic_arn)
+        assert attrs is not None
+        assert 'DisplayName' in attrs
+        assert attrs['DisplayName'] == "a fifo topic"
+        assert 'FifoTopic' in attrs
+        assert bool(attrs['FifoTopic']) == True
+        assert 'ContentBasedDeduplication' in attrs
+        assert bool(attrs['ContentBasedDeduplication']) == True
