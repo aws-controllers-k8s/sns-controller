@@ -17,12 +17,26 @@ package platform_application
 
 import (
 	"context"
+	"fmt"
+
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	iamapitypes "github.com/aws-controllers-k8s/iam-controller/apis/v1alpha1"
+	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
+	ackcondition "github.com/aws-controllers-k8s/runtime/pkg/condition"
+	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
 	acktypes "github.com/aws-controllers-k8s/runtime/pkg/types"
 
 	svcapitypes "github.com/aws-controllers-k8s/sns-controller/apis/v1alpha1"
 )
+
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
+
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
 
 // ResolveReferences finds if there are any Reference field(s) present
 // inside AWSResource passed in the parameter and attempts to resolve
@@ -36,17 +50,281 @@ func (rm *resourceManager) ResolveReferences(
 	apiReader client.Reader,
 	res acktypes.AWSResource,
 ) (acktypes.AWSResource, error) {
-	return res, nil
+	namespace := res.MetaObject().GetNamespace()
+	ko := rm.concreteResource(res).ko.DeepCopy()
+	err := validateReferenceFields(ko)
+	if err == nil {
+		err = resolveReferenceForEventEndpointCreated(ctx, apiReader, namespace, ko)
+	}
+	if err == nil {
+		err = resolveReferenceForEventEndpointDeleted(ctx, apiReader, namespace, ko)
+	}
+	if err == nil {
+		err = resolveReferenceForEventEndpointUpdated(ctx, apiReader, namespace, ko)
+	}
+	if err == nil {
+		err = resolveReferenceForFailureFeedbackRoleARN(ctx, apiReader, namespace, ko)
+	}
+	if err == nil {
+		err = resolveReferenceForSuccessFeedbackRoleARN(ctx, apiReader, namespace, ko)
+	}
+
+	// If there was an error while resolving any reference, reset all the
+	// resolved values so that they do not get persisted inside etcd
+	if err != nil {
+		ko = rm.concreteResource(res).ko.DeepCopy()
+	}
+	if hasNonNilReferences(ko) {
+		return ackcondition.WithReferencesResolvedCondition(&resource{ko}, err)
+	}
+	return &resource{ko}, err
 }
 
 // validateReferenceFields validates the reference field and corresponding
 // identifier field.
 func validateReferenceFields(ko *svcapitypes.PlatformApplication) error {
+	if ko.Spec.EventEndpointCreatedRef != nil && ko.Spec.EventEndpointCreated != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("EventEndpointCreated", "EventEndpointCreatedRef")
+	}
+	if ko.Spec.EventEndpointDeletedRef != nil && ko.Spec.EventEndpointDeleted != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("EventEndpointDeleted", "EventEndpointDeletedRef")
+	}
+	if ko.Spec.EventEndpointUpdatedRef != nil && ko.Spec.EventEndpointUpdated != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("EventEndpointUpdated", "EventEndpointUpdatedRef")
+	}
+	if ko.Spec.FailureFeedbackRoleRef != nil && ko.Spec.FailureFeedbackRoleARN != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("FailureFeedbackRoleARN", "FailureFeedbackRoleRef")
+	}
+	if ko.Spec.SuccessFeedbackRoleRef != nil && ko.Spec.SuccessFeedbackRoleARN != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("SuccessFeedbackRoleARN", "SuccessFeedbackRoleRef")
+	}
 	return nil
 }
 
 // hasNonNilReferences returns true if resource contains a reference to another
 // resource
 func hasNonNilReferences(ko *svcapitypes.PlatformApplication) bool {
-	return false
+	return false || (ko.Spec.EventEndpointCreatedRef != nil) || (ko.Spec.EventEndpointDeletedRef != nil) || (ko.Spec.EventEndpointUpdatedRef != nil) || (ko.Spec.FailureFeedbackRoleRef != nil) || (ko.Spec.SuccessFeedbackRoleRef != nil)
+}
+
+// resolveReferenceForEventEndpointCreated reads the resource referenced
+// from EventEndpointCreatedRef field and sets the EventEndpointCreated
+// from referenced resource
+func resolveReferenceForEventEndpointCreated(
+	ctx context.Context,
+	apiReader client.Reader,
+	namespace string,
+	ko *svcapitypes.PlatformApplication,
+) error {
+	if ko.Spec.EventEndpointCreatedRef != nil && ko.Spec.EventEndpointCreatedRef.From != nil {
+		arr := ko.Spec.EventEndpointCreatedRef.From
+		if arr == nil || arr.Name == nil || *arr.Name == "" {
+			return fmt.Errorf("provided resource reference is nil or empty: EventEndpointCreatedRef")
+		}
+		obj := &svcapitypes.Topic{}
+		if err := getReferencedResourceState_Topic(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return err
+		}
+		ko.Spec.EventEndpointCreated = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return nil
+}
+
+// getReferencedResourceState_Topic looks up whether a referenced resource
+// exists and is in a ACK.ResourceSynced=True state. If the referenced resource does exist and is
+// in a Synced state, returns nil, otherwise returns `ackerr.ResourceReferenceTerminalFor` or
+// `ResourceReferenceNotSyncedFor` depending on if the resource is in a Terminal state.
+func getReferencedResourceState_Topic(
+	ctx context.Context,
+	apiReader client.Reader,
+	obj *svcapitypes.Topic,
+	name string, // the Kubernetes name of the referenced resource
+	namespace string, // the Kubernetes namespace of the referenced resource
+) error {
+	namespacedName := types.NamespacedName{
+		Namespace: namespace,
+		Name:      name,
+	}
+	err := apiReader.Get(ctx, namespacedName, obj)
+	if err != nil {
+		return err
+	}
+	var refResourceSynced, refResourceTerminal bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeResourceSynced &&
+			cond.Status == corev1.ConditionTrue {
+			refResourceSynced = true
+		}
+		if cond.Type == ackv1alpha1.ConditionTypeTerminal &&
+			cond.Status == corev1.ConditionTrue {
+			return ackerr.ResourceReferenceTerminalFor(
+				"Topic",
+				namespace, name)
+		}
+	}
+	if refResourceTerminal {
+		return ackerr.ResourceReferenceTerminalFor(
+			"Topic",
+			namespace, name)
+	}
+	if !refResourceSynced {
+		return ackerr.ResourceReferenceNotSyncedFor(
+			"Topic",
+			namespace, name)
+	}
+	if obj.Status.ACKResourceMetadata == nil || obj.Status.ACKResourceMetadata.ARN == nil {
+		return ackerr.ResourceReferenceMissingTargetFieldFor(
+			"Topic",
+			namespace, name,
+			"Status.ACKResourceMetadata.ARN")
+	}
+	return nil
+}
+
+// resolveReferenceForEventEndpointDeleted reads the resource referenced
+// from EventEndpointDeletedRef field and sets the EventEndpointDeleted
+// from referenced resource
+func resolveReferenceForEventEndpointDeleted(
+	ctx context.Context,
+	apiReader client.Reader,
+	namespace string,
+	ko *svcapitypes.PlatformApplication,
+) error {
+	if ko.Spec.EventEndpointDeletedRef != nil && ko.Spec.EventEndpointDeletedRef.From != nil {
+		arr := ko.Spec.EventEndpointDeletedRef.From
+		if arr == nil || arr.Name == nil || *arr.Name == "" {
+			return fmt.Errorf("provided resource reference is nil or empty: EventEndpointDeletedRef")
+		}
+		obj := &svcapitypes.Topic{}
+		if err := getReferencedResourceState_Topic(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return err
+		}
+		ko.Spec.EventEndpointDeleted = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return nil
+}
+
+// resolveReferenceForEventEndpointUpdated reads the resource referenced
+// from EventEndpointUpdatedRef field and sets the EventEndpointUpdated
+// from referenced resource
+func resolveReferenceForEventEndpointUpdated(
+	ctx context.Context,
+	apiReader client.Reader,
+	namespace string,
+	ko *svcapitypes.PlatformApplication,
+) error {
+	if ko.Spec.EventEndpointUpdatedRef != nil && ko.Spec.EventEndpointUpdatedRef.From != nil {
+		arr := ko.Spec.EventEndpointUpdatedRef.From
+		if arr == nil || arr.Name == nil || *arr.Name == "" {
+			return fmt.Errorf("provided resource reference is nil or empty: EventEndpointUpdatedRef")
+		}
+		obj := &svcapitypes.Topic{}
+		if err := getReferencedResourceState_Topic(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return err
+		}
+		ko.Spec.EventEndpointUpdated = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return nil
+}
+
+// resolveReferenceForFailureFeedbackRoleARN reads the resource referenced
+// from FailureFeedbackRoleRef field and sets the FailureFeedbackRoleARN
+// from referenced resource
+func resolveReferenceForFailureFeedbackRoleARN(
+	ctx context.Context,
+	apiReader client.Reader,
+	namespace string,
+	ko *svcapitypes.PlatformApplication,
+) error {
+	if ko.Spec.FailureFeedbackRoleRef != nil && ko.Spec.FailureFeedbackRoleRef.From != nil {
+		arr := ko.Spec.FailureFeedbackRoleRef.From
+		if arr == nil || arr.Name == nil || *arr.Name == "" {
+			return fmt.Errorf("provided resource reference is nil or empty: FailureFeedbackRoleRef")
+		}
+		obj := &iamapitypes.Role{}
+		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return err
+		}
+		ko.Spec.FailureFeedbackRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return nil
+}
+
+// getReferencedResourceState_Role looks up whether a referenced resource
+// exists and is in a ACK.ResourceSynced=True state. If the referenced resource does exist and is
+// in a Synced state, returns nil, otherwise returns `ackerr.ResourceReferenceTerminalFor` or
+// `ResourceReferenceNotSyncedFor` depending on if the resource is in a Terminal state.
+func getReferencedResourceState_Role(
+	ctx context.Context,
+	apiReader client.Reader,
+	obj *iamapitypes.Role,
+	name string, // the Kubernetes name of the referenced resource
+	namespace string, // the Kubernetes namespace of the referenced resource
+) error {
+	namespacedName := types.NamespacedName{
+		Namespace: namespace,
+		Name:      name,
+	}
+	err := apiReader.Get(ctx, namespacedName, obj)
+	if err != nil {
+		return err
+	}
+	var refResourceSynced, refResourceTerminal bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeResourceSynced &&
+			cond.Status == corev1.ConditionTrue {
+			refResourceSynced = true
+		}
+		if cond.Type == ackv1alpha1.ConditionTypeTerminal &&
+			cond.Status == corev1.ConditionTrue {
+			return ackerr.ResourceReferenceTerminalFor(
+				"Role",
+				namespace, name)
+		}
+	}
+	if refResourceTerminal {
+		return ackerr.ResourceReferenceTerminalFor(
+			"Role",
+			namespace, name)
+	}
+	if !refResourceSynced {
+		return ackerr.ResourceReferenceNotSyncedFor(
+			"Role",
+			namespace, name)
+	}
+	if obj.Status.ACKResourceMetadata == nil || obj.Status.ACKResourceMetadata.ARN == nil {
+		return ackerr.ResourceReferenceMissingTargetFieldFor(
+			"Role",
+			namespace, name,
+			"Status.ACKResourceMetadata.ARN")
+	}
+	return nil
+}
+
+// resolveReferenceForSuccessFeedbackRoleARN reads the resource referenced
+// from SuccessFeedbackRoleRef field and sets the SuccessFeedbackRoleARN
+// from referenced resource
+func resolveReferenceForSuccessFeedbackRoleARN(
+	ctx context.Context,
+	apiReader client.Reader,
+	namespace string,
+	ko *svcapitypes.PlatformApplication,
+) error {
+	if ko.Spec.SuccessFeedbackRoleRef != nil && ko.Spec.SuccessFeedbackRoleRef.From != nil {
+		arr := ko.Spec.SuccessFeedbackRoleRef.From
+		if arr == nil || arr.Name == nil || *arr.Name == "" {
+			return fmt.Errorf("provided resource reference is nil or empty: SuccessFeedbackRoleRef")
+		}
+		obj := &iamapitypes.Role{}
+		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return err
+		}
+		ko.Spec.SuccessFeedbackRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return nil
 }

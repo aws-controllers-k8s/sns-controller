@@ -33,11 +33,12 @@ type TopicSpec struct {
 	// The policy must be in JSON string format.
 	//
 	// Length Constraints: Maximum length of 30,720.
-	DataProtectionPolicy *string `json:"dataProtectionPolicy,omitempty"`
-	DeliveryPolicy       *string `json:"deliveryPolicy,omitempty"`
-	DisplayName          *string `json:"displayName,omitempty"`
-	FIFOTopic            *string `json:"fifoTopic,omitempty"`
-	KMSMasterKeyID       *string `json:"kmsMasterKeyID,omitempty"`
+	DataProtectionPolicy *string                                  `json:"dataProtectionPolicy,omitempty"`
+	DeliveryPolicy       *string                                  `json:"deliveryPolicy,omitempty"`
+	DisplayName          *string                                  `json:"displayName,omitempty"`
+	FIFOTopic            *string                                  `json:"fifoTopic,omitempty"`
+	KMSMasterKeyID       *string                                  `json:"kmsMasterKeyID,omitempty"`
+	KMSMasterKeyRef      *ackv1alpha1.AWSResourceReferenceWrapper `json:"kmsMasterKeyRef,omitempty"`
 	// The name of the topic you want to create.
 	//
 	// Constraints: Topic names must be made up of only uppercase and lowercase
@@ -46,8 +47,9 @@ type TopicSpec struct {
 	//
 	// For a FIFO (first-in-first-out) topic, the name must end with the .fifo suffix.
 	// +kubebuilder:validation:Required
-	Name   *string `json:"name"`
-	Policy *string `json:"policy,omitempty"`
+	Name      *string                                  `json:"name"`
+	Policy    *string                                  `json:"policy,omitempty"`
+	PolicyRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"policyRef,omitempty"`
 	// The list of tags to add to a new topic.
 	//
 	// To be able to tag a topic on creation, you must have the sns:CreateTopic

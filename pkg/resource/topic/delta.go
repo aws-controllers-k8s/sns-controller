@@ -85,6 +85,9 @@ func newResourceDelta(
 			delta.Add("Spec.KMSMasterKeyID", a.ko.Spec.KMSMasterKeyID, b.ko.Spec.KMSMasterKeyID)
 		}
 	}
+	if !reflect.DeepEqual(a.ko.Spec.KMSMasterKeyRef, b.ko.Spec.KMSMasterKeyRef) {
+		delta.Add("Spec.KMSMasterKeyRef", a.ko.Spec.KMSMasterKeyRef, b.ko.Spec.KMSMasterKeyRef)
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.Name, b.ko.Spec.Name) {
 		delta.Add("Spec.Name", a.ko.Spec.Name, b.ko.Spec.Name)
 	} else if a.ko.Spec.Name != nil && b.ko.Spec.Name != nil {
@@ -98,6 +101,9 @@ func newResourceDelta(
 		if *a.ko.Spec.Policy != *b.ko.Spec.Policy {
 			delta.Add("Spec.Policy", a.ko.Spec.Policy, b.ko.Spec.Policy)
 		}
+	}
+	if !reflect.DeepEqual(a.ko.Spec.PolicyRef, b.ko.Spec.PolicyRef) {
+		delta.Add("Spec.PolicyRef", a.ko.Spec.PolicyRef, b.ko.Spec.PolicyRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.TracingConfig, b.ko.Spec.TracingConfig) {
 		delta.Add("Spec.TracingConfig", a.ko.Spec.TracingConfig, b.ko.Spec.TracingConfig)
