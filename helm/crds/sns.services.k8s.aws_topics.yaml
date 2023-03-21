@@ -53,6 +53,19 @@ spec:
                 type: string
               kmsMasterKeyID:
                 type: string
+              kmsMasterKeyRef:
+                description: "AWSResourceReferenceWrapper provides a wrapper around
+                  *AWSResourceReference type to provide more user friendly syntax
+                  for references using 'from' field Ex: APIIDRef: \n from: name: my-api"
+                properties:
+                  from:
+                    description: AWSResourceReference provides all the values necessary
+                      to reference another k8s resource for finding the identifier(Id/ARN/Name)
+                    properties:
+                      name:
+                        type: string
+                    type: object
+                type: object
               name:
                 description: "The name of the topic you want to create. \n Constraints:
                   Topic names must be made up of only uppercase and lowercase ASCII
@@ -62,6 +75,19 @@ spec:
                 type: string
               policy:
                 type: string
+              policyRef:
+                description: "AWSResourceReferenceWrapper provides a wrapper around
+                  *AWSResourceReference type to provide more user friendly syntax
+                  for references using 'from' field Ex: APIIDRef: \n from: name: my-api"
+                properties:
+                  from:
+                    description: AWSResourceReference provides all the values necessary
+                      to reference another k8s resource for finding the identifier(Id/ARN/Name)
+                    properties:
+                      name:
+                        type: string
+                    type: object
+                type: object
               tags:
                 description: "The list of tags to add to a new topic. \n To be able
                   to tag a topic on creation, you must have the sns:CreateTopic and

@@ -24,11 +24,15 @@ import (
 //
 // Platform application object.
 type PlatformApplicationSpec struct {
-	EventDeliveryFailure   *string `json:"eventDeliveryFailure,omitempty"`
-	EventEndpointCreated   *string `json:"eventEndpointCreated,omitempty"`
-	EventEndpointDeleted   *string `json:"eventEndpointDeleted,omitempty"`
-	EventEndpointUpdated   *string `json:"eventEndpointUpdated,omitempty"`
-	FailureFeedbackRoleARN *string `json:"failureFeedbackRoleARN,omitempty"`
+	EventDeliveryFailure    *string                                  `json:"eventDeliveryFailure,omitempty"`
+	EventEndpointCreated    *string                                  `json:"eventEndpointCreated,omitempty"`
+	EventEndpointCreatedRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"eventEndpointCreatedRef,omitempty"`
+	EventEndpointDeleted    *string                                  `json:"eventEndpointDeleted,omitempty"`
+	EventEndpointDeletedRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"eventEndpointDeletedRef,omitempty"`
+	EventEndpointUpdated    *string                                  `json:"eventEndpointUpdated,omitempty"`
+	EventEndpointUpdatedRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"eventEndpointUpdatedRef,omitempty"`
+	FailureFeedbackRoleARN  *string                                  `json:"failureFeedbackRoleARN,omitempty"`
+	FailureFeedbackRoleRef  *ackv1alpha1.AWSResourceReferenceWrapper `json:"failureFeedbackRoleRef,omitempty"`
 	// Application names must be made up of only uppercase and lowercase ASCII letters,
 	// numbers, underscores, hyphens, and periods, and must be between 1 and 256
 	// characters long.
@@ -38,11 +42,12 @@ type PlatformApplicationSpec struct {
 	// (Apple Push Notification Service), APNS_SANDBOX, and GCM (Firebase Cloud
 	// Messaging).
 	// +kubebuilder:validation:Required
-	Platform                  *string `json:"platform"`
-	PlatformCredential        *string `json:"platformCredential,omitempty"`
-	PlatformPrincipal         *string `json:"platformPrincipal,omitempty"`
-	SuccessFeedbackRoleARN    *string `json:"successFeedbackRoleARN,omitempty"`
-	SuccessFeedbackSampleRate *string `json:"successFeedbackSampleRate,omitempty"`
+	Platform                  *string                                  `json:"platform"`
+	PlatformCredential        *string                                  `json:"platformCredential,omitempty"`
+	PlatformPrincipal         *string                                  `json:"platformPrincipal,omitempty"`
+	SuccessFeedbackRoleARN    *string                                  `json:"successFeedbackRoleARN,omitempty"`
+	SuccessFeedbackRoleRef    *ackv1alpha1.AWSResourceReferenceWrapper `json:"successFeedbackRoleRef,omitempty"`
+	SuccessFeedbackSampleRate *string                                  `json:"successFeedbackSampleRate,omitempty"`
 }
 
 // PlatformApplicationStatus defines the observed state of PlatformApplication

@@ -30,8 +30,18 @@ resources:
         is_attribute: true
       Policy:
         is_attribute: true
+        type: string
+        references:
+          service_name: iam
+          resource: Policy
+          path: Spec.PolicyDocument
       KmsMasterKeyId:
         is_attribute: true
+        type: string
+        references:
+          service_name: kms
+          resource: Key
+          path: Status.KeyID
       Owner:
         is_attribute: true
         is_read_only: true
@@ -55,16 +65,38 @@ resources:
         is_attribute: true
       EventEndpointCreated:
         is_attribute: true
+        type: string
+        references:
+          resource: Topic
+          path: Status.ACKResourceMetadata.ARN
       EventEndpointDeleted:
         is_attribute: true
+        type: string
+        references:
+          resource: Topic
+          path: Status.ACKResourceMetadata.ARN
       EventEndpointUpdated:
         is_attribute: true
+        type: string
+        references:
+          resource: Topic
+          path: Status.ACKResourceMetadata.ARN
       EventDeliveryFailure:
         is_attribute: true
       SuccessFeedbackRoleArn:
         is_attribute: true
+        type: string
+        references:
+          service_name: iam
+          resource: Role
+          path: Status.ACKResourceMetadata.ARN
       FailureFeedbackRoleArn:
         is_attribute: true
+        type: string
+        references:
+          service_name: iam
+          resource: Role
+          path: Status.ACKResourceMetadata.ARN
       SuccessFeedbackSampleRate:
         is_attribute: true
     # TODO(jaypipes): Some SNS resources support tag on create. Support tags

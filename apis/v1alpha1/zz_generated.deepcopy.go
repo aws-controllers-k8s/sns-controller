@@ -212,20 +212,40 @@ func (in *PlatformApplicationSpec) DeepCopyInto(out *PlatformApplicationSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.EventEndpointCreatedRef != nil {
+		in, out := &in.EventEndpointCreatedRef, &out.EventEndpointCreatedRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.EventEndpointDeleted != nil {
 		in, out := &in.EventEndpointDeleted, &out.EventEndpointDeleted
 		*out = new(string)
 		**out = **in
+	}
+	if in.EventEndpointDeletedRef != nil {
+		in, out := &in.EventEndpointDeletedRef, &out.EventEndpointDeletedRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.EventEndpointUpdated != nil {
 		in, out := &in.EventEndpointUpdated, &out.EventEndpointUpdated
 		*out = new(string)
 		**out = **in
 	}
+	if in.EventEndpointUpdatedRef != nil {
+		in, out := &in.EventEndpointUpdatedRef, &out.EventEndpointUpdatedRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.FailureFeedbackRoleARN != nil {
 		in, out := &in.FailureFeedbackRoleARN, &out.FailureFeedbackRoleARN
 		*out = new(string)
 		**out = **in
+	}
+	if in.FailureFeedbackRoleRef != nil {
+		in, out := &in.FailureFeedbackRoleRef, &out.FailureFeedbackRoleRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.Name != nil {
 		in, out := &in.Name, &out.Name
@@ -251,6 +271,11 @@ func (in *PlatformApplicationSpec) DeepCopyInto(out *PlatformApplicationSpec) {
 		in, out := &in.SuccessFeedbackRoleARN, &out.SuccessFeedbackRoleARN
 		*out = new(string)
 		**out = **in
+	}
+	if in.SuccessFeedbackRoleRef != nil {
+		in, out := &in.SuccessFeedbackRoleRef, &out.SuccessFeedbackRoleRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.SuccessFeedbackSampleRate != nil {
 		in, out := &in.SuccessFeedbackSampleRate, &out.SuccessFeedbackSampleRate
@@ -657,6 +682,11 @@ func (in *TopicSpec) DeepCopyInto(out *TopicSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.KMSMasterKeyRef != nil {
+		in, out := &in.KMSMasterKeyRef, &out.KMSMasterKeyRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Name != nil {
 		in, out := &in.Name, &out.Name
 		*out = new(string)
@@ -666,6 +696,11 @@ func (in *TopicSpec) DeepCopyInto(out *TopicSpec) {
 		in, out := &in.Policy, &out.Policy
 		*out = new(string)
 		**out = **in
+	}
+	if in.PolicyRef != nil {
+		in, out := &in.PolicyRef, &out.PolicyRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.Tags != nil {
 		in, out := &in.Tags, &out.Tags
