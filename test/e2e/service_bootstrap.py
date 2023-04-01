@@ -15,15 +15,48 @@
 import logging
 
 from acktest.bootstrapping import Resources, BootstrapFailureException
+from acktest.bootstrapping.sqs import Queue
+from acktest.bootstrapping.sns import Topic
+from acktest.aws.identity import get_region, get_account_id
 
 from e2e import bootstrap_directory
 from e2e.bootstrap_resources import BootstrapResources
+
+topic = Topic(name_prefix="subscribe-topic")
+
+queue_policy = """{
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "sns.amazonaws.com"
+      },
+      "Action": "sqs:SendMessage",
+      "Resource": "arn:aws:sqs:$REGION:$ACCOUNT_ID:$NAME",
+      "Condition": {
+        "ArnEquals": {
+          "aws:SourceArn": "arn:aws:sns:$REGION:$ACCOUNT_ID:$TOPIC_NAME"
+        }
+      }
+    }
+  ]
+}
+"""
+
+queue_policy_vars = {
+    "$TOPIC_NAME": topic.name,
+}
 
 def service_bootstrap() -> Resources:
     logging.getLogger().setLevel(logging.INFO)
 
     resources = BootstrapResources(
-        # TODO: Add bootstrapping when you have defined the resources
+        Topic=topic,
+        Queue=Queue(
+            name_prefix="subscribe-queue",
+            policy=queue_policy,
+            policy_vars=queue_policy_vars,
+        ),
     )
 
     try:

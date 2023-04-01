@@ -11,7 +11,7 @@
 # express or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-"""Utilities for working with Topic resources"""
+"""Utilities for working with Subscription resources"""
 
 import datetime
 import time
@@ -26,17 +26,17 @@ DEFAULT_WAIT_UNTIL_DELETED_INTERVAL_SECONDS = 15
 
 
 def wait_until_exists(
-        topic_arn: str,
+        subscription_arn: str,
         timeout_seconds: int = DEFAULT_WAIT_UNTIL_EXISTS_TIMEOUT_SECONDS,
         interval_seconds: int = DEFAULT_WAIT_UNTIL_EXISTS_INTERVAL_SECONDS,
     ) -> None:
-    """Waits until a Topic with a supplied ARN is returned from SNS
-    GetTopicAttributes API.
+    """Waits until a Subscription with a supplied ARN is returned from SNS
+    GetSubscriptionAttributes API.
 
     Usage:
-        from e2e.topic import wait_until_exists
+        from e2e.subscription import wait_until_exists
 
-        wait_until_exists(topic_arn)
+        wait_until_exists(subscription_arn)
 
     Raises:
         pytest.fail upon timeout
@@ -47,28 +47,28 @@ def wait_until_exists(
     while True:
         if datetime.datetime.now() >= timeout:
             pytest.fail(
-                "Timed out waiting for Topic to exist "
+                "Timed out waiting for Subscription to exist "
                 "in SNS API"
             )
         time.sleep(interval_seconds)
 
-        latest = get_attributes(topic_arn)
+        latest = get_attributes(subscription_arn)
         if latest is not None:
             break
 
 
 def wait_until_deleted(
-        topic_arn: str,
+        sub_arn: str,
         timeout_seconds: int = DEFAULT_WAIT_UNTIL_DELETED_TIMEOUT_SECONDS,
         interval_seconds: int = DEFAULT_WAIT_UNTIL_DELETED_INTERVAL_SECONDS,
     ) -> None:
-    """Waits until a Topic with a supplied ARN is no longer returned from
+    """Waits until a Subscription with a supplied ARN is no longer returned from
     the SNS API.
 
     Usage:
-        from e2e.topic import wait_until_deleted
+        from e2e.subscription import wait_until_deleted
 
-        wait_until_deleted(topic_arn)
+        wait_until_deleted(sub_arn)
 
     Raises:
         pytest.fail upon timeout
@@ -79,38 +79,38 @@ def wait_until_deleted(
     while True:
         if datetime.datetime.now() >= timeout:
             pytest.fail(
-                "Timed out waiting for Topic to be "
+                "Timed out waiting for Subscription to be "
                 "deleted in SNS API"
             )
         time.sleep(interval_seconds)
 
-        latest = get_attributes(topic_arn)
+        latest = get_attributes(sub_arn)
         if latest is None:
             break
 
 
-def get_attributes(topic_arn):
-    """Returns a dict containing the Topic attributes from the SNS
-    GetTopicAttributes API.
+def get_attributes(subscription_arn):
+    """Returns a dict containing the Subscription attributes from the SNS
+    GetSubscriptionAttributes API.
 
-    If no such Topic exists, returns None.
+    If no such Subscription exists, returns None.
     """
     c = boto3.client('sns')
     try:
-        resp = c.get_topic_attributes(TopicArn=topic_arn)
+        resp = c.get_subscription_attributes(SubscriptionArn=subscription_arn)
         return resp['Attributes']
     except c.exceptions.NotFoundException:
         return None
 
 
-def get_tags(topic_arn):
-    """Returns the tags for the topic with a supplied ARN.
+def get_tags(subscription_arn):
+    """Returns the tags for the subscription with a supplied ARN.
 
-    If no such Topic exists, returns None.
+    If no such Subscription exists, returns None.
     """
     c = boto3.client('sns')
     try:
-        resp = c.list_tags_for_resource(ResourceArn=topic_arn)
+        resp = c.list_tags_for_resource(ResourceArn=subscription_arn)
         return resp['Tags']
     except c.exceptions.ResourceNotFoundException:
         return None

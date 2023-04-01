@@ -171,6 +171,26 @@ rules:
 - apiGroups:
   - sns.services.k8s.aws
   resources:
+  - subscriptions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - sns.services.k8s.aws
+  resources:
+  - subscriptions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - sns.services.k8s.aws
+  resources:
   - topics
   verbs:
   - create

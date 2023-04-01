@@ -38,6 +38,7 @@ import (
 
 	_ "github.com/aws-controllers-k8s/sns-controller/pkg/resource/platform_application"
 	_ "github.com/aws-controllers-k8s/sns-controller/pkg/resource/platform_endpoint"
+	_ "github.com/aws-controllers-k8s/sns-controller/pkg/resource/subscription"
 	_ "github.com/aws-controllers-k8s/sns-controller/pkg/resource/topic"
 
 	"github.com/aws-controllers-k8s/sns-controller/pkg/version"

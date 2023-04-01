@@ -84,8 +84,12 @@ type PublishBatchResultEntry struct {
 }
 
 // A wrapper type for the attributes of an Amazon SNS subscription.
-type Subscription struct {
-	TopicARN *string `json:"topicARN,omitempty"`
+type Subscription_SDK struct {
+	Endpoint        *string `json:"endpoint,omitempty"`
+	Owner           *string `json:"owner,omitempty"`
+	Protocol        *string `json:"protocol,omitempty"`
+	SubscriptionARN *string `json:"subscriptionARN,omitempty"`
+	TopicARN        *string `json:"topicARN,omitempty"`
 }
 
 // The list of tags to be added to the specified topic.

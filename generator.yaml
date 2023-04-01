@@ -1,6 +1,8 @@
 ignore:
   resource_names:
     - SMSSandboxPhoneNumber
+  field_paths:
+    - SubscribeInput.ReturnSubscriptionArn
 operations:
   # NOTE(jaypipes): Because OF COURSE the name of the API doesn't match the
   # name of the API Resource :( grrrr...
@@ -9,7 +11,27 @@ operations:
     operation_type: GET_ATTRIBUTES 
   SetEndpointAttributes:
     resource_name: PlatformEndpoint
-    operation_type: SET_ATTRIBUTES 
+    operation_type: SET_ATTRIBUTES
+  # NOTE(jaypipes): The Subscription resource has a number of usage caveats in
+  # order to make it fit into the Kubernetes declarative resource model and
+  # behaviour expectations. Notably, we constrain Subscribe operations to only
+  # topics and endpoints that are owned by the same AWS account as the
+  # subscriber and where the protocol is NOT "http(s)" or "email". This is
+  # because there is a manual 2-step multi-account ConfirmSubscription workflow
+  # that is required if the endpoint is owned by a different AWS account or
+  # those protocols are used...
+  Subscribe:
+    resource_name: Subscription
+    operation_type: CREATE
+  Unsubscribe:
+    resource_name: Subscription
+    operation_type: DELETE
+  GetSubscriptionAttributes:
+    resource_name: Subscription
+    operation_type: GET_ATTRIBUTES
+  SetSubscriptionAttributes:
+    resource_name: Subscription
+    operation_type: SET_ATTRIBUTES
 resources:
   Topic:
     unpack_attributes_map:
@@ -115,5 +137,44 @@ resources:
         is_attribute: true
     # TODO(jaypipes): Some SNS resources support tag on create. Support tags
     # using Tagris APIs after creation in the future.
+    tags:
+      ignore: true
+  Subscription:
+    unpack_attributes_map:
+      set_attributes_single_attribute: true
+    exceptions:
+      terminal_codes:
+        - InvalidParameter
+    hooks:
+      sdk_create_post_build_request:
+        template_path: hooks/subscription/sdk_create_post_build_request.go.tpl
+    fields:
+      ConfirmationWasAuthenticated:
+        is_attribute: true
+        is_read_only: true
+      DeliveryPolicy:
+        is_attribute: true
+      EffectiveDeliveryPolicy:
+        is_attribute: true
+        is_read_only: true
+      FilterPolicy:
+        is_attribute: true
+      Owner:
+        is_attribute: true
+        is_read_only: true
+        is_owner_account_id: true
+      PendingConfirmation:
+        is_attribute: true
+        is_read_only: true
+      RawMessageDelivery:
+        is_attribute: true
+      RedrivePolicy:
+        is_attribute: true
+      SubscriptionRoleArn:
+        is_attribute: true
+      TopicArn:
+        references:
+          resource: Topic
+          path: Status.ACKResourceMetadata.ARN
     tags:
       ignore: true

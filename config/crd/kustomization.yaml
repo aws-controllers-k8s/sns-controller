@@ -4,4 +4,5 @@ resources:
   - common
   - bases/sns.services.k8s.aws_platformapplications.yaml
   - bases/sns.services.k8s.aws_platformendpoints.yaml
+  - bases/sns.services.k8s.aws_subscriptions.yaml
   - bases/sns.services.k8s.aws_topics.yaml

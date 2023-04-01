@@ -11,6 +11,7 @@ rules:
   resources:
   - platformapplications
   - platformendpoints
+  - subscriptions
   - topics
   verbs:
   - get
