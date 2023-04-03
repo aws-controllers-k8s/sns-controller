@@ -39,6 +39,13 @@ resources:
     exceptions:
       terminal_codes:
         - InvalidParameter
+    hooks:
+      delta_pre_compare:
+        code: compareTags(delta, a, b)
+      sdk_get_attributes_post_set_output:
+        template_path: hooks/topic/sdk_get_attributes_post_set_output.go.tpl
+      sdk_update_pre_build_request:
+        template_path: hooks/topic/sdk_update_pre_build_request.go.tpl
     fields:
       FifoTopic:
         is_attribute: true

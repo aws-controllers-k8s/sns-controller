@@ -20,11 +20,11 @@ import pytest
 from acktest.k8s import condition
 from acktest.k8s import resource as k8s
 from acktest.resources import random_suffix_name
+from acktest import tags
 from e2e import service_marker, CRD_GROUP, CRD_VERSION, load_resource
 from e2e.common.types import TOPIC_RESOURCE_PLURAL
 from e2e.replacement_values import REPLACEMENT_VALUES
 from e2e import topic
-from e2e import tag
 
 DELETE_WAIT_AFTER_SECONDS = 10
 MODIFY_WAIT_AFTER_SECONDS = 10
@@ -142,35 +142,39 @@ class TestTopic:
 #        assert 'DisplayName' in latest
 #        assert latest['DisplayName'] == new_display_name
 #
-#        # Same update code path check for tags...
-#        latest_tags = topic.get_tags(topic_name)
-#        before_update_expected_tags = [
-#            {
-#                "Key": "tag1",
-#                "Value": "val1"
-#            }
-#        ]
-#        assert tag.cleaned(latest_tags) == before_update_expected_tags
-#        new_tags = [
-#            {
-#                "key": "tag2",
-#                "value": "val2",
-#            }
-#        ]
-#        updates = {
-#            "spec": {"tags": new_tags},
-#        }
-#        k8s.patch_custom_resource(ref, updates)
-#        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
-#
-#        after_update_expected_tags = [
-#            {
-#                "Key": "tag2",
-#                "Value": "val2",
-#            }
-#        ]
-#        latest_tags = role.get_tags(role_name)
-#        assert tag.cleaned(latest_tags) == after_update_expected_tags
+        # Same update code path check for tags...
+        latest_tags = topic.get_tags(topic_arn)
+        expect_before_update_tags = [
+            {
+                "Key": "tag1",
+                "Value": "val1"
+            }
+        ]
+        tags.assert_equal_without_ack_tags(
+            expect_before_update_tags, latest_tags,
+        )
+        new_tags = [
+            {
+                "key": "tag2",
+                "value": "val2",
+            }
+        ]
+        updates = {
+            "spec": {"tags": new_tags},
+        }
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
+
+        expect_after_update_tags = [
+            {
+                "Key": "tag2",
+                "Value": "val2",
+            }
+        ]
+        latest_tags = topic.get_tags(topic_arn)
+        tags.assert_equal_without_ack_tags(
+            expect_after_update_tags, latest_tags,
+        )
 
     def test_crud_fifo(self, fifo_topic):
         ref, res = fifo_topic
