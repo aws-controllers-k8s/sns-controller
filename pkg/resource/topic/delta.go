@@ -42,6 +42,7 @@ func newResourceDelta(
 		delta.Add("", a, b)
 		return delta
 	}
+	compareTags(delta, a, b)
 
 	if ackcompare.HasNilDifference(a.ko.Spec.ContentBasedDeduplication, b.ko.Spec.ContentBasedDeduplication) {
 		delta.Add("Spec.ContentBasedDeduplication", a.ko.Spec.ContentBasedDeduplication, b.ko.Spec.ContentBasedDeduplication)
