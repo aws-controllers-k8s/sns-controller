@@ -125,23 +125,22 @@ class TestTopic:
         assert 'DisplayName' in attrs
         assert attrs['DisplayName'] == "a simple topic"
 
-#        new_display_name = "new display name"
-#
-#        # We're now going to modify the DisplayName field of the Role, wait
-#        # some time and verify that the SNS server-side resource shows the new
-#        # value of the field.
-#        updates = {
-#            "spec": {"displayName": new_display_name},
-#        }
-#        k8s.patch_custom_resource(ref, updates)
-#        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
-#
-#        latest = topic.get_attributes(topic_name)
-#        assert latest is not None
-#        assert 'Attributes' in latest
-#        assert 'DisplayName' in latest
-#        assert latest['DisplayName'] == new_display_name
-#
+        new_display_name = "new display name"
+
+        # We're now going to modify the DisplayName field of the Topic, wait
+        # some time and verify that the SNS server-side resource shows the new
+        # value of the field.
+        updates = {
+            "spec": {"displayName": new_display_name},
+        }
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
+
+        latest = topic.get_attributes(topic_arn)
+        assert latest is not None
+        assert 'DisplayName' in latest
+        assert latest['DisplayName'] == new_display_name
+
         # Same update code path check for tags...
         latest_tags = topic.get_tags(topic_arn)
         expect_before_update_tags = [

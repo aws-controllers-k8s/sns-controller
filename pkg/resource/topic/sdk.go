@@ -98,8 +98,7 @@ func (rm *resourceManager) sdkFind(
 	tmpOwnerID := ackv1alpha1.AWSAccountID(*resp.Attributes["Owner"])
 	ko.Status.ACKResourceMetadata.OwnerAccountID = &tmpOwnerID
 	ko.Spec.Policy = resp.Attributes["Policy"]
-	tmpARN := ackv1alpha1.AWSResourceName(*resp.Attributes["TopicArn"])
-	ko.Status.ACKResourceMetadata.ARN = &tmpARN
+	ko.Spec.SignatureVersion = resp.Attributes["SignatureVersion"]
 	ko.Spec.TracingConfig = resp.Attributes["TracingConfig"]
 
 	rm.setStatusDefaults(ko)
@@ -205,6 +204,9 @@ func (rm *resourceManager) newCreateRequestPayload(
 	if r.ko.Spec.Policy != nil {
 		attrMap["Policy"] = r.ko.Spec.Policy
 	}
+	if r.ko.Spec.SignatureVersion != nil {
+		attrMap["SignatureVersion"] = r.ko.Spec.SignatureVersion
+	}
 	if r.ko.Spec.TracingConfig != nil {
 		attrMap["TracingConfig"] = r.ko.Spec.TracingConfig
 	}
@@ -241,73 +243,7 @@ func (rm *resourceManager) sdkUpdate(
 	latest *resource,
 	delta *ackcompare.Delta,
 ) (*resource, error) {
-	var err error
-	rlog := ackrtlog.FromContext(ctx)
-	exit := rlog.Trace("rm.sdkUpdate")
-	defer func() {
-		exit(err)
-	}()
-	if delta.DifferentAt("Spec.Tags") {
-		if err := rm.syncTags(ctx, desired, latest); err != nil {
-			return nil, err
-		}
-	}
-	if !delta.DifferentExcept("Spec.Tags") {
-		return desired, nil
-	}
-
-	// If any required fields in the input shape are missing, AWS resource is
-	// not created yet. And sdkUpdate should never be called if this is the
-	// case, and it's an error in the generated code if it is...
-	if rm.requiredFieldsMissingFromSetAttributesInput(desired) {
-		panic("Required field in SetAttributes input shape missing!")
-	}
-
-	input, err := rm.newSetAttributesRequestPayload(desired)
-	if err != nil {
-		return nil, err
-	}
-
-	// NOTE(jaypipes): SetAttributes calls return a response but they don't
-	// contain any useful information. Instead, below, we'll be returning a
-	// DeepCopy of the supplied desired state, which should be fine because
-	// that desired state has been constructed from a call to GetAttributes...
-	_, respErr := rm.sdkapi.SetTopicAttributesWithContext(ctx, input)
-	rm.metrics.RecordAPICall("SET_ATTRIBUTES", "SetTopicAttributes", respErr)
-	if respErr != nil {
-		if awsErr, ok := ackerr.AWSError(respErr); ok && awsErr.Code() == "NotFound" {
-			// Technically, this means someone deleted the backend resource in
-			// between the time we got a result back from sdkFind() and here...
-			return nil, ackerr.NotFound
-		}
-		return nil, respErr
-	}
-
-	// Merge in the information we read from the API call above to the copy of
-	// the original Kubernetes object we passed to the function
-	ko := desired.ko.DeepCopy()
-	rm.setStatusDefaults(ko)
-	return &resource{ko}, nil
-}
-
-// requiredFieldsMissingFromSetAtttributesInput returns true if there are any
-// fields for the SetAttributes Input shape that are required by not present in
-// the resource's Spec or Status
-func (rm *resourceManager) requiredFieldsMissingFromSetAttributesInput(
-	r *resource,
-) bool {
-	return (r.ko.Status.ACKResourceMetadata == nil || r.ko.Status.ACKResourceMetadata.ARN == nil)
-
-}
-
-// newSetAttributesRequestPayload returns SDK-specific struct for the HTTP
-// request payload of the SetAttributes API call for the resource
-func (rm *resourceManager) newSetAttributesRequestPayload(
-	r *resource,
-) (*svcsdk.SetTopicAttributesInput, error) {
-	res := &svcsdk.SetTopicAttributesInput{}
-
-	return res, nil
+	return rm.customUpdate(ctx, desired, latest, delta)
 }
 
 // sdkDelete deletes the supplied resource in the backend AWS service API

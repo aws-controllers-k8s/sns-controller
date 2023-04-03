@@ -892,6 +892,11 @@ func (in *TopicSpec) DeepCopyInto(out *TopicSpec) {
 		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.SignatureVersion != nil {
+		in, out := &in.SignatureVersion, &out.SignatureVersion
+		*out = new(string)
+		**out = **in
+	}
 	if in.Tags != nil {
 		in, out := &in.Tags, &out.Tags
 		*out = make([]*Tag, len(*in))

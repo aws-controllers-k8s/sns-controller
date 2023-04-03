@@ -106,6 +106,13 @@ func newResourceDelta(
 	if !reflect.DeepEqual(a.ko.Spec.PolicyRef, b.ko.Spec.PolicyRef) {
 		delta.Add("Spec.PolicyRef", a.ko.Spec.PolicyRef, b.ko.Spec.PolicyRef)
 	}
+	if ackcompare.HasNilDifference(a.ko.Spec.SignatureVersion, b.ko.Spec.SignatureVersion) {
+		delta.Add("Spec.SignatureVersion", a.ko.Spec.SignatureVersion, b.ko.Spec.SignatureVersion)
+	} else if a.ko.Spec.SignatureVersion != nil && b.ko.Spec.SignatureVersion != nil {
+		if *a.ko.Spec.SignatureVersion != *b.ko.Spec.SignatureVersion {
+			delta.Add("Spec.SignatureVersion", a.ko.Spec.SignatureVersion, b.ko.Spec.SignatureVersion)
+		}
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.TracingConfig, b.ko.Spec.TracingConfig) {
 		delta.Add("Spec.TracingConfig", a.ko.Spec.TracingConfig, b.ko.Spec.TracingConfig)
 	} else if a.ko.Spec.TracingConfig != nil && b.ko.Spec.TracingConfig != nil {
