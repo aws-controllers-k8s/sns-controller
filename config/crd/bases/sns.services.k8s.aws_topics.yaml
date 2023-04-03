@@ -88,6 +88,8 @@ spec:
                         type: string
                     type: object
                 type: object
+              signatureVersion:
+                type: string
               tags:
                 description: "The list of tags to add to a new topic. \n To be able
                   to tag a topic on creation, you must have the sns:CreateTopic and

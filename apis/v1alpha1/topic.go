@@ -47,9 +47,10 @@ type TopicSpec struct {
 	//
 	// For a FIFO (first-in-first-out) topic, the name must end with the .fifo suffix.
 	// +kubebuilder:validation:Required
-	Name      *string                                  `json:"name"`
-	Policy    *string                                  `json:"policy,omitempty"`
-	PolicyRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"policyRef,omitempty"`
+	Name             *string                                  `json:"name"`
+	Policy           *string                                  `json:"policy,omitempty"`
+	PolicyRef        *ackv1alpha1.AWSResourceReferenceWrapper `json:"policyRef,omitempty"`
+	SignatureVersion *string                                  `json:"signatureVersion,omitempty"`
 	// The list of tags to add to a new topic.
 	//
 	// To be able to tag a topic on creation, you must have the sns:CreateTopic

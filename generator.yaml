@@ -34,6 +34,8 @@ operations:
     operation_type: SET_ATTRIBUTES
 resources:
   Topic:
+    update_operation:
+      custom_method_name: customUpdate
     unpack_attributes_map:
       set_attributes_single_attribute: true
     exceptions:
@@ -44,8 +46,6 @@ resources:
         code: compareTags(delta, a, b)
       sdk_get_attributes_post_set_output:
         template_path: hooks/topic/sdk_get_attributes_post_set_output.go.tpl
-      sdk_update_pre_build_request:
-        template_path: hooks/topic/sdk_update_pre_build_request.go.tpl
     fields:
       FifoTopic:
         is_attribute: true
@@ -64,6 +64,9 @@ resources:
           service_name: iam
           resource: Policy
           path: Spec.PolicyDocument
+        # The topic policy is apparently automatically set on the server side
+        # if not supplied during create
+        late_initialize: {}
       KmsMasterKeyId:
         is_attribute: true
         type: string
@@ -78,9 +81,8 @@ resources:
       EffectiveDeliveryPolicy:
         is_attribute: true
         is_read_only: true
-      TopicArn:
+      SignatureVersion:
         is_attribute: true
-        is_read_only: true
       Tags:
         compare:
           is_ignored: true
