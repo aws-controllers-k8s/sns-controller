@@ -130,8 +130,6 @@ resources:
           path: Status.ACKResourceMetadata.ARN
       SuccessFeedbackSampleRate:
         is_attribute: true
-    # TODO(jaypipes): Some SNS resources support tag on create. Support tags
-    # using Tagris APIs after creation in the future.
     tags:
       ignore: true
   PlatformEndpoint:
@@ -144,11 +142,11 @@ resources:
         is_attribute: true
       Token:
         is_attribute: true
-    # TODO(jaypipes): Some SNS resources support tag on create. Support tags
-    # using Tagris APIs after creation in the future.
     tags:
       ignore: true
   Subscription:
+    update_operation:
+      custom_method_name: customUpdate
     unpack_attributes_map:
       set_attributes_single_attribute: true
     exceptions:
@@ -167,6 +165,8 @@ resources:
         is_attribute: true
         is_read_only: true
       FilterPolicy:
+        is_attribute: true
+      FilterPolicyScope:
         is_attribute: true
       Owner:
         is_attribute: true

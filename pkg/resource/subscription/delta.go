@@ -64,6 +64,13 @@ func newResourceDelta(
 			delta.Add("Spec.FilterPolicy", a.ko.Spec.FilterPolicy, b.ko.Spec.FilterPolicy)
 		}
 	}
+	if ackcompare.HasNilDifference(a.ko.Spec.FilterPolicyScope, b.ko.Spec.FilterPolicyScope) {
+		delta.Add("Spec.FilterPolicyScope", a.ko.Spec.FilterPolicyScope, b.ko.Spec.FilterPolicyScope)
+	} else if a.ko.Spec.FilterPolicyScope != nil && b.ko.Spec.FilterPolicyScope != nil {
+		if *a.ko.Spec.FilterPolicyScope != *b.ko.Spec.FilterPolicyScope {
+			delta.Add("Spec.FilterPolicyScope", a.ko.Spec.FilterPolicyScope, b.ko.Spec.FilterPolicyScope)
+		}
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.Protocol, b.ko.Spec.Protocol) {
 		delta.Add("Spec.Protocol", a.ko.Spec.Protocol, b.ko.Spec.Protocol)
 	} else if a.ko.Spec.Protocol != nil && b.ko.Spec.Protocol != nil {

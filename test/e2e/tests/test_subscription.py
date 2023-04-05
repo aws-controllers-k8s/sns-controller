@@ -13,6 +13,7 @@
 
 """Integration tests for the SNS Subscription resource"""
 
+import json
 import time
 
 import pytest
@@ -25,8 +26,6 @@ from e2e.bootstrap_resources import get_bootstrap_resources
 from e2e.common.types import SUBSCRIPTION_RESOURCE_PLURAL
 from e2e.replacement_values import REPLACEMENT_VALUES
 from e2e import subscription
-from e2e import tag
-from e2e import topic
 
 MODIFY_WAIT_AFTER_SECONDS = 10
 CHECK_WAIT_AFTER_REF_RESOLVE_SECONDS = 10
@@ -88,3 +87,50 @@ class TestSubscription:
         subscription.wait_until_exists(sub_arn)
 
         condition.assert_synced(sub_ref)
+
+        # Before we update the Topic CR below, let's check to see that the
+        # DisplayName field in the CR is still what we set in the original
+        # Create call.
+        cr = k8s.get_resource(sub_ref)
+        assert cr is not None
+        assert 'spec' in cr
+        assert 'deliveryPolicy' not in cr['spec']
+
+        attrs = subscription.get_attributes(sub_arn)
+        assert attrs is not None
+        assert 'DeliveryPolicy' not in attrs
+
+        delivery_policy = {
+            "healthyRetryPolicy": {
+                "minDelayTarget": 1,
+                "maxDelayTarget": 60,
+                "numRetries": 50,
+                "numNoDelayRetries": 3,
+                "numMinDelayRetries": 2,
+                "numMaxDelayRetries": 35,
+                "backoffFunction": "exponential"
+            }
+        }
+        new_delivery_policy = json.dumps(delivery_policy)
+
+        # We're now going to modify the DeliveryPolicy field of the
+        # Subscription, wait some time and verify that the SNS server-side
+        # resource shows the new value of the field.
+        updates = {
+            "spec": {"deliveryPolicy": new_delivery_policy},
+        }
+        k8s.patch_custom_resource(sub_ref, updates)
+        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
+
+        latest = subscription.get_attributes(sub_arn)
+        assert latest is not None
+        assert 'DeliveryPolicy' in latest
+
+        # NOTE(jaypipes): SNS adds some default field values to the
+        # DeliveryPolicy JSON object on the server-side, including things like
+        # `"guaranteed": false` and `"requestPolicy": null`. We will simply
+        # verify that the healthRetryPolicy segment we updated is correct.
+        got_delivery_policy= json.loads(latest['DeliveryPolicy'])
+        assert 'healthyRetryPolicy' in got_delivery_policy
+        exp_healthy_retry_policy = delivery_policy['healthyRetryPolicy']
+        assert exp_healthy_retry_policy == got_delivery_policy['healthyRetryPolicy']

@@ -49,8 +49,9 @@ type SubscriptionSpec struct {
 	//
 	//   - For the firehose protocol, the endpoint is the ARN of an Amazon Kinesis
 	//     Data Firehose delivery stream.
-	Endpoint     *string `json:"endpoint,omitempty"`
-	FilterPolicy *string `json:"filterPolicy,omitempty"`
+	Endpoint          *string `json:"endpoint,omitempty"`
+	FilterPolicy      *string `json:"filterPolicy,omitempty"`
+	FilterPolicyScope *string `json:"filterPolicyScope,omitempty"`
 	// The protocol that you want to use. Supported protocols include:
 	//
 	//   - http – delivery of JSON-encoded message via HTTP POST
