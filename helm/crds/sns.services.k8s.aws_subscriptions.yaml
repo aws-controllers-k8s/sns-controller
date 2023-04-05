@@ -55,6 +55,8 @@ spec:
                 type: string
               filterPolicy:
                 type: string
+              filterPolicyScope:
+                type: string
               protocol:
                 description: "The protocol that you want to use. Supported protocols
                   include: \n - http – delivery of JSON-encoded message via HTTP POST

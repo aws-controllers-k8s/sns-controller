@@ -622,6 +622,11 @@ func (in *SubscriptionSpec) DeepCopyInto(out *SubscriptionSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.FilterPolicyScope != nil {
+		in, out := &in.FilterPolicyScope, &out.FilterPolicyScope
+		*out = new(string)
+		**out = **in
+	}
 	if in.Protocol != nil {
 		in, out := &in.Protocol, &out.Protocol
 		*out = new(string)
