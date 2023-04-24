@@ -34,6 +34,7 @@ operations:
     operation_type: SET_ATTRIBUTES
 resources:
   Topic:
+    is_arn_primary_key: true
     update_operation:
       custom_method_name: customUpdate
     unpack_attributes_map:
@@ -87,6 +88,7 @@ resources:
         compare:
           is_ignored: true
   PlatformApplication:
+    is_arn_primary_key: true
     unpack_attributes_map:
       set_attributes_single_attribute: false
     fields:
@@ -133,6 +135,7 @@ resources:
     tags:
       ignore: true
   PlatformEndpoint:
+    is_arn_primary_key: true
     unpack_attributes_map:
       set_attributes_single_attribute: false
     fields:
@@ -145,6 +148,7 @@ resources:
     tags:
       ignore: true
   Subscription:
+    is_arn_primary_key: true
     update_operation:
       custom_method_name: customUpdate
     unpack_attributes_map:
