@@ -197,7 +197,9 @@ func (rm *resourceManager) newCreateRequestPayload(
 	if r.ko.Spec.SubscriptionRoleARN != nil {
 		attrMap["SubscriptionRoleArn"] = r.ko.Spec.SubscriptionRoleARN
 	}
-	res.SetAttributes(attrMap)
+	if len(attrMap) > 0 {
+		res.SetAttributes(attrMap)
+	}
 	if r.ko.Spec.Endpoint != nil {
 		res.SetEndpoint(*r.ko.Spec.Endpoint)
 	}

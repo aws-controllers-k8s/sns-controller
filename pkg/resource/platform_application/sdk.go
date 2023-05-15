@@ -202,7 +202,9 @@ func (rm *resourceManager) newCreateRequestPayload(
 	if r.ko.Spec.SuccessFeedbackSampleRate != nil {
 		attrMap["SuccessFeedbackSampleRate"] = r.ko.Spec.SuccessFeedbackSampleRate
 	}
-	res.SetAttributes(attrMap)
+	if len(attrMap) > 0 {
+		res.SetAttributes(attrMap)
+	}
 	if r.ko.Spec.Name != nil {
 		res.SetName(*r.ko.Spec.Name)
 	}

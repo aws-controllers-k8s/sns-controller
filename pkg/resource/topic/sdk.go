@@ -210,7 +210,9 @@ func (rm *resourceManager) newCreateRequestPayload(
 	if r.ko.Spec.TracingConfig != nil {
 		attrMap["TracingConfig"] = r.ko.Spec.TracingConfig
 	}
-	res.SetAttributes(attrMap)
+	if len(attrMap) > 0 {
+		res.SetAttributes(attrMap)
+	}
 	if r.ko.Spec.DataProtectionPolicy != nil {
 		res.SetDataProtectionPolicy(*r.ko.Spec.DataProtectionPolicy)
 	}
