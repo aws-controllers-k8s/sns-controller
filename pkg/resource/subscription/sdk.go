@@ -97,10 +97,17 @@ func (rm *resourceManager) sdkFind(
 	tmpOwnerID := ackv1alpha1.AWSAccountID(*resp.Attributes["Owner"])
 	ko.Status.ACKResourceMetadata.OwnerAccountID = &tmpOwnerID
 	ko.Status.PendingConfirmation = resp.Attributes["PendingConfirmation"]
-	ko.Spec.Protocol = resp.Attributes["Protocol"]
 	ko.Spec.RawMessageDelivery = resp.Attributes["RawMessageDelivery"]
 	ko.Spec.RedrivePolicy = resp.Attributes["RedrivePolicy"]
 	ko.Spec.SubscriptionRoleARN = resp.Attributes["SubscriptionRoleArn"]
+
+	// If the Protocol field is empty, populate it with the Protocol attribute value
+	// present in the response of the GetSubscriptionAttributes API call
+	// This is a workaround for the fact that the Protocol field is a required field
+	// Use case: adopting an existing subscription by subcription ARN
+	if ko.Spec.Protocol == nil {
+		ko.Spec.Protocol = resp.Attributes["Protocol"]
+	}
 
 	rm.setStatusDefaults(ko)
 	return &resource{ko}, nil
@@ -188,9 +195,6 @@ func (rm *resourceManager) newCreateRequestPayload(
 	}
 	if r.ko.Spec.FilterPolicyScope != nil {
 		attrMap["FilterPolicyScope"] = r.ko.Spec.FilterPolicyScope
-	}
-	if r.ko.Spec.Protocol != nil {
-		attrMap["Protocol"] = r.ko.Spec.Protocol
 	}
 	if r.ko.Spec.RawMessageDelivery != nil {
 		attrMap["RawMessageDelivery"] = r.ko.Spec.RawMessageDelivery

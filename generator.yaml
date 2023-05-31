@@ -166,6 +166,8 @@ resources:
     hooks:
       sdk_create_post_build_request:
         template_path: hooks/subscription/sdk_create_post_build_request.go.tpl
+      sdk_get_attributes_pre_set_output:
+        template_path: hooks/subscription/sdk_get_attributes_pre_set_output.go.tpl
     fields:
       ConfirmationWasAuthenticated:
         is_attribute: true
@@ -175,9 +177,6 @@ resources:
       EffectiveDeliveryPolicy:
         is_attribute: true
         is_read_only: true
-      Protocol:
-        is_attribute: true
-        is_required: true
       FilterPolicy:
         is_attribute: true
       FilterPolicyScope:
