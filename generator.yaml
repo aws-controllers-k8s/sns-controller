@@ -45,9 +45,16 @@ resources:
     hooks:
       delta_pre_compare:
         code: compareTags(delta, a, b)
+      sdk_get_attributes_pre_set_output:
+        template_path: hooks/topic/sdk_get_attributes_pre_set_output.go.tpl
       sdk_get_attributes_post_set_output:
         template_path: hooks/topic/sdk_get_attributes_post_set_output.go.tpl
     fields:
+      TopicArn:
+        is_attribute: true
+        is_arn: true
+        is_read_only: true
+        type: string
       FifoTopic:
         is_attribute: true
       ContentBasedDeduplication:

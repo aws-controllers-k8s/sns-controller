@@ -16,13 +16,15 @@
 import time
 
 import pytest
+import boto3
 
 from acktest.k8s import condition
 from acktest.k8s import resource as k8s
 from acktest.resources import random_suffix_name
+from acktest import adoption as adoption
 from acktest import tags
 from e2e import service_marker, CRD_GROUP, CRD_VERSION, load_resource
-from e2e.common.types import TOPIC_RESOURCE_PLURAL
+from e2e.common.types import TOPIC_RESOURCE_KIND, TOPIC_RESOURCE_PLURAL
 from e2e.replacement_values import REPLACEMENT_VALUES
 from e2e import topic
 
@@ -205,3 +207,26 @@ class TestTopic:
         assert bool(attrs['FifoTopic']) == True
         assert 'ContentBasedDeduplication' in attrs
         assert bool(attrs['ContentBasedDeduplication']) == True
+
+
+class TestAdoptTopic(adoption.AbstractAdoptionTest):
+    RESOURCE_PLURAL: str = TOPIC_RESOURCE_PLURAL
+    RESOURCE_VERSION: str = CRD_VERSION
+
+    _topic_name: str = random_suffix_name("ack-adopted-topic", 24)
+    _topic_arn: str
+
+    def bootstrap_resource(self):
+        c = boto3.client('sns')
+        resp = c.create_topic(Name=self._topic_name)
+        self._topic_arn = resp['TopicArn']
+
+    def cleanup_resource(self):
+        client = boto3.client('sns')
+        client.delete_topic(TopicArn=self._topic_arn)
+
+    def get_resource_spec(self) -> adoption.AdoptedResourceSpec:
+        return adoption.AdoptedResourceSpec(
+            aws=adoption.AdoptedResourceARNIdentifier(additionalKeys={}, arn=self._topic_arn),
+            kubernetes=adoption.AdoptedResourceKubernetesIdentifiers(CRD_GROUP, TOPIC_RESOURCE_KIND),
+        )

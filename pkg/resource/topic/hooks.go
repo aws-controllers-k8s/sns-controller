@@ -15,10 +15,13 @@ package topic
 
 import (
 	"context"
+	"fmt"
 
+	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
+	"github.com/aws/aws-sdk-go/aws/arn"
 	svcsdk "github.com/aws/aws-sdk-go/service/sns"
 
 	svcapitypes "github.com/aws-controllers-k8s/sns-controller/apis/v1alpha1"
@@ -332,4 +335,13 @@ func (rm *resourceManager) removeTags(
 	_, err = rm.sdkapi.UntagResourceWithContext(ctx, input)
 	rm.metrics.RecordAPICall("UPDATE", "UntagResource", err)
 	return err
+}
+
+// getTopicNameFromARN retrieves the topic name from the topic arn
+func (rm *resourceManager) getTopicNameFromARN(tmpARN ackv1alpha1.AWSResourceName) (string, error) {
+	topicARN, err := arn.Parse(string(tmpARN))
+	if err != nil {
+		return "", fmt.Errorf("error parsing topic ARN: %s, error: %w", tmpARN, err)
+	}
+	return topicARN.Resource, nil
 }
