@@ -337,6 +337,7 @@ func (rm *resourceManager) removeTags(
 	return err
 }
 
+// getTopicNameFromARN retrieves the topic name from the topic arn
 func (rm *resourceManager) getTopicNameFromARN(tmpARN ackv1alpha1.AWSResourceName) (string, error) {
 	topicARN, err := arn.Parse(string(tmpARN))
 	if err != nil {
