@@ -208,6 +208,7 @@ class TestTopic:
         assert 'ContentBasedDeduplication' in attrs
         assert bool(attrs['ContentBasedDeduplication']) == True
 
+
 class TestAdoptTopic(adoption.AbstractAdoptionTest):
     RESOURCE_PLURAL: str = TOPIC_RESOURCE_PLURAL
     RESOURCE_VERSION: str = CRD_VERSION
