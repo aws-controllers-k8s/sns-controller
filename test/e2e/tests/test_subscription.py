@@ -17,13 +17,15 @@ import json
 import time
 
 import pytest
+import boto3
 
 from acktest.k8s import condition
 from acktest.k8s import resource as k8s
 from acktest.resources import random_suffix_name
+from acktest import adoption
 from e2e import service_marker, CRD_GROUP, CRD_VERSION, load_resource
 from e2e.bootstrap_resources import get_bootstrap_resources
-from e2e.common.types import SUBSCRIPTION_RESOURCE_PLURAL
+from e2e.common.types import SUBSCRIPTION_RESOURCE_KIND, SUBSCRIPTION_RESOURCE_PLURAL
 from e2e.replacement_values import REPLACEMENT_VALUES
 from e2e import subscription
 
@@ -134,3 +136,25 @@ class TestSubscription:
         assert 'healthyRetryPolicy' in got_delivery_policy
         exp_healthy_retry_policy = delivery_policy['healthyRetryPolicy']
         assert exp_healthy_retry_policy == got_delivery_policy['healthyRetryPolicy']
+
+
+class TestAdoptSubscription(adoption.AbstractAdoptionTest):
+    _subscription_arn: str
+
+    def bootstrap_resource(self):
+        boot_resources = get_bootstrap_resources()
+        client = boto3.client('sns')
+        queue = boot_resources.Queue
+        topic = boot_resources.Topic
+        resp = client.subscribe(TopicArn=topic.arn, Protocol='sqs', Endpoint=queue.arn, ReturnSubscriptionArn=True)
+        self._subscription_arn = resp['SubscriptionArn']
+
+    def cleanup_resource(self):
+        client = boto3.client('sns')
+        client.unsubscribe(SubscriptionArn=self._subscription_arn)
+
+    def get_resource_spec(self) -> adoption.AdoptedResourceSpec:
+        return adoption.AdoptedResourceSpec(
+            aws=adoption.AdoptedResourceARNIdentifier(additionalKeys={}, arn=self._subscription_arn),
+            kubernetes=adoption.AdoptedResourceKubernetesIdentifiers(CRD_GROUP, SUBSCRIPTION_RESOURCE_KIND),
+        )

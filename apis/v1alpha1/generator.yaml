@@ -175,6 +175,9 @@ resources:
       EffectiveDeliveryPolicy:
         is_attribute: true
         is_read_only: true
+      Protocol:
+        is_attribute: true
+        is_required: true
       FilterPolicy:
         is_attribute: true
       FilterPolicyScope:
