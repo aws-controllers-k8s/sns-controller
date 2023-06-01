@@ -83,7 +83,6 @@ def subscription_sqs():
 @service_marker
 @pytest.mark.canary
 class TestSubscription:
-    @pytest.mark.xdist_group("subscription")
     def test_crud(self, subscription_sqs):
         sub_ref, sub_cr, sub_arn = subscription_sqs
 
