@@ -139,6 +139,9 @@ class TestSubscription:
 
 
 class TestAdoptSubscription(adoption.AbstractAdoptionTest):
+    RESOURCE_PLURAL: str = SUBSCRIPTION_RESOURCE_PLURAL
+    RESOURCE_VERSION: str = CRD_VERSION
+
     _subscription_arn: str
 
     def bootstrap_resource(self):
