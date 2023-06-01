@@ -83,6 +83,7 @@ def subscription_sqs():
 @service_marker
 @pytest.mark.canary
 class TestSubscription:
+    @pytest.mark.xdist_group("subscription")
     def test_crud(self, subscription_sqs):
         sub_ref, sub_cr, sub_arn = subscription_sqs
 
@@ -146,15 +147,15 @@ class TestAdoptSubscription(adoption.AbstractAdoptionTest):
 
     def bootstrap_resource(self):
         boot_resources = get_bootstrap_resources()
-        client = boto3.client('sns')
         queue = boot_resources.Queue
         topic = boot_resources.Topic
+
+        client = boto3.client('sns')
         resp = client.subscribe(TopicArn=topic.arn, Protocol='sqs', Endpoint=queue.arn, ReturnSubscriptionArn=True)
         self._subscription_arn = resp['SubscriptionArn']
 
     def cleanup_resource(self):
-        client = boto3.client('sns')
-        client.unsubscribe(SubscriptionArn=self._subscription_arn)
+        pass
 
     def get_resource_spec(self) -> adoption.AdoptedResourceSpec:
         return adoption.AdoptedResourceSpec(
