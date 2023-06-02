@@ -23,8 +23,10 @@ from e2e import bootstrap_directory
 
 @dataclass
 class BootstrapResources(Resources):
-    Topic: Topic
-    Queue: Queue
+    Topic1: Topic
+    Topic2: Topic
+    Queue1: Queue
+    Queue2: Queue
 
 _bootstrap_resources = None
 

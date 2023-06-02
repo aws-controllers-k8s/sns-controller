@@ -40,8 +40,8 @@ def subscription_sqs():
     display_name  = "a subscription to a queue"
 
     boot_resources = get_bootstrap_resources()
-    q = boot_resources.Queue
-    topic = boot_resources.Topic
+    q = boot_resources.Queue1
+    topic = boot_resources.Topic1
 
     replacements = REPLACEMENT_VALUES.copy()
     replacements['SUBSCRIPTION_NAME'] = subscription_name
@@ -146,15 +146,16 @@ class TestAdoptSubscription(adoption.AbstractAdoptionTest):
 
     def bootstrap_resource(self):
         boot_resources = get_bootstrap_resources()
-        queue = boot_resources.Queue
-        topic = boot_resources.Topic
+        queue = boot_resources.Queue2
+        topic = boot_resources.Topic2
 
         client = boto3.client('sns')
         resp = client.subscribe(TopicArn=topic.arn, Protocol='sqs', Endpoint=queue.arn, ReturnSubscriptionArn=True)
         self._subscription_arn = resp['SubscriptionArn']
 
     def cleanup_resource(self):
-        pass
+        client = boto3.client('sns')
+        client.unsubscribe(SubscriptionArn=self._subscription_arn)
 
     def get_resource_spec(self) -> adoption.AdoptedResourceSpec:
         return adoption.AdoptedResourceSpec(
