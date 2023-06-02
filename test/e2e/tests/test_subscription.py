@@ -17,13 +17,15 @@ import json
 import time
 
 import pytest
+import boto3
 
 from acktest.k8s import condition
 from acktest.k8s import resource as k8s
 from acktest.resources import random_suffix_name
+from acktest import adoption
 from e2e import service_marker, CRD_GROUP, CRD_VERSION, load_resource
 from e2e.bootstrap_resources import get_bootstrap_resources
-from e2e.common.types import SUBSCRIPTION_RESOURCE_PLURAL
+from e2e.common.types import SUBSCRIPTION_RESOURCE_KIND, SUBSCRIPTION_RESOURCE_PLURAL
 from e2e.replacement_values import REPLACEMENT_VALUES
 from e2e import subscription
 
@@ -38,8 +40,8 @@ def subscription_sqs():
     display_name  = "a subscription to a queue"
 
     boot_resources = get_bootstrap_resources()
-    q = boot_resources.Queue
-    topic = boot_resources.Topic
+    q = boot_resources.Queue1
+    topic = boot_resources.Topic1
 
     replacements = REPLACEMENT_VALUES.copy()
     replacements['SUBSCRIPTION_NAME'] = subscription_name
@@ -134,3 +136,29 @@ class TestSubscription:
         assert 'healthyRetryPolicy' in got_delivery_policy
         exp_healthy_retry_policy = delivery_policy['healthyRetryPolicy']
         assert exp_healthy_retry_policy == got_delivery_policy['healthyRetryPolicy']
+
+
+class TestAdoptSubscription(adoption.AbstractAdoptionTest):
+    RESOURCE_PLURAL: str = SUBSCRIPTION_RESOURCE_PLURAL
+    RESOURCE_VERSION: str = CRD_VERSION
+
+    _subscription_arn: str
+
+    def bootstrap_resource(self):
+        boot_resources = get_bootstrap_resources()
+        queue = boot_resources.Queue2
+        topic = boot_resources.Topic2
+
+        client = boto3.client('sns')
+        resp = client.subscribe(TopicArn=topic.arn, Protocol='sqs', Endpoint=queue.arn, ReturnSubscriptionArn=True)
+        self._subscription_arn = resp['SubscriptionArn']
+
+    def cleanup_resource(self):
+        client = boto3.client('sns')
+        client.unsubscribe(SubscriptionArn=self._subscription_arn)
+
+    def get_resource_spec(self) -> adoption.AdoptedResourceSpec:
+        return adoption.AdoptedResourceSpec(
+            aws=adoption.AdoptedResourceARNIdentifier(additionalKeys={}, arn=self._subscription_arn),
+            kubernetes=adoption.AdoptedResourceKubernetesIdentifiers(CRD_GROUP, SUBSCRIPTION_RESOURCE_KIND),
+        )

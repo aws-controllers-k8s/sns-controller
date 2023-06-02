@@ -22,7 +22,8 @@ from acktest.aws.identity import get_region, get_account_id
 from e2e import bootstrap_directory
 from e2e.bootstrap_resources import BootstrapResources
 
-topic = Topic(name_prefix="subscribe-topic")
+topic1 = Topic(name_prefix="subscribe-topic")
+topic2 = Topic(name_prefix="adoption-subscribe-topic")
 
 queue_policy = """{
   "Statement": [
@@ -43,19 +44,29 @@ queue_policy = """{
 }
 """
 
-queue_policy_vars = {
-    "$TOPIC_NAME": topic.name,
+queue1_policy_vars = {
+    "$TOPIC_NAME": topic1.name,
+}
+
+queue2_policy_vars = {
+    "$TOPIC_NAME": topic2.name,
 }
 
 def service_bootstrap() -> Resources:
     logging.getLogger().setLevel(logging.INFO)
 
     resources = BootstrapResources(
-        Topic=topic,
-        Queue=Queue(
+        Topic1=topic1,
+        Topic2=topic2,
+        Queue1=Queue(
             name_prefix="subscribe-queue",
             policy=queue_policy,
-            policy_vars=queue_policy_vars,
+            policy_vars=queue1_policy_vars,
+        ),
+        Queue2=Queue(
+            name_prefix="adoption-subscribe-queue",
+            policy=queue_policy,
+            policy_vars=queue2_policy_vars,
         ),
     )
 
