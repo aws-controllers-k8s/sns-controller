@@ -76,6 +76,8 @@ type TopicStatus struct {
 	EffectiveDeliveryPolicy *string `json:"effectiveDeliveryPolicy,omitempty"`
 	// +kubebuilder:validation:Optional
 	Owner *string `json:"owner,omitempty"`
+	// +kubebuilder:validation:Optional
+	TopicARN *string `json:"topicARN,omitempty"`
 }
 
 // Topic is the Schema for the Topics API

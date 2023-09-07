@@ -176,6 +176,8 @@ spec:
                 type: string
               owner:
                 type: string
+              topicARN:
+                type: string
             type: object
         type: object
     served: true
