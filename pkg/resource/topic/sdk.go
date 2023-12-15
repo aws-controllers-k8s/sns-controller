@@ -92,13 +92,12 @@ func (rm *resourceManager) sdkFind(
 	ko.Status.EffectiveDeliveryPolicy = resp.Attributes["EffectiveDeliveryPolicy"]
 	ko.Spec.FIFOTopic = resp.Attributes["FifoTopic"]
 	ko.Spec.KMSMasterKeyID = resp.Attributes["KmsMasterKeyId"]
+	ko.Status.Owner = resp.Attributes["Owner"]
+	ko.Spec.Policy = resp.Attributes["Policy"]
+	ko.Spec.SignatureVersion = resp.Attributes["SignatureVersion"]
 	if ko.Status.ACKResourceMetadata == nil {
 		ko.Status.ACKResourceMetadata = &ackv1alpha1.ResourceMetadata{}
 	}
-	tmpOwnerID := ackv1alpha1.AWSAccountID(*resp.Attributes["Owner"])
-	ko.Status.ACKResourceMetadata.OwnerAccountID = &tmpOwnerID
-	ko.Spec.Policy = resp.Attributes["Policy"]
-	ko.Spec.SignatureVersion = resp.Attributes["SignatureVersion"]
 	tmpARN := ackv1alpha1.AWSResourceName(*resp.Attributes["TopicArn"])
 	ko.Status.ACKResourceMetadata.ARN = &tmpARN
 	ko.Spec.TracingConfig = resp.Attributes["TracingConfig"]

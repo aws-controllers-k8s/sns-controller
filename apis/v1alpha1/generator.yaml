@@ -85,7 +85,6 @@ resources:
       Owner:
         is_attribute: true
         is_read_only: true
-        is_owner_account_id: true
       EffectiveDeliveryPolicy:
         is_attribute: true
         is_read_only: true
@@ -184,7 +183,6 @@ resources:
       Owner:
         is_attribute: true
         is_read_only: true
-        is_owner_account_id: true
       PendingConfirmation:
         is_attribute: true
         is_read_only: true

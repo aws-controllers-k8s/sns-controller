@@ -91,11 +91,7 @@ func (rm *resourceManager) sdkFind(
 	ko.Status.EffectiveDeliveryPolicy = resp.Attributes["EffectiveDeliveryPolicy"]
 	ko.Spec.FilterPolicy = resp.Attributes["FilterPolicy"]
 	ko.Spec.FilterPolicyScope = resp.Attributes["FilterPolicyScope"]
-	if ko.Status.ACKResourceMetadata == nil {
-		ko.Status.ACKResourceMetadata = &ackv1alpha1.ResourceMetadata{}
-	}
-	tmpOwnerID := ackv1alpha1.AWSAccountID(*resp.Attributes["Owner"])
-	ko.Status.ACKResourceMetadata.OwnerAccountID = &tmpOwnerID
+	ko.Status.Owner = resp.Attributes["Owner"]
 	ko.Status.PendingConfirmation = resp.Attributes["PendingConfirmation"]
 	ko.Spec.RawMessageDelivery = resp.Attributes["RawMessageDelivery"]
 	ko.Spec.RedrivePolicy = resp.Attributes["RedrivePolicy"]
