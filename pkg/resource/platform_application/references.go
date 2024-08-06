@@ -79,36 +79,35 @@ func (rm *resourceManager) ResolveReferences(
 	apiReader client.Reader,
 	res acktypes.AWSResource,
 ) (acktypes.AWSResource, bool, error) {
-	namespace := res.MetaObject().GetNamespace()
 	ko := rm.concreteResource(res).ko
 
 	resourceHasReferences := false
 	err := validateReferenceFields(ko)
-	if fieldHasReferences, err := rm.resolveReferenceForEventEndpointCreated(ctx, apiReader, namespace, ko); err != nil {
+	if fieldHasReferences, err := rm.resolveReferenceForEventEndpointCreated(ctx, apiReader, ko); err != nil {
 		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
 	} else {
 		resourceHasReferences = resourceHasReferences || fieldHasReferences
 	}
 
-	if fieldHasReferences, err := rm.resolveReferenceForEventEndpointDeleted(ctx, apiReader, namespace, ko); err != nil {
+	if fieldHasReferences, err := rm.resolveReferenceForEventEndpointDeleted(ctx, apiReader, ko); err != nil {
 		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
 	} else {
 		resourceHasReferences = resourceHasReferences || fieldHasReferences
 	}
 
-	if fieldHasReferences, err := rm.resolveReferenceForEventEndpointUpdated(ctx, apiReader, namespace, ko); err != nil {
+	if fieldHasReferences, err := rm.resolveReferenceForEventEndpointUpdated(ctx, apiReader, ko); err != nil {
 		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
 	} else {
 		resourceHasReferences = resourceHasReferences || fieldHasReferences
 	}
 
-	if fieldHasReferences, err := rm.resolveReferenceForFailureFeedbackRoleARN(ctx, apiReader, namespace, ko); err != nil {
+	if fieldHasReferences, err := rm.resolveReferenceForFailureFeedbackRoleARN(ctx, apiReader, ko); err != nil {
 		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
 	} else {
 		resourceHasReferences = resourceHasReferences || fieldHasReferences
 	}
 
-	if fieldHasReferences, err := rm.resolveReferenceForSuccessFeedbackRoleARN(ctx, apiReader, namespace, ko); err != nil {
+	if fieldHasReferences, err := rm.resolveReferenceForSuccessFeedbackRoleARN(ctx, apiReader, ko); err != nil {
 		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
 	} else {
 		resourceHasReferences = resourceHasReferences || fieldHasReferences
@@ -150,7 +149,6 @@ func validateReferenceFields(ko *svcapitypes.PlatformApplication) error {
 func (rm *resourceManager) resolveReferenceForEventEndpointCreated(
 	ctx context.Context,
 	apiReader client.Reader,
-	namespace string,
 	ko *svcapitypes.PlatformApplication,
 ) (hasReferences bool, err error) {
 	if ko.Spec.EventEndpointCreatedRef != nil && ko.Spec.EventEndpointCreatedRef.From != nil {
@@ -158,6 +156,10 @@ func (rm *resourceManager) resolveReferenceForEventEndpointCreated(
 		arr := ko.Spec.EventEndpointCreatedRef.From
 		if arr.Name == nil || *arr.Name == "" {
 			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: EventEndpointCreatedRef")
+		}
+		namespace := ko.ObjectMeta.GetNamespace()
+		if arr.Namespace != nil && *arr.Namespace != "" {
+			namespace = *arr.Namespace
 		}
 		obj := &svcapitypes.Topic{}
 		if err := getReferencedResourceState_Topic(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
@@ -227,7 +229,6 @@ func getReferencedResourceState_Topic(
 func (rm *resourceManager) resolveReferenceForEventEndpointDeleted(
 	ctx context.Context,
 	apiReader client.Reader,
-	namespace string,
 	ko *svcapitypes.PlatformApplication,
 ) (hasReferences bool, err error) {
 	if ko.Spec.EventEndpointDeletedRef != nil && ko.Spec.EventEndpointDeletedRef.From != nil {
@@ -235,6 +236,10 @@ func (rm *resourceManager) resolveReferenceForEventEndpointDeleted(
 		arr := ko.Spec.EventEndpointDeletedRef.From
 		if arr.Name == nil || *arr.Name == "" {
 			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: EventEndpointDeletedRef")
+		}
+		namespace := ko.ObjectMeta.GetNamespace()
+		if arr.Namespace != nil && *arr.Namespace != "" {
+			namespace = *arr.Namespace
 		}
 		obj := &svcapitypes.Topic{}
 		if err := getReferencedResourceState_Topic(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
@@ -253,7 +258,6 @@ func (rm *resourceManager) resolveReferenceForEventEndpointDeleted(
 func (rm *resourceManager) resolveReferenceForEventEndpointUpdated(
 	ctx context.Context,
 	apiReader client.Reader,
-	namespace string,
 	ko *svcapitypes.PlatformApplication,
 ) (hasReferences bool, err error) {
 	if ko.Spec.EventEndpointUpdatedRef != nil && ko.Spec.EventEndpointUpdatedRef.From != nil {
@@ -261,6 +265,10 @@ func (rm *resourceManager) resolveReferenceForEventEndpointUpdated(
 		arr := ko.Spec.EventEndpointUpdatedRef.From
 		if arr.Name == nil || *arr.Name == "" {
 			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: EventEndpointUpdatedRef")
+		}
+		namespace := ko.ObjectMeta.GetNamespace()
+		if arr.Namespace != nil && *arr.Namespace != "" {
+			namespace = *arr.Namespace
 		}
 		obj := &svcapitypes.Topic{}
 		if err := getReferencedResourceState_Topic(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
@@ -279,7 +287,6 @@ func (rm *resourceManager) resolveReferenceForEventEndpointUpdated(
 func (rm *resourceManager) resolveReferenceForFailureFeedbackRoleARN(
 	ctx context.Context,
 	apiReader client.Reader,
-	namespace string,
 	ko *svcapitypes.PlatformApplication,
 ) (hasReferences bool, err error) {
 	if ko.Spec.FailureFeedbackRoleRef != nil && ko.Spec.FailureFeedbackRoleRef.From != nil {
@@ -287,6 +294,10 @@ func (rm *resourceManager) resolveReferenceForFailureFeedbackRoleARN(
 		arr := ko.Spec.FailureFeedbackRoleRef.From
 		if arr.Name == nil || *arr.Name == "" {
 			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: FailureFeedbackRoleRef")
+		}
+		namespace := ko.ObjectMeta.GetNamespace()
+		if arr.Namespace != nil && *arr.Namespace != "" {
+			namespace = *arr.Namespace
 		}
 		obj := &iamapitypes.Role{}
 		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
@@ -356,7 +367,6 @@ func getReferencedResourceState_Role(
 func (rm *resourceManager) resolveReferenceForSuccessFeedbackRoleARN(
 	ctx context.Context,
 	apiReader client.Reader,
-	namespace string,
 	ko *svcapitypes.PlatformApplication,
 ) (hasReferences bool, err error) {
 	if ko.Spec.SuccessFeedbackRoleRef != nil && ko.Spec.SuccessFeedbackRoleRef.From != nil {
@@ -364,6 +374,10 @@ func (rm *resourceManager) resolveReferenceForSuccessFeedbackRoleARN(
 		arr := ko.Spec.SuccessFeedbackRoleRef.From
 		if arr.Name == nil || *arr.Name == "" {
 			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: SuccessFeedbackRoleRef")
+		}
+		namespace := ko.ObjectMeta.GetNamespace()
+		if arr.Namespace != nil && *arr.Namespace != "" {
+			namespace = *arr.Namespace
 		}
 		obj := &iamapitypes.Role{}
 		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
