@@ -55,6 +55,7 @@ rules:
   - ""
   resources:
   - configmaps
+  - secrets
   verbs:
   - get
   - list
@@ -69,38 +70,11 @@ rules:
   - list
   - watch
 - apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - list
-  - patch
-  - watch
-- apiGroups:
   - iam.services.k8s.aws
   resources:
   - policies
-  verbs:
-  - get
-  - list
-- apiGroups:
-  - iam.services.k8s.aws
-  resources:
   - policies/status
-  verbs:
-  - get
-  - list
-- apiGroups:
-  - iam.services.k8s.aws
-  resources:
   - roles
-  verbs:
-  - get
-  - list
-- apiGroups:
-  - iam.services.k8s.aws
-  resources:
   - roles/status
   verbs:
   - get
@@ -109,12 +83,6 @@ rules:
   - kms.services.k8s.aws
   resources:
   - keys
-  verbs:
-  - get
-  - list
-- apiGroups:
-  - kms.services.k8s.aws
-  resources:
   - keys/status
   verbs:
   - get
@@ -123,25 +91,6 @@ rules:
   - services.k8s.aws
   resources:
   - adoptedresources
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - services.k8s.aws
-  resources:
-  - adoptedresources/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - services.k8s.aws
-  resources:
   - fieldexports
   verbs:
   - create
@@ -154,6 +103,7 @@ rules:
 - apiGroups:
   - services.k8s.aws
   resources:
+  - adoptedresources/status
   - fieldexports/status
   verbs:
   - get
@@ -163,65 +113,8 @@ rules:
   - sns.services.k8s.aws
   resources:
   - platformapplications
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - sns.services.k8s.aws
-  resources:
-  - platformapplications/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - sns.services.k8s.aws
-  resources:
   - platformendpoints
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - sns.services.k8s.aws
-  resources:
-  - platformendpoints/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - sns.services.k8s.aws
-  resources:
   - subscriptions
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - sns.services.k8s.aws
-  resources:
-  - subscriptions/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - sns.services.k8s.aws
-  resources:
   - topics
   verbs:
   - create
@@ -234,6 +127,9 @@ rules:
 - apiGroups:
   - sns.services.k8s.aws
   resources:
+  - platformapplications/status
+  - platformendpoints/status
+  - subscriptions/status
   - topics/status
   verbs:
   - get
