@@ -308,7 +308,9 @@ func (rm *resourceManager) newSetAttributesRequestPayload(
 	if r.ko.Spec.SuccessFeedbackSampleRate != nil {
 		attrMap["SuccessFeedbackSampleRate"] = r.ko.Spec.SuccessFeedbackSampleRate
 	}
-	res.SetAttributes(attrMap)
+	if len(attrMap) > 0 {
+		res.SetAttributes(attrMap)
+	}
 	if r.ko.Status.ACKResourceMetadata != nil && r.ko.Status.ACKResourceMetadata.ARN != nil {
 		res.SetPlatformApplicationArn(string(*r.ko.Status.ACKResourceMetadata.ARN))
 	} else {

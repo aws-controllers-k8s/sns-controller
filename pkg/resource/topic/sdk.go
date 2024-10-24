@@ -103,17 +103,15 @@ func (rm *resourceManager) sdkFind(
 	ko.Status.ACKResourceMetadata.ARN = &tmpARN
 	ko.Spec.TracingConfig = resp.Attributes["TracingConfig"]
 
-	// If the Name field is empty, populate it with the last part of the topic ARN
+	// Populate the name field with the last part of the topic ARN
 	// This is a workaround for the fact that the Name field is required by the
 	// CreateTopic API call, but not by the GetTopicAttributes API call
 	// Use case: adopting an existing topic by topic ARN
-	if ko.Spec.Name == nil {
-		topicName, err := rm.getTopicNameFromARN(tmpARN)
-		if err != nil {
-			return nil, err
-		}
-		ko.Spec.Name = &topicName
+	topicName, err := rm.getTopicNameFromARN(tmpARN)
+	if err != nil {
+		return nil, err
 	}
+	ko.Spec.Name = &topicName
 
 	rm.setStatusDefaults(ko)
 	if tags, err := rm.getTags(ctx, r); err != nil {
@@ -409,4 +407,16 @@ func (rm *resourceManager) terminalAWSError(err error) bool {
 	default:
 		return false
 	}
+}
+
+// getImmutableFieldChanges returns list of immutable fields from the
+func (rm *resourceManager) getImmutableFieldChanges(
+	delta *ackcompare.Delta,
+) []string {
+	var fields []string
+	if delta.DifferentAt("Spec.Name") {
+		fields = append(fields, "Name")
+	}
+
+	return fields
 }
