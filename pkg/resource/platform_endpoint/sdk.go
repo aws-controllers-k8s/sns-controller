@@ -265,7 +265,9 @@ func (rm *resourceManager) newSetAttributesRequestPayload(
 	if r.ko.Spec.Token != nil {
 		attrMap["Token"] = r.ko.Spec.Token
 	}
-	res.SetAttributes(attrMap)
+	if len(attrMap) > 0 {
+		res.SetAttributes(attrMap)
+	}
 	if r.ko.Status.EndpointARN != nil {
 		res.SetEndpointArn(*r.ko.Status.EndpointARN)
 	}
