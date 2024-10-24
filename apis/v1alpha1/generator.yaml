@@ -168,6 +168,8 @@ resources:
         template_path: hooks/subscription/sdk_create_post_build_request.go.tpl
       sdk_get_attributes_pre_set_output:
         template_path: hooks/subscription/sdk_get_attributes_pre_set_output.go.tpl
+      delta_pre_compare:
+        code: customPreCompare(delta, a, b)
     fields:
       ConfirmationWasAuthenticated:
         is_attribute: true
