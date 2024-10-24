@@ -34,6 +34,18 @@ operations:
     operation_type: SET_ATTRIBUTES
 resources:
   Topic:
+    print:
+      add_age_column: true
+      add_synced_column: true
+      additional_columns:
+        - name: ARN
+          json_path: .status.ackResourceMetadata.arn
+          type: string
+          priority: 1 # shows only in -o view
+        - name: DISPLAYNAME
+          json_path: .spec.displayName
+          type: string
+          priority: 0
     is_arn_primary_key: true
     update_operation:
       custom_method_name: customUpdate
@@ -155,6 +167,14 @@ resources:
     tags:
       ignore: true
   Subscription:
+    print:
+      add_age_column: true
+      add_synced_column: true
+      additional_columns:
+        - name: ARN
+          json_path: .status.ackResourceMetadata.arn
+          type: string
+          priority: 1 # shows only in -o view
     is_arn_primary_key: true
     update_operation:
       custom_method_name: customUpdate
