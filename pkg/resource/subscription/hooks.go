@@ -156,3 +156,9 @@ func (rm *resourceManager) newSetAttributesRequestPayload(
 	}
 	return res
 }
+
+func customPreCompare(delta *ackcompare.Delta, a, b *resource) {
+	if a.ko.Spec.RawMessageDelivery == nil {
+		a.ko.Spec.RawMessageDelivery = b.ko.Spec.RawMessageDelivery
+	}
+}
