@@ -62,6 +62,8 @@ resources:
       sdk_get_attributes_post_set_output:
         template_path: hooks/topic/sdk_get_attributes_post_set_output.go.tpl
     fields:
+      Name:
+        is_immutable: true
       TopicArn:
         is_attribute: true
         is_arn: true
