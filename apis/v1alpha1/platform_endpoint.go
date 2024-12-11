@@ -22,9 +22,6 @@ import (
 
 // PlatformEndpointSpec defines the desired state of PlatformEndpoint.
 type PlatformEndpointSpec struct {
-
-	// Arbitrary user data to associate with the endpoint. Amazon SNS does not use
-	// this data. The data must be in UTF-8 format and less than 2KB.
 	CustomUserData *string `json:"customUserData,omitempty"`
 	Enabled        *string `json:"enabled,omitempty"`
 	// PlatformApplicationArn returned from CreatePlatformApplication is used to
