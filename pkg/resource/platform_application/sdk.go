@@ -28,8 +28,9 @@ import (
 	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
 	ackrequeue "github.com/aws-controllers-k8s/runtime/pkg/requeue"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
-	"github.com/aws/aws-sdk-go/aws"
-	svcsdk "github.com/aws/aws-sdk-go/service/sns"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	svcsdk "github.com/aws/aws-sdk-go-v2/service/sns"
+	smithy "github.com/aws/smithy-go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -40,8 +41,7 @@ import (
 var (
 	_ = &metav1.Time{}
 	_ = strings.ToLower("")
-	_ = &aws.JSONValue{}
-	_ = &svcsdk.SNS{}
+	_ = &svcsdk.Client{}
 	_ = &svcapitypes.PlatformApplication{}
 	_ = ackv1alpha1.AWSAccountID("")
 	_ = &ackerr.NotFound
@@ -49,6 +49,7 @@ var (
 	_ = &reflect.Value{}
 	_ = fmt.Sprintf("")
 	_ = &ackrequeue.NoRequeue{}
+	_ = &aws.Config{}
 )
 
 // sdkFind returns SDK-specific information about a supplied resource
@@ -73,10 +74,11 @@ func (rm *resourceManager) sdkFind(
 		return nil, err
 	}
 	var resp *svcsdk.GetPlatformApplicationAttributesOutput
-	resp, err = rm.sdkapi.GetPlatformApplicationAttributesWithContext(ctx, input)
+	resp, err = rm.sdkapi.GetPlatformApplicationAttributes(ctx, input)
 	rm.metrics.RecordAPICall("GET_ATTRIBUTES", "GetPlatformApplicationAttributes", err)
 	if err != nil {
-		if awsErr, ok := ackerr.AWSError(err); ok && awsErr.Code() == "NotFound" {
+		var awsErr smithy.APIError
+		if errors.As(err, &awsErr) && awsErr.ErrorCode() == "NotFound" {
 			return nil, ackerr.NotFound
 		}
 		return nil, err
@@ -86,15 +88,60 @@ func (rm *resourceManager) sdkFind(
 	// the original Kubernetes object we passed to the function
 	ko := r.ko.DeepCopy()
 
-	ko.Spec.EventDeliveryFailure = resp.Attributes["EventDeliveryFailure"]
-	ko.Spec.EventEndpointCreated = resp.Attributes["EventEndpointCreated"]
-	ko.Spec.EventEndpointDeleted = resp.Attributes["EventEndpointDeleted"]
-	ko.Spec.EventEndpointUpdated = resp.Attributes["EventEndpointUpdated"]
-	ko.Spec.FailureFeedbackRoleARN = resp.Attributes["FailureFeedbackRoleArn"]
-	ko.Spec.PlatformCredential = resp.Attributes["PlatformCredential"]
-	ko.Spec.PlatformPrincipal = resp.Attributes["PlatformPrincipal"]
-	ko.Spec.SuccessFeedbackRoleARN = resp.Attributes["SuccessFeedbackRoleArn"]
-	ko.Spec.SuccessFeedbackSampleRate = resp.Attributes["SuccessFeedbackSampleRate"]
+	f0, ok := resp.Attributes["EventDeliveryFailure"]
+	if ok {
+		ko.Spec.EventDeliveryFailure = &f0
+	} else {
+		ko.Spec.EventDeliveryFailure = nil
+	}
+	f1, ok := resp.Attributes["EventEndpointCreated"]
+	if ok {
+		ko.Spec.EventEndpointCreated = &f1
+	} else {
+		ko.Spec.EventEndpointCreated = nil
+	}
+	f2, ok := resp.Attributes["EventEndpointDeleted"]
+	if ok {
+		ko.Spec.EventEndpointDeleted = &f2
+	} else {
+		ko.Spec.EventEndpointDeleted = nil
+	}
+	f3, ok := resp.Attributes["EventEndpointUpdated"]
+	if ok {
+		ko.Spec.EventEndpointUpdated = &f3
+	} else {
+		ko.Spec.EventEndpointUpdated = nil
+	}
+	f4, ok := resp.Attributes["FailureFeedbackRoleArn"]
+	if ok {
+		ko.Spec.FailureFeedbackRoleARN = &f4
+	} else {
+		ko.Spec.FailureFeedbackRoleARN = nil
+	}
+	f5, ok := resp.Attributes["PlatformCredential"]
+	if ok {
+		ko.Spec.PlatformCredential = &f5
+	} else {
+		ko.Spec.PlatformCredential = nil
+	}
+	f6, ok := resp.Attributes["PlatformPrincipal"]
+	if ok {
+		ko.Spec.PlatformPrincipal = &f6
+	} else {
+		ko.Spec.PlatformPrincipal = nil
+	}
+	f7, ok := resp.Attributes["SuccessFeedbackRoleArn"]
+	if ok {
+		ko.Spec.SuccessFeedbackRoleARN = &f7
+	} else {
+		ko.Spec.SuccessFeedbackRoleARN = nil
+	}
+	f8, ok := resp.Attributes["SuccessFeedbackSampleRate"]
+	if ok {
+		ko.Spec.SuccessFeedbackSampleRate = &f8
+	} else {
+		ko.Spec.SuccessFeedbackSampleRate = nil
+	}
 
 	rm.setStatusDefaults(ko)
 	return &resource{ko}, nil
@@ -118,9 +165,9 @@ func (rm *resourceManager) newGetAttributesRequestPayload(
 	res := &svcsdk.GetPlatformApplicationAttributesInput{}
 
 	if r.ko.Status.ACKResourceMetadata != nil && r.ko.Status.ACKResourceMetadata.ARN != nil {
-		res.SetPlatformApplicationArn(string(*r.ko.Status.ACKResourceMetadata.ARN))
+		res.PlatformApplicationArn = aws.String(string(*r.ko.Status.ACKResourceMetadata.ARN))
 	} else {
-		res.SetPlatformApplicationArn(rm.ARNFromName(*r.ko.Spec.Name))
+		res.PlatformApplicationArn = aws.String(rm.ARNFromName(*r.ko.Spec.Name))
 	}
 
 	return res, nil
@@ -145,7 +192,7 @@ func (rm *resourceManager) sdkCreate(
 
 	var resp *svcsdk.CreatePlatformApplicationOutput
 	_ = resp
-	resp, err = rm.sdkapi.CreatePlatformApplicationWithContext(ctx, input)
+	resp, err = rm.sdkapi.CreatePlatformApplication(ctx, input)
 	rm.metrics.RecordAPICall("CREATE", "CreatePlatformApplication", err)
 	if err != nil {
 		return nil, err
@@ -174,42 +221,42 @@ func (rm *resourceManager) newCreateRequestPayload(
 ) (*svcsdk.CreatePlatformApplicationInput, error) {
 	res := &svcsdk.CreatePlatformApplicationInput{}
 
-	attrMap := map[string]*string{}
+	attrMap := map[string]string{}
 	if r.ko.Spec.EventDeliveryFailure != nil {
-		attrMap["EventDeliveryFailure"] = r.ko.Spec.EventDeliveryFailure
+		attrMap["EventDeliveryFailure"] = *r.ko.Spec.EventDeliveryFailure
 	}
 	if r.ko.Spec.EventEndpointCreated != nil {
-		attrMap["EventEndpointCreated"] = r.ko.Spec.EventEndpointCreated
+		attrMap["EventEndpointCreated"] = *r.ko.Spec.EventEndpointCreated
 	}
 	if r.ko.Spec.EventEndpointDeleted != nil {
-		attrMap["EventEndpointDeleted"] = r.ko.Spec.EventEndpointDeleted
+		attrMap["EventEndpointDeleted"] = *r.ko.Spec.EventEndpointDeleted
 	}
 	if r.ko.Spec.EventEndpointUpdated != nil {
-		attrMap["EventEndpointUpdated"] = r.ko.Spec.EventEndpointUpdated
+		attrMap["EventEndpointUpdated"] = *r.ko.Spec.EventEndpointUpdated
 	}
 	if r.ko.Spec.FailureFeedbackRoleARN != nil {
-		attrMap["FailureFeedbackRoleArn"] = r.ko.Spec.FailureFeedbackRoleARN
+		attrMap["FailureFeedbackRoleArn"] = *r.ko.Spec.FailureFeedbackRoleARN
 	}
 	if r.ko.Spec.PlatformCredential != nil {
-		attrMap["PlatformCredential"] = r.ko.Spec.PlatformCredential
+		attrMap["PlatformCredential"] = *r.ko.Spec.PlatformCredential
 	}
 	if r.ko.Spec.PlatformPrincipal != nil {
-		attrMap["PlatformPrincipal"] = r.ko.Spec.PlatformPrincipal
+		attrMap["PlatformPrincipal"] = *r.ko.Spec.PlatformPrincipal
 	}
 	if r.ko.Spec.SuccessFeedbackRoleARN != nil {
-		attrMap["SuccessFeedbackRoleArn"] = r.ko.Spec.SuccessFeedbackRoleARN
+		attrMap["SuccessFeedbackRoleArn"] = *r.ko.Spec.SuccessFeedbackRoleARN
 	}
 	if r.ko.Spec.SuccessFeedbackSampleRate != nil {
-		attrMap["SuccessFeedbackSampleRate"] = r.ko.Spec.SuccessFeedbackSampleRate
+		attrMap["SuccessFeedbackSampleRate"] = *r.ko.Spec.SuccessFeedbackSampleRate
 	}
 	if len(attrMap) > 0 {
-		res.SetAttributes(attrMap)
+		res.Attributes = attrMap
 	}
 	if r.ko.Spec.Name != nil {
-		res.SetName(*r.ko.Spec.Name)
+		res.Name = r.ko.Spec.Name
 	}
 	if r.ko.Spec.Platform != nil {
-		res.SetPlatform(*r.ko.Spec.Platform)
+		res.Platform = r.ko.Spec.Platform
 	}
 
 	return res, nil
@@ -245,10 +292,11 @@ func (rm *resourceManager) sdkUpdate(
 	// contain any useful information. Instead, below, we'll be returning a
 	// DeepCopy of the supplied desired state, which should be fine because
 	// that desired state has been constructed from a call to GetAttributes...
-	_, respErr := rm.sdkapi.SetPlatformApplicationAttributesWithContext(ctx, input)
+	_, respErr := rm.sdkapi.SetPlatformApplicationAttributes(ctx, input)
 	rm.metrics.RecordAPICall("SET_ATTRIBUTES", "SetPlatformApplicationAttributes", respErr)
 	if respErr != nil {
-		if awsErr, ok := ackerr.AWSError(respErr); ok && awsErr.Code() == "NotFound" {
+		var awsErr smithy.APIError
+		if errors.As(err, &awsErr) && awsErr.ErrorCode() == "NotFound" {
 			// Technically, this means someone deleted the backend resource in
 			// between the time we got a result back from sdkFind() and here...
 			return nil, ackerr.NotFound
@@ -280,41 +328,41 @@ func (rm *resourceManager) newSetAttributesRequestPayload(
 ) (*svcsdk.SetPlatformApplicationAttributesInput, error) {
 	res := &svcsdk.SetPlatformApplicationAttributesInput{}
 
-	attrMap := map[string]*string{}
+	attrMap := map[string]string{}
 	if r.ko.Spec.EventDeliveryFailure != nil {
-		attrMap["EventDeliveryFailure"] = r.ko.Spec.EventDeliveryFailure
+		attrMap["EventDeliveryFailure"] = *r.ko.Spec.EventDeliveryFailure
 	}
 	if r.ko.Spec.EventEndpointCreated != nil {
-		attrMap["EventEndpointCreated"] = r.ko.Spec.EventEndpointCreated
+		attrMap["EventEndpointCreated"] = *r.ko.Spec.EventEndpointCreated
 	}
 	if r.ko.Spec.EventEndpointDeleted != nil {
-		attrMap["EventEndpointDeleted"] = r.ko.Spec.EventEndpointDeleted
+		attrMap["EventEndpointDeleted"] = *r.ko.Spec.EventEndpointDeleted
 	}
 	if r.ko.Spec.EventEndpointUpdated != nil {
-		attrMap["EventEndpointUpdated"] = r.ko.Spec.EventEndpointUpdated
+		attrMap["EventEndpointUpdated"] = *r.ko.Spec.EventEndpointUpdated
 	}
 	if r.ko.Spec.FailureFeedbackRoleARN != nil {
-		attrMap["FailureFeedbackRoleArn"] = r.ko.Spec.FailureFeedbackRoleARN
+		attrMap["FailureFeedbackRoleArn"] = *r.ko.Spec.FailureFeedbackRoleARN
 	}
 	if r.ko.Spec.PlatformCredential != nil {
-		attrMap["PlatformCredential"] = r.ko.Spec.PlatformCredential
+		attrMap["PlatformCredential"] = *r.ko.Spec.PlatformCredential
 	}
 	if r.ko.Spec.PlatformPrincipal != nil {
-		attrMap["PlatformPrincipal"] = r.ko.Spec.PlatformPrincipal
+		attrMap["PlatformPrincipal"] = *r.ko.Spec.PlatformPrincipal
 	}
 	if r.ko.Spec.SuccessFeedbackRoleARN != nil {
-		attrMap["SuccessFeedbackRoleArn"] = r.ko.Spec.SuccessFeedbackRoleARN
+		attrMap["SuccessFeedbackRoleArn"] = *r.ko.Spec.SuccessFeedbackRoleARN
 	}
 	if r.ko.Spec.SuccessFeedbackSampleRate != nil {
-		attrMap["SuccessFeedbackSampleRate"] = r.ko.Spec.SuccessFeedbackSampleRate
+		attrMap["SuccessFeedbackSampleRate"] = *r.ko.Spec.SuccessFeedbackSampleRate
 	}
 	if len(attrMap) > 0 {
-		res.SetAttributes(attrMap)
+		res.Attributes = attrMap
 	}
 	if r.ko.Status.ACKResourceMetadata != nil && r.ko.Status.ACKResourceMetadata.ARN != nil {
-		res.SetPlatformApplicationArn(string(*r.ko.Status.ACKResourceMetadata.ARN))
+		res.PlatformApplicationArn = aws.String(string(*r.ko.Status.ACKResourceMetadata.ARN))
 	} else {
-		res.SetPlatformApplicationArn(rm.ARNFromName(*r.ko.Spec.Name))
+		res.PlatformApplicationArn = aws.String(rm.ARNFromName(*r.ko.Spec.Name))
 	}
 
 	return res, nil
@@ -336,7 +384,7 @@ func (rm *resourceManager) sdkDelete(
 	}
 	var resp *svcsdk.DeletePlatformApplicationOutput
 	_ = resp
-	resp, err = rm.sdkapi.DeletePlatformApplicationWithContext(ctx, input)
+	resp, err = rm.sdkapi.DeletePlatformApplication(ctx, input)
 	rm.metrics.RecordAPICall("DELETE", "DeletePlatformApplication", err)
 	return nil, err
 }
@@ -349,7 +397,7 @@ func (rm *resourceManager) newDeleteRequestPayload(
 	res := &svcsdk.DeletePlatformApplicationInput{}
 
 	if r.ko.Status.ACKResourceMetadata != nil && r.ko.Status.ACKResourceMetadata.ARN != nil {
-		res.SetPlatformApplicationArn(string(*r.ko.Status.ACKResourceMetadata.ARN))
+		res.PlatformApplicationArn = (*string)(r.ko.Status.ACKResourceMetadata.ARN)
 	}
 
 	return res, nil

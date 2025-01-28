@@ -15,6 +15,7 @@ package topic
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -22,8 +23,11 @@ import (
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	svcsdk "github.com/aws/aws-sdk-go-v2/service/sns"
+	svcsdktypes "github.com/aws/aws-sdk-go-v2/service/sns/types"
 	"github.com/aws/aws-sdk-go/aws/arn"
-	svcsdk "github.com/aws/aws-sdk-go/service/sns"
+	"github.com/aws/smithy-go"
 
 	svcapitypes "github.com/aws-controllers-k8s/sns-controller/apis/v1alpha1"
 	commonutil "github.com/aws-controllers-k8s/sns-controller/pkg/util"
@@ -133,10 +137,11 @@ func (rm *resourceManager) setTopicAttribute(
 	// contain any useful information. Instead, below, we'll be returning a
 	// DeepCopy of the supplied desired state, which should be fine because
 	// that desired state has been constructed from a call to GetAttributes...
-	_, respErr := rm.sdkapi.SetTopicAttributesWithContext(ctx, input)
+	_, respErr := rm.sdkapi.SetTopicAttributes(ctx, input)
 	rm.metrics.RecordAPICall("SET_ATTRIBUTES", "SetTopicAttributes", respErr)
 	if respErr != nil {
-		if awsErr, ok := ackerr.AWSError(respErr); ok && awsErr.Code() == "NotFound" {
+		var awsErr smithy.APIError
+		if errors.As(err, &awsErr) && awsErr.ErrorCode() == "NotFound" {
 			// Technically, this means someone deleted the backend resource in
 			// between the time we got a result back from sdkFind() and here...
 			return ackerr.NotFound
@@ -153,28 +158,28 @@ func (rm *resourceManager) newSetAttributesRequestPayload(
 	crdFieldName string,
 ) *svcsdk.SetTopicAttributesInput {
 	res := &svcsdk.SetTopicAttributesInput{}
-	res.SetTopicArn(string(*r.ko.Status.ACKResourceMetadata.ARN))
+	res.TopicArn = aws.String(string(*r.ko.Status.ACKResourceMetadata.ARN))
 	switch crdFieldName {
 	case "DeliveryPolicy":
-		res.SetAttributeName("DeliveryPolicy")
+		res.AttributeName = aws.String("DeliveryPolicy")
 		res.AttributeValue = r.ko.Spec.DeliveryPolicy
 	case "DisplayName":
-		res.SetAttributeName("DisplayName")
+		res.AttributeName = aws.String("DisplayName")
 		res.AttributeValue = r.ko.Spec.DisplayName
 	case "Policy":
-		res.SetAttributeName("Policy")
+		res.AttributeName = aws.String("Policy")
 		res.AttributeValue = r.ko.Spec.Policy
 	case "TracingConfig":
-		res.SetAttributeName("TracingConfig")
+		res.AttributeName = aws.String("TracingConfig")
 		res.AttributeValue = r.ko.Spec.TracingConfig
 	case "KMSMasterKeyID":
-		res.SetAttributeName("KmsMasterKeyId")
+		res.AttributeName = aws.String("KmsMasterKeyId")
 		res.AttributeValue = r.ko.Spec.KMSMasterKeyID
 	case "SignatureVersion":
-		res.SetAttributeName("SignatureVersion")
+		res.AttributeName = aws.String("SignatureVersion")
 		res.AttributeValue = r.ko.Spec.SignatureVersion
 	case "ContentBasedDeduplication":
-		res.SetAttributeName("ContentBasedDeduplication")
+		res.AttributeName = aws.String("ContentBasedDeduplication")
 		res.AttributeValue = r.ko.Spec.ContentBasedDeduplication
 	}
 	return res
@@ -281,7 +286,7 @@ func (rm *resourceManager) getTags(
 
 	// NOTE(jaypipes): Unlike other list tag APIs, SNS' ListTagsForResource is
 	// not paginated...
-	resp, err = rm.sdkapi.ListTagsForResourceWithContext(ctx, input)
+	resp, err = rm.sdkapi.ListTagsForResource(ctx, input)
 	if err != nil || resp == nil {
 		return nil, err
 	}
@@ -306,13 +311,13 @@ func (rm *resourceManager) addTags(
 
 	input := &svcsdk.TagResourceInput{}
 	input.ResourceArn = arn
-	inTags := []*svcsdk.Tag{}
+	inTags := []svcsdktypes.Tag{}
 	for _, t := range tags {
-		inTags = append(inTags, &svcsdk.Tag{Key: t.Key, Value: t.Value})
+		inTags = append(inTags, svcsdktypes.Tag{Key: t.Key, Value: t.Value})
 	}
 	input.Tags = inTags
 
-	_, err = rm.sdkapi.TagResourceWithContext(ctx, input)
+	_, err = rm.sdkapi.TagResource(ctx, input)
 	rm.metrics.RecordAPICall("UPDATE", "TagResource", err)
 	return err
 }
@@ -331,13 +336,13 @@ func (rm *resourceManager) removeTags(
 
 	input := &svcsdk.UntagResourceInput{}
 	input.ResourceArn = arn
-	inTagKeys := []*string{}
+	inTagKeys := []string{}
 	for _, t := range tags {
-		inTagKeys = append(inTagKeys, t.Key)
+		inTagKeys = append(inTagKeys, *t.Key)
 	}
 	input.TagKeys = inTagKeys
 
-	_, err = rm.sdkapi.UntagResourceWithContext(ctx, input)
+	_, err = rm.sdkapi.UntagResource(ctx, input)
 	rm.metrics.RecordAPICall("UPDATE", "UntagResource", err)
 	return err
 }

@@ -18,17 +18,17 @@ package v1alpha1
 type LanguageCodeString string
 
 const (
-	LanguageCodeString_en_US  LanguageCodeString = "en-US"
+	LanguageCodeString_de_DE  LanguageCodeString = "de-DE"
 	LanguageCodeString_en_GB  LanguageCodeString = "en-GB"
+	LanguageCodeString_en_US  LanguageCodeString = "en-US"
 	LanguageCodeString_es_419 LanguageCodeString = "es-419"
 	LanguageCodeString_es_ES  LanguageCodeString = "es-ES"
-	LanguageCodeString_de_DE  LanguageCodeString = "de-DE"
 	LanguageCodeString_fr_CA  LanguageCodeString = "fr-CA"
 	LanguageCodeString_fr_FR  LanguageCodeString = "fr-FR"
 	LanguageCodeString_it_IT  LanguageCodeString = "it-IT"
 	LanguageCodeString_ja_JP  LanguageCodeString = "ja-JP"
-	LanguageCodeString_pt_BR  LanguageCodeString = "pt-BR"
 	LanguageCodeString_kr_KR  LanguageCodeString = "kr-KR"
+	LanguageCodeString_pt_BR  LanguageCodeString = "pt-BR"
 	LanguageCodeString_zh_CN  LanguageCodeString = "zh-CN"
 	LanguageCodeString_zh_TW  LanguageCodeString = "zh-TW"
 )
@@ -36,17 +36,17 @@ const (
 type NumberCapability string
 
 const (
-	NumberCapability_SMS   NumberCapability = "SMS"
 	NumberCapability_MMS   NumberCapability = "MMS"
+	NumberCapability_SMS   NumberCapability = "SMS"
 	NumberCapability_VOICE NumberCapability = "VOICE"
 )
 
 type RouteType string
 
 const (
-	RouteType_Transactional RouteType = "Transactional"
-	RouteType_Promotional   RouteType = "Promotional"
 	RouteType_Premium       RouteType = "Premium"
+	RouteType_Promotional   RouteType = "Promotional"
+	RouteType_Transactional RouteType = "Transactional"
 )
 
 type SMSSandboxPhoneNumberVerificationStatus string

@@ -28,8 +28,9 @@ import (
 	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
 	ackrequeue "github.com/aws-controllers-k8s/runtime/pkg/requeue"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
-	"github.com/aws/aws-sdk-go/aws"
-	svcsdk "github.com/aws/aws-sdk-go/service/sns"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	svcsdk "github.com/aws/aws-sdk-go-v2/service/sns"
+	smithy "github.com/aws/smithy-go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -40,8 +41,7 @@ import (
 var (
 	_ = &metav1.Time{}
 	_ = strings.ToLower("")
-	_ = &aws.JSONValue{}
-	_ = &svcsdk.SNS{}
+	_ = &svcsdk.Client{}
 	_ = &svcapitypes.Subscription{}
 	_ = ackv1alpha1.AWSAccountID("")
 	_ = &ackerr.NotFound
@@ -49,6 +49,7 @@ var (
 	_ = &reflect.Value{}
 	_ = fmt.Sprintf("")
 	_ = &ackrequeue.NoRequeue{}
+	_ = &aws.Config{}
 )
 
 // sdkFind returns SDK-specific information about a supplied resource
@@ -73,10 +74,11 @@ func (rm *resourceManager) sdkFind(
 		return nil, err
 	}
 	var resp *svcsdk.GetSubscriptionAttributesOutput
-	resp, err = rm.sdkapi.GetSubscriptionAttributesWithContext(ctx, input)
+	resp, err = rm.sdkapi.GetSubscriptionAttributes(ctx, input)
 	rm.metrics.RecordAPICall("GET_ATTRIBUTES", "GetSubscriptionAttributes", err)
 	if err != nil {
-		if awsErr, ok := ackerr.AWSError(err); ok && awsErr.Code() == "NotFound" {
+		var awsErr smithy.APIError
+		if errors.As(err, &awsErr) && awsErr.ErrorCode() == "NotFound" {
 			return nil, ackerr.NotFound
 		}
 		return nil, err
@@ -86,33 +88,78 @@ func (rm *resourceManager) sdkFind(
 	// the original Kubernetes object we passed to the function
 	ko := r.ko.DeepCopy()
 
-	ko.Status.ConfirmationWasAuthenticated = resp.Attributes["ConfirmationWasAuthenticated"]
-	ko.Spec.DeliveryPolicy = resp.Attributes["DeliveryPolicy"]
-	ko.Status.EffectiveDeliveryPolicy = resp.Attributes["EffectiveDeliveryPolicy"]
-	ko.Spec.FilterPolicy = resp.Attributes["FilterPolicy"]
-	ko.Spec.FilterPolicyScope = resp.Attributes["FilterPolicyScope"]
+	f0, ok := resp.Attributes["ConfirmationWasAuthenticated"]
+	if ok {
+		ko.Status.ConfirmationWasAuthenticated = &f0
+	} else {
+		ko.Status.ConfirmationWasAuthenticated = nil
+	}
+	f1, ok := resp.Attributes["DeliveryPolicy"]
+	if ok {
+		ko.Spec.DeliveryPolicy = &f1
+	} else {
+		ko.Spec.DeliveryPolicy = nil
+	}
+	f2, ok := resp.Attributes["EffectiveDeliveryPolicy"]
+	if ok {
+		ko.Status.EffectiveDeliveryPolicy = &f2
+	} else {
+		ko.Status.EffectiveDeliveryPolicy = nil
+	}
+	f3, ok := resp.Attributes["FilterPolicy"]
+	if ok {
+		ko.Spec.FilterPolicy = &f3
+	} else {
+		ko.Spec.FilterPolicy = nil
+	}
+	f4, ok := resp.Attributes["FilterPolicyScope"]
+	if ok {
+		ko.Spec.FilterPolicyScope = &f4
+	} else {
+		ko.Spec.FilterPolicyScope = nil
+	}
 	if ko.Status.ACKResourceMetadata == nil {
 		ko.Status.ACKResourceMetadata = &ackv1alpha1.ResourceMetadata{}
 	}
-	tmpOwnerID := ackv1alpha1.AWSAccountID(*resp.Attributes["Owner"])
+	tmpOwnerID := ackv1alpha1.AWSAccountID(resp.Attributes["Owner"])
 	ko.Status.ACKResourceMetadata.OwnerAccountID = &tmpOwnerID
-	ko.Status.PendingConfirmation = resp.Attributes["PendingConfirmation"]
-	ko.Spec.RawMessageDelivery = resp.Attributes["RawMessageDelivery"]
-	ko.Spec.RedrivePolicy = resp.Attributes["RedrivePolicy"]
-	ko.Spec.SubscriptionRoleARN = resp.Attributes["SubscriptionRoleArn"]
+	f6, ok := resp.Attributes["PendingConfirmation"]
+	if ok {
+		ko.Status.PendingConfirmation = &f6
+	} else {
+		ko.Status.PendingConfirmation = nil
+	}
+	f7, ok := resp.Attributes["RawMessageDelivery"]
+	if ok {
+		ko.Spec.RawMessageDelivery = &f7
+	} else {
+		ko.Spec.RawMessageDelivery = nil
+	}
+	f8, ok := resp.Attributes["RedrivePolicy"]
+	if ok {
+		ko.Spec.RedrivePolicy = &f8
+	} else {
+		ko.Spec.RedrivePolicy = nil
+	}
+	f9, ok := resp.Attributes["SubscriptionRoleArn"]
+	if ok {
+		ko.Spec.SubscriptionRoleARN = &f9
+	} else {
+		ko.Spec.SubscriptionRoleARN = nil
+	}
 
 	// If one of the below 3 fields (i.e. Protocol, Endpoint, TopicARN/TopicRef) is empty
 	// populate them with their respective attribute values
 	// present in the response of the GetSubscriptionAttributes API call
 	// Use case: adopting an existing subscription by subcription ARN
 	if ko.Spec.Protocol == nil {
-		ko.Spec.Protocol = resp.Attributes["Protocol"]
+		ko.Spec.Protocol = aws.String(resp.Attributes["Protocol"])
 	}
 	if ko.Spec.Endpoint == nil {
-		ko.Spec.Endpoint = resp.Attributes["Endpoint"]
+		ko.Spec.Endpoint = aws.String(resp.Attributes["Endpoint"])
 	}
 	if ko.Spec.TopicARN == nil && ko.Spec.TopicRef == nil {
-		ko.Spec.TopicARN = resp.Attributes["TopicArn"]
+		ko.Spec.TopicARN = aws.String(resp.Attributes["TopicArn"])
 	}
 
 	rm.setStatusDefaults(ko)
@@ -137,7 +184,7 @@ func (rm *resourceManager) newGetAttributesRequestPayload(
 	res := &svcsdk.GetSubscriptionAttributesInput{}
 
 	if r.ko.Status.ACKResourceMetadata != nil && r.ko.Status.ACKResourceMetadata.ARN != nil {
-		res.SetSubscriptionArn(string(*r.ko.Status.ACKResourceMetadata.ARN))
+		res.SubscriptionArn = aws.String(string(*r.ko.Status.ACKResourceMetadata.ARN))
 	}
 
 	return res, nil
@@ -159,11 +206,11 @@ func (rm *resourceManager) sdkCreate(
 	if err != nil {
 		return nil, err
 	}
-	input.SetReturnSubscriptionArn(true)
+	input.ReturnSubscriptionArn = true
 
 	var resp *svcsdk.SubscribeOutput
 	_ = resp
-	resp, err = rm.sdkapi.SubscribeWithContext(ctx, input)
+	resp, err = rm.sdkapi.Subscribe(ctx, input)
 	rm.metrics.RecordAPICall("CREATE", "Subscribe", err)
 	if err != nil {
 		return nil, err
@@ -192,36 +239,36 @@ func (rm *resourceManager) newCreateRequestPayload(
 ) (*svcsdk.SubscribeInput, error) {
 	res := &svcsdk.SubscribeInput{}
 
-	attrMap := map[string]*string{}
+	attrMap := map[string]string{}
 	if r.ko.Spec.DeliveryPolicy != nil {
-		attrMap["DeliveryPolicy"] = r.ko.Spec.DeliveryPolicy
+		attrMap["DeliveryPolicy"] = *r.ko.Spec.DeliveryPolicy
 	}
 	if r.ko.Spec.FilterPolicy != nil {
-		attrMap["FilterPolicy"] = r.ko.Spec.FilterPolicy
+		attrMap["FilterPolicy"] = *r.ko.Spec.FilterPolicy
 	}
 	if r.ko.Spec.FilterPolicyScope != nil {
-		attrMap["FilterPolicyScope"] = r.ko.Spec.FilterPolicyScope
+		attrMap["FilterPolicyScope"] = *r.ko.Spec.FilterPolicyScope
 	}
 	if r.ko.Spec.RawMessageDelivery != nil {
-		attrMap["RawMessageDelivery"] = r.ko.Spec.RawMessageDelivery
+		attrMap["RawMessageDelivery"] = *r.ko.Spec.RawMessageDelivery
 	}
 	if r.ko.Spec.RedrivePolicy != nil {
-		attrMap["RedrivePolicy"] = r.ko.Spec.RedrivePolicy
+		attrMap["RedrivePolicy"] = *r.ko.Spec.RedrivePolicy
 	}
 	if r.ko.Spec.SubscriptionRoleARN != nil {
-		attrMap["SubscriptionRoleArn"] = r.ko.Spec.SubscriptionRoleARN
+		attrMap["SubscriptionRoleArn"] = *r.ko.Spec.SubscriptionRoleARN
 	}
 	if len(attrMap) > 0 {
-		res.SetAttributes(attrMap)
+		res.Attributes = attrMap
 	}
 	if r.ko.Spec.Endpoint != nil {
-		res.SetEndpoint(*r.ko.Spec.Endpoint)
+		res.Endpoint = r.ko.Spec.Endpoint
 	}
 	if r.ko.Spec.Protocol != nil {
-		res.SetProtocol(*r.ko.Spec.Protocol)
+		res.Protocol = r.ko.Spec.Protocol
 	}
 	if r.ko.Spec.TopicARN != nil {
-		res.SetTopicArn(*r.ko.Spec.TopicARN)
+		res.TopicArn = r.ko.Spec.TopicARN
 	}
 
 	return res, nil
@@ -254,7 +301,7 @@ func (rm *resourceManager) sdkDelete(
 	}
 	var resp *svcsdk.UnsubscribeOutput
 	_ = resp
-	resp, err = rm.sdkapi.UnsubscribeWithContext(ctx, input)
+	resp, err = rm.sdkapi.Unsubscribe(ctx, input)
 	rm.metrics.RecordAPICall("DELETE", "Unsubscribe", err)
 	return nil, err
 }
@@ -267,7 +314,7 @@ func (rm *resourceManager) newDeleteRequestPayload(
 	res := &svcsdk.UnsubscribeInput{}
 
 	if r.ko.Status.ACKResourceMetadata != nil && r.ko.Status.ACKResourceMetadata.ARN != nil {
-		res.SetSubscriptionArn(string(*r.ko.Status.ACKResourceMetadata.ARN))
+		res.SubscriptionArn = (*string)(r.ko.Status.ACKResourceMetadata.ARN)
 	}
 
 	return res, nil
@@ -375,11 +422,12 @@ func (rm *resourceManager) terminalAWSError(err error) bool {
 	if err == nil {
 		return false
 	}
-	awsErr, ok := ackerr.AWSError(err)
-	if !ok {
+
+	var terminalErr smithy.APIError
+	if !errors.As(err, &terminalErr) {
 		return false
 	}
-	switch awsErr.Code() {
+	switch terminalErr.ErrorCode() {
 	case "InvalidParameter":
 		return true
 	default:

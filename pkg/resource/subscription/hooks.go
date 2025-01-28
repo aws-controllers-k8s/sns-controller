@@ -15,11 +15,14 @@ package subscription
 
 import (
 	"context"
+	"errors"
 
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
-	svcsdk "github.com/aws/aws-sdk-go/service/sns"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	svcsdk "github.com/aws/aws-sdk-go-v2/service/sns"
+	"github.com/aws/smithy-go"
 )
 
 var (
@@ -113,10 +116,11 @@ func (rm *resourceManager) setSubscriptionAttribute(
 	// contain any useful information. Instead, below, we'll be returning a
 	// DeepCopy of the supplied desired state, which should be fine because
 	// that desired state has been constructed from a call to GetAttributes...
-	_, respErr := rm.sdkapi.SetSubscriptionAttributesWithContext(ctx, input)
+	_, respErr := rm.sdkapi.SetSubscriptionAttributes(ctx, input)
 	rm.metrics.RecordAPICall("SET_ATTRIBUTES", "SetSubscriptionAttributes", respErr)
 	if respErr != nil {
-		if awsErr, ok := ackerr.AWSError(respErr); ok && awsErr.Code() == "NotFound" {
+		var awsErr smithy.APIError
+		if errors.As(err, &awsErr) && awsErr.ErrorCode() == "NotFound" {
 			// Technically, this means someone deleted the backend resource in
 			// between the time we got a result back from sdkFind() and here...
 			return ackerr.NotFound
@@ -133,25 +137,25 @@ func (rm *resourceManager) newSetAttributesRequestPayload(
 	crdFieldName string,
 ) *svcsdk.SetSubscriptionAttributesInput {
 	res := &svcsdk.SetSubscriptionAttributesInput{}
-	res.SetSubscriptionArn(string(*r.ko.Status.ACKResourceMetadata.ARN))
+	res.SubscriptionArn = aws.String(string(*r.ko.Status.ACKResourceMetadata.ARN))
 	switch crdFieldName {
 	case "DeliveryPolicy":
-		res.SetAttributeName("DeliveryPolicy")
+		res.AttributeName = aws.String("DeliveryPolicy")
 		res.AttributeValue = r.ko.Spec.DeliveryPolicy
 	case "FilterPolicy":
-		res.SetAttributeName("FilterPolicy")
+		res.AttributeName = aws.String("FilterPolicy")
 		res.AttributeValue = r.ko.Spec.FilterPolicy
 	case "FilterPolicyScope":
-		res.SetAttributeName("FilterPolicyScope")
+		res.AttributeName = aws.String("FilterPolicyScope")
 		res.AttributeValue = r.ko.Spec.FilterPolicyScope
 	case "RawMessageDelivery":
-		res.SetAttributeName("RawMessageDelivery")
+		res.AttributeName = aws.String("RawMessageDelivery")
 		res.AttributeValue = r.ko.Spec.RawMessageDelivery
 	case "RedrivePolicy":
-		res.SetAttributeName("RedrivePolicy")
+		res.AttributeName = aws.String("RedrivePolicy")
 		res.AttributeValue = r.ko.Spec.RedrivePolicy
 	case "SubscriptionRoleARN":
-		res.SetAttributeName("SubscriptionRoleArn")
+		res.AttributeName = aws.String("SubscriptionRoleArn")
 		res.AttributeValue = r.ko.Spec.SubscriptionRoleARN
 	}
 	return res
