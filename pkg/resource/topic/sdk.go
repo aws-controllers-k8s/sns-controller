@@ -28,8 +28,10 @@ import (
 	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
 	ackrequeue "github.com/aws-controllers-k8s/runtime/pkg/requeue"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
-	"github.com/aws/aws-sdk-go/aws"
-	svcsdk "github.com/aws/aws-sdk-go/service/sns"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	svcsdk "github.com/aws/aws-sdk-go-v2/service/sns"
+	svcsdktypes "github.com/aws/aws-sdk-go-v2/service/sns/types"
+	smithy "github.com/aws/smithy-go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -40,8 +42,7 @@ import (
 var (
 	_ = &metav1.Time{}
 	_ = strings.ToLower("")
-	_ = &aws.JSONValue{}
-	_ = &svcsdk.SNS{}
+	_ = &svcsdk.Client{}
 	_ = &svcapitypes.Topic{}
 	_ = ackv1alpha1.AWSAccountID("")
 	_ = &ackerr.NotFound
@@ -49,6 +50,7 @@ var (
 	_ = &reflect.Value{}
 	_ = fmt.Sprintf("")
 	_ = &ackrequeue.NoRequeue{}
+	_ = &aws.Config{}
 )
 
 // sdkFind returns SDK-specific information about a supplied resource
@@ -73,10 +75,11 @@ func (rm *resourceManager) sdkFind(
 		return nil, err
 	}
 	var resp *svcsdk.GetTopicAttributesOutput
-	resp, err = rm.sdkapi.GetTopicAttributesWithContext(ctx, input)
+	resp, err = rm.sdkapi.GetTopicAttributes(ctx, input)
 	rm.metrics.RecordAPICall("GET_ATTRIBUTES", "GetTopicAttributes", err)
 	if err != nil {
-		if awsErr, ok := ackerr.AWSError(err); ok && awsErr.Code() == "NotFound" {
+		var awsErr smithy.APIError
+		if errors.As(err, &awsErr) && awsErr.ErrorCode() == "NotFound" {
 			return nil, ackerr.NotFound
 		}
 		return nil, err
@@ -86,22 +89,67 @@ func (rm *resourceManager) sdkFind(
 	// the original Kubernetes object we passed to the function
 	ko := r.ko.DeepCopy()
 
-	ko.Spec.ContentBasedDeduplication = resp.Attributes["ContentBasedDeduplication"]
-	ko.Spec.DeliveryPolicy = resp.Attributes["DeliveryPolicy"]
-	ko.Spec.DisplayName = resp.Attributes["DisplayName"]
-	ko.Status.EffectiveDeliveryPolicy = resp.Attributes["EffectiveDeliveryPolicy"]
-	ko.Spec.FIFOTopic = resp.Attributes["FifoTopic"]
-	ko.Spec.KMSMasterKeyID = resp.Attributes["KmsMasterKeyId"]
+	f0, ok := resp.Attributes["ContentBasedDeduplication"]
+	if ok {
+		ko.Spec.ContentBasedDeduplication = &f0
+	} else {
+		ko.Spec.ContentBasedDeduplication = nil
+	}
+	f1, ok := resp.Attributes["DeliveryPolicy"]
+	if ok {
+		ko.Spec.DeliveryPolicy = &f1
+	} else {
+		ko.Spec.DeliveryPolicy = nil
+	}
+	f2, ok := resp.Attributes["DisplayName"]
+	if ok {
+		ko.Spec.DisplayName = &f2
+	} else {
+		ko.Spec.DisplayName = nil
+	}
+	f3, ok := resp.Attributes["EffectiveDeliveryPolicy"]
+	if ok {
+		ko.Status.EffectiveDeliveryPolicy = &f3
+	} else {
+		ko.Status.EffectiveDeliveryPolicy = nil
+	}
+	f4, ok := resp.Attributes["FifoTopic"]
+	if ok {
+		ko.Spec.FIFOTopic = &f4
+	} else {
+		ko.Spec.FIFOTopic = nil
+	}
+	f5, ok := resp.Attributes["KmsMasterKeyId"]
+	if ok {
+		ko.Spec.KMSMasterKeyID = &f5
+	} else {
+		ko.Spec.KMSMasterKeyID = nil
+	}
 	if ko.Status.ACKResourceMetadata == nil {
 		ko.Status.ACKResourceMetadata = &ackv1alpha1.ResourceMetadata{}
 	}
-	tmpOwnerID := ackv1alpha1.AWSAccountID(*resp.Attributes["Owner"])
+	tmpOwnerID := ackv1alpha1.AWSAccountID(resp.Attributes["Owner"])
 	ko.Status.ACKResourceMetadata.OwnerAccountID = &tmpOwnerID
-	ko.Spec.Policy = resp.Attributes["Policy"]
-	ko.Spec.SignatureVersion = resp.Attributes["SignatureVersion"]
-	tmpARN := ackv1alpha1.AWSResourceName(*resp.Attributes["TopicArn"])
+	f7, ok := resp.Attributes["Policy"]
+	if ok {
+		ko.Spec.Policy = &f7
+	} else {
+		ko.Spec.Policy = nil
+	}
+	f8, ok := resp.Attributes["SignatureVersion"]
+	if ok {
+		ko.Spec.SignatureVersion = &f8
+	} else {
+		ko.Spec.SignatureVersion = nil
+	}
+	tmpARN := ackv1alpha1.AWSResourceName(resp.Attributes["TopicArn"])
 	ko.Status.ACKResourceMetadata.ARN = &tmpARN
-	ko.Spec.TracingConfig = resp.Attributes["TracingConfig"]
+	f10, ok := resp.Attributes["TracingConfig"]
+	if ok {
+		ko.Spec.TracingConfig = &f10
+	} else {
+		ko.Spec.TracingConfig = nil
+	}
 
 	// Populate the name field with the last part of the topic ARN
 	// This is a workaround for the fact that the Name field is required by the
@@ -141,9 +189,9 @@ func (rm *resourceManager) newGetAttributesRequestPayload(
 	res := &svcsdk.GetTopicAttributesInput{}
 
 	if r.ko.Status.ACKResourceMetadata != nil && r.ko.Status.ACKResourceMetadata.ARN != nil {
-		res.SetTopicArn(string(*r.ko.Status.ACKResourceMetadata.ARN))
+		res.TopicArn = aws.String(string(*r.ko.Status.ACKResourceMetadata.ARN))
 	} else {
-		res.SetTopicArn(rm.ARNFromName(*r.ko.Spec.Name))
+		res.TopicArn = aws.String(rm.ARNFromName(*r.ko.Spec.Name))
 	}
 
 	return res, nil
@@ -168,7 +216,7 @@ func (rm *resourceManager) sdkCreate(
 
 	var resp *svcsdk.CreateTopicOutput
 	_ = resp
-	resp, err = rm.sdkapi.CreateTopicWithContext(ctx, input)
+	resp, err = rm.sdkapi.CreateTopic(ctx, input)
 	rm.metrics.RecordAPICall("CREATE", "CreateTopic", err)
 	if err != nil {
 		return nil, err
@@ -197,53 +245,53 @@ func (rm *resourceManager) newCreateRequestPayload(
 ) (*svcsdk.CreateTopicInput, error) {
 	res := &svcsdk.CreateTopicInput{}
 
-	attrMap := map[string]*string{}
+	attrMap := map[string]string{}
 	if r.ko.Spec.ContentBasedDeduplication != nil {
-		attrMap["ContentBasedDeduplication"] = r.ko.Spec.ContentBasedDeduplication
+		attrMap["ContentBasedDeduplication"] = *r.ko.Spec.ContentBasedDeduplication
 	}
 	if r.ko.Spec.DeliveryPolicy != nil {
-		attrMap["DeliveryPolicy"] = r.ko.Spec.DeliveryPolicy
+		attrMap["DeliveryPolicy"] = *r.ko.Spec.DeliveryPolicy
 	}
 	if r.ko.Spec.DisplayName != nil {
-		attrMap["DisplayName"] = r.ko.Spec.DisplayName
+		attrMap["DisplayName"] = *r.ko.Spec.DisplayName
 	}
 	if r.ko.Spec.FIFOTopic != nil {
-		attrMap["FifoTopic"] = r.ko.Spec.FIFOTopic
+		attrMap["FifoTopic"] = *r.ko.Spec.FIFOTopic
 	}
 	if r.ko.Spec.KMSMasterKeyID != nil {
-		attrMap["KmsMasterKeyId"] = r.ko.Spec.KMSMasterKeyID
+		attrMap["KmsMasterKeyId"] = *r.ko.Spec.KMSMasterKeyID
 	}
 	if r.ko.Spec.Policy != nil {
-		attrMap["Policy"] = r.ko.Spec.Policy
+		attrMap["Policy"] = *r.ko.Spec.Policy
 	}
 	if r.ko.Spec.SignatureVersion != nil {
-		attrMap["SignatureVersion"] = r.ko.Spec.SignatureVersion
+		attrMap["SignatureVersion"] = *r.ko.Spec.SignatureVersion
 	}
 	if r.ko.Spec.TracingConfig != nil {
-		attrMap["TracingConfig"] = r.ko.Spec.TracingConfig
+		attrMap["TracingConfig"] = *r.ko.Spec.TracingConfig
 	}
 	if len(attrMap) > 0 {
-		res.SetAttributes(attrMap)
+		res.Attributes = attrMap
 	}
 	if r.ko.Spec.DataProtectionPolicy != nil {
-		res.SetDataProtectionPolicy(*r.ko.Spec.DataProtectionPolicy)
+		res.DataProtectionPolicy = r.ko.Spec.DataProtectionPolicy
 	}
 	if r.ko.Spec.Name != nil {
-		res.SetName(*r.ko.Spec.Name)
+		res.Name = r.ko.Spec.Name
 	}
 	if r.ko.Spec.Tags != nil {
-		f3 := []*svcsdk.Tag{}
+		f3 := []svcsdktypes.Tag{}
 		for _, f3iter := range r.ko.Spec.Tags {
-			f3elem := &svcsdk.Tag{}
+			f3elem := &svcsdktypes.Tag{}
 			if f3iter.Key != nil {
-				f3elem.SetKey(*f3iter.Key)
+				f3elem.Key = f3iter.Key
 			}
 			if f3iter.Value != nil {
-				f3elem.SetValue(*f3iter.Value)
+				f3elem.Value = f3iter.Value
 			}
-			f3 = append(f3, f3elem)
+			f3 = append(f3, *f3elem)
 		}
-		res.SetTags(f3)
+		res.Tags = f3
 	}
 
 	return res, nil
@@ -276,7 +324,7 @@ func (rm *resourceManager) sdkDelete(
 	}
 	var resp *svcsdk.DeleteTopicOutput
 	_ = resp
-	resp, err = rm.sdkapi.DeleteTopicWithContext(ctx, input)
+	resp, err = rm.sdkapi.DeleteTopic(ctx, input)
 	rm.metrics.RecordAPICall("DELETE", "DeleteTopic", err)
 	return nil, err
 }
@@ -289,7 +337,7 @@ func (rm *resourceManager) newDeleteRequestPayload(
 	res := &svcsdk.DeleteTopicInput{}
 
 	if r.ko.Status.ACKResourceMetadata != nil && r.ko.Status.ACKResourceMetadata.ARN != nil {
-		res.SetTopicArn(string(*r.ko.Status.ACKResourceMetadata.ARN))
+		res.TopicArn = (*string)(r.ko.Status.ACKResourceMetadata.ARN)
 	}
 
 	return res, nil
@@ -397,11 +445,12 @@ func (rm *resourceManager) terminalAWSError(err error) bool {
 	if err == nil {
 		return false
 	}
-	awsErr, ok := ackerr.AWSError(err)
-	if !ok {
+
+	var terminalErr smithy.APIError
+	if !errors.As(err, &terminalErr) {
 		return false
 	}
-	switch awsErr.Code() {
+	switch terminalErr.ErrorCode() {
 	case "InvalidParameter":
 		return true
 	default:

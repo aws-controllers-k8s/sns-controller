@@ -59,8 +59,7 @@ type MessageAttributeValue struct {
 
 // A list of phone numbers and their metadata.
 type PhoneNumberInformation struct {
-	PhoneNumber *string `json:"phoneNumber,omitempty"`
-	Status      *string `json:"status,omitempty"`
+	Status *string `json:"status,omitempty"`
 }
 
 // Platform application object.

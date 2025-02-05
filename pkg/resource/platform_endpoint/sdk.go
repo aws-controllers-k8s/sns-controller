@@ -28,8 +28,9 @@ import (
 	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
 	ackrequeue "github.com/aws-controllers-k8s/runtime/pkg/requeue"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
-	"github.com/aws/aws-sdk-go/aws"
-	svcsdk "github.com/aws/aws-sdk-go/service/sns"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	svcsdk "github.com/aws/aws-sdk-go-v2/service/sns"
+	smithy "github.com/aws/smithy-go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -40,8 +41,7 @@ import (
 var (
 	_ = &metav1.Time{}
 	_ = strings.ToLower("")
-	_ = &aws.JSONValue{}
-	_ = &svcsdk.SNS{}
+	_ = &svcsdk.Client{}
 	_ = &svcapitypes.PlatformEndpoint{}
 	_ = ackv1alpha1.AWSAccountID("")
 	_ = &ackerr.NotFound
@@ -49,6 +49,7 @@ var (
 	_ = &reflect.Value{}
 	_ = fmt.Sprintf("")
 	_ = &ackrequeue.NoRequeue{}
+	_ = &aws.Config{}
 )
 
 // sdkFind returns SDK-specific information about a supplied resource
@@ -73,10 +74,11 @@ func (rm *resourceManager) sdkFind(
 		return nil, err
 	}
 	var resp *svcsdk.GetEndpointAttributesOutput
-	resp, err = rm.sdkapi.GetEndpointAttributesWithContext(ctx, input)
+	resp, err = rm.sdkapi.GetEndpointAttributes(ctx, input)
 	rm.metrics.RecordAPICall("GET_ATTRIBUTES", "GetEndpointAttributes", err)
 	if err != nil {
-		if awsErr, ok := ackerr.AWSError(err); ok && awsErr.Code() == "NotFound" {
+		var awsErr smithy.APIError
+		if errors.As(err, &awsErr) && awsErr.ErrorCode() == "NotFound" {
 			return nil, ackerr.NotFound
 		}
 		return nil, err
@@ -86,9 +88,24 @@ func (rm *resourceManager) sdkFind(
 	// the original Kubernetes object we passed to the function
 	ko := r.ko.DeepCopy()
 
-	ko.Spec.CustomUserData = resp.Attributes["CustomUserData"]
-	ko.Spec.Enabled = resp.Attributes["Enabled"]
-	ko.Spec.Token = resp.Attributes["Token"]
+	f0, ok := resp.Attributes["CustomUserData"]
+	if ok {
+		ko.Spec.CustomUserData = &f0
+	} else {
+		ko.Spec.CustomUserData = nil
+	}
+	f1, ok := resp.Attributes["Enabled"]
+	if ok {
+		ko.Spec.Enabled = &f1
+	} else {
+		ko.Spec.Enabled = nil
+	}
+	f2, ok := resp.Attributes["Token"]
+	if ok {
+		ko.Spec.Token = &f2
+	} else {
+		ko.Spec.Token = nil
+	}
 
 	rm.setStatusDefaults(ko)
 	return &resource{ko}, nil
@@ -112,7 +129,7 @@ func (rm *resourceManager) newGetAttributesRequestPayload(
 	res := &svcsdk.GetEndpointAttributesInput{}
 
 	if r.ko.Status.EndpointARN != nil {
-		res.SetEndpointArn(*r.ko.Status.EndpointARN)
+		res.EndpointArn = r.ko.Status.EndpointARN
 	}
 
 	return res, nil
@@ -137,7 +154,7 @@ func (rm *resourceManager) sdkCreate(
 
 	var resp *svcsdk.CreatePlatformEndpointOutput
 	_ = resp
-	resp, err = rm.sdkapi.CreatePlatformEndpointWithContext(ctx, input)
+	resp, err = rm.sdkapi.CreatePlatformEndpoint(ctx, input)
 	rm.metrics.RecordAPICall("CREATE", "CreatePlatformEndpoint", err)
 	if err != nil {
 		return nil, err
@@ -164,27 +181,27 @@ func (rm *resourceManager) newCreateRequestPayload(
 ) (*svcsdk.CreatePlatformEndpointInput, error) {
 	res := &svcsdk.CreatePlatformEndpointInput{}
 
-	attrMap := map[string]*string{}
+	attrMap := map[string]string{}
 	if r.ko.Spec.CustomUserData != nil {
-		attrMap["CustomUserData"] = r.ko.Spec.CustomUserData
+		attrMap["CustomUserData"] = *r.ko.Spec.CustomUserData
 	}
 	if r.ko.Spec.Enabled != nil {
-		attrMap["Enabled"] = r.ko.Spec.Enabled
+		attrMap["Enabled"] = *r.ko.Spec.Enabled
 	}
 	if r.ko.Spec.Token != nil {
-		attrMap["Token"] = r.ko.Spec.Token
+		attrMap["Token"] = *r.ko.Spec.Token
 	}
 	if len(attrMap) > 0 {
-		res.SetAttributes(attrMap)
+		res.Attributes = attrMap
 	}
 	if r.ko.Spec.CustomUserData != nil {
-		res.SetCustomUserData(*r.ko.Spec.CustomUserData)
+		res.CustomUserData = r.ko.Spec.CustomUserData
 	}
 	if r.ko.Spec.PlatformApplicationARN != nil {
-		res.SetPlatformApplicationArn(*r.ko.Spec.PlatformApplicationARN)
+		res.PlatformApplicationArn = r.ko.Spec.PlatformApplicationARN
 	}
 	if r.ko.Spec.Token != nil {
-		res.SetToken(*r.ko.Spec.Token)
+		res.Token = r.ko.Spec.Token
 	}
 
 	return res, nil
@@ -220,10 +237,11 @@ func (rm *resourceManager) sdkUpdate(
 	// contain any useful information. Instead, below, we'll be returning a
 	// DeepCopy of the supplied desired state, which should be fine because
 	// that desired state has been constructed from a call to GetAttributes...
-	_, respErr := rm.sdkapi.SetEndpointAttributesWithContext(ctx, input)
+	_, respErr := rm.sdkapi.SetEndpointAttributes(ctx, input)
 	rm.metrics.RecordAPICall("SET_ATTRIBUTES", "SetEndpointAttributes", respErr)
 	if respErr != nil {
-		if awsErr, ok := ackerr.AWSError(respErr); ok && awsErr.Code() == "NotFound" {
+		var awsErr smithy.APIError
+		if errors.As(err, &awsErr) && awsErr.ErrorCode() == "NotFound" {
 			// Technically, this means someone deleted the backend resource in
 			// between the time we got a result back from sdkFind() and here...
 			return nil, ackerr.NotFound
@@ -255,21 +273,21 @@ func (rm *resourceManager) newSetAttributesRequestPayload(
 ) (*svcsdk.SetEndpointAttributesInput, error) {
 	res := &svcsdk.SetEndpointAttributesInput{}
 
-	attrMap := map[string]*string{}
+	attrMap := map[string]string{}
 	if r.ko.Spec.CustomUserData != nil {
-		attrMap["CustomUserData"] = r.ko.Spec.CustomUserData
+		attrMap["CustomUserData"] = *r.ko.Spec.CustomUserData
 	}
 	if r.ko.Spec.Enabled != nil {
-		attrMap["Enabled"] = r.ko.Spec.Enabled
+		attrMap["Enabled"] = *r.ko.Spec.Enabled
 	}
 	if r.ko.Spec.Token != nil {
-		attrMap["Token"] = r.ko.Spec.Token
+		attrMap["Token"] = *r.ko.Spec.Token
 	}
 	if len(attrMap) > 0 {
-		res.SetAttributes(attrMap)
+		res.Attributes = attrMap
 	}
 	if r.ko.Status.EndpointARN != nil {
-		res.SetEndpointArn(*r.ko.Status.EndpointARN)
+		res.EndpointArn = r.ko.Status.EndpointARN
 	}
 
 	return res, nil
