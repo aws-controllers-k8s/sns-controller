@@ -177,19 +177,6 @@ class TestTopic:
             expect_after_update_tags, latest_tags,
         )
 
-        updates = {
-            "spec": {"name": "my-simple-topic-edited"}
-        }
-        k8s.patch_custom_resource(ref, updates)
-        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
-        k8s.wait_resource_consumed_by_controller(ref)
-        condition.assert_type_status(ref, condition.CONDITION_TYPE_TERMINAL) 
-
-        expected_msg = "Immutable Spec fields have been modified: Name"
-        terminal_condition = k8s.get_resource_condition(ref, condition.CONDITION_TYPE_TERMINAL)
-        # The name is immutable, testing if we get a terminal error
-        assert expected_msg in terminal_condition['message']
-
     def test_crud_fifo(self, fifo_topic):
         ref, res = fifo_topic
 

@@ -17,7 +17,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 
 	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
@@ -65,10 +64,6 @@ func (rm *resourceManager) customUpdate(
 	defer func() {
 		exit(err)
 	}()
-	if immutableFieldChanges := rm.getImmutableFieldChanges(delta); len(immutableFieldChanges) > 0 {
-		msg := fmt.Sprintf("Immutable Spec fields have been modified: %s", strings.Join(immutableFieldChanges, ","))
-		return nil, ackerr.NewTerminalError(fmt.Errorf(msg))
-	}
 	if delta.DifferentAt("Spec.Tags") {
 		if err := rm.syncTags(ctx, desired, latest); err != nil {
 			return nil, err
