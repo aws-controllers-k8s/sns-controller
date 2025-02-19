@@ -23,12 +23,17 @@ import (
 // PlatformEndpointSpec defines the desired state of PlatformEndpoint.
 type PlatformEndpointSpec struct {
 	CustomUserData *string `json:"customUserData,omitempty"`
-	Enabled        *string `json:"enabled,omitempty"`
+
+	Enabled *string `json:"enabled,omitempty"`
 	// PlatformApplicationArn returned from CreatePlatformApplication is used to
 	// create a an endpoint.
+
 	// +kubebuilder:validation:Required
+
 	PlatformApplicationARN *string `json:"platformApplicationARN"`
+
 	// +kubebuilder:validation:Required
+
 	Token *string `json:"token"`
 }
 
@@ -39,7 +44,7 @@ type PlatformEndpointStatus struct {
 	// constructed ARN for the resource
 	// +kubebuilder:validation:Optional
 	ACKResourceMetadata *ackv1alpha1.ResourceMetadata `json:"ackResourceMetadata"`
-	// All CRS managed by ACK have a common `Status.Conditions` member that
+	// All CRs managed by ACK have a common `Status.Conditions` member that
 	// contains a collection of `ackv1alpha1.Condition` objects that describe
 	// the various terminal states of the CR and its backend AWS service API
 	// resource
