@@ -40,8 +40,10 @@ spec:
             description: PlatformEndpointSpec defines the desired state of PlatformEndpoint.
             properties:
               customUserData:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               enabled:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               platformApplicationARN:
                 description: |-
@@ -49,6 +51,7 @@ spec:
                   create a an endpoint.
                 type: string
               token:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
             required:
             - platformApplicationARN

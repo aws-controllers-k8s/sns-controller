@@ -44,6 +44,7 @@ spec:
               Platform application object.
             properties:
               eventDeliveryFailure:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               eventEndpointCreated:
                 type: string
@@ -134,8 +135,10 @@ spec:
                   Messaging).
                 type: string
               platformCredential:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               platformPrincipal:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               successFeedbackRoleARN:
                 type: string
@@ -157,6 +160,7 @@ spec:
                     type: object
                 type: object
               successFeedbackSampleRate:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
             required:
             - name

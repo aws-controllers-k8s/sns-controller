@@ -58,6 +58,7 @@ spec:
               topic's attributes, use GetTopicAttributes.
             properties:
               contentBasedDeduplication:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               dataProtectionPolicy:
                 description: |-
@@ -70,10 +71,13 @@ spec:
                   Length Constraints: Maximum length of 30,720.
                 type: string
               deliveryPolicy:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               displayName:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               fifoTopic:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               kmsMasterKeyID:
                 type: string
@@ -127,6 +131,7 @@ spec:
                     type: object
                 type: object
               signatureVersion:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               tags:
                 description: |-
@@ -144,6 +149,7 @@ spec:
                   type: object
                 type: array
               tracingConfig:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
             required:
             - name
@@ -216,8 +222,10 @@ spec:
                   type: object
                 type: array
               effectiveDeliveryPolicy:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               owner:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               topicARN:
                 type: string

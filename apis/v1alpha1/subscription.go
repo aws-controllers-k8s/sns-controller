@@ -24,6 +24,8 @@ import (
 //
 // A wrapper type for the attributes of an Amazon SNS subscription.
 type SubscriptionSpec struct {
+
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
 	DeliveryPolicy *string `json:"deliveryPolicy,omitempty"`
 	// The endpoint that you want to receive notifications. Endpoints vary by protocol:
 	//
@@ -49,8 +51,10 @@ type SubscriptionSpec struct {
 	//
 	//   - For the firehose protocol, the endpoint is the ARN of an Amazon Kinesis
 	//     Data Firehose delivery stream.
-	Endpoint          *string `json:"endpoint,omitempty"`
-	FilterPolicy      *string `json:"filterPolicy,omitempty"`
+	Endpoint *string `json:"endpoint,omitempty"`
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
+	FilterPolicy *string `json:"filterPolicy,omitempty"`
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
 	FilterPolicyScope *string `json:"filterPolicyScope,omitempty"`
 	// The protocol that you want to use. Supported protocols include:
 	//
@@ -75,9 +79,12 @@ type SubscriptionSpec struct {
 	//     Firehose delivery stream.
 	//
 	// +kubebuilder:validation:Required
-	Protocol            *string `json:"protocol"`
-	RawMessageDelivery  *string `json:"rawMessageDelivery,omitempty"`
-	RedrivePolicy       *string `json:"redrivePolicy,omitempty"`
+	Protocol *string `json:"protocol"`
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
+	RawMessageDelivery *string `json:"rawMessageDelivery,omitempty"`
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
+	RedrivePolicy *string `json:"redrivePolicy,omitempty"`
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
 	SubscriptionRoleARN *string `json:"subscriptionRoleARN,omitempty"`
 	// The ARN of the topic you want to subscribe to.
 	TopicARN *string                                  `json:"topicARN,omitempty"`
@@ -97,12 +104,16 @@ type SubscriptionStatus struct {
 	// resource
 	// +kubebuilder:validation:Optional
 	Conditions []*ackv1alpha1.Condition `json:"conditions"`
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
 	// +kubebuilder:validation:Optional
 	ConfirmationWasAuthenticated *string `json:"confirmationWasAuthenticated,omitempty"`
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
 	// +kubebuilder:validation:Optional
 	EffectiveDeliveryPolicy *string `json:"effectiveDeliveryPolicy,omitempty"`
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
 	// +kubebuilder:validation:Optional
 	Owner *string `json:"owner,omitempty"`
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
 	// +kubebuilder:validation:Optional
 	PendingConfirmation *string `json:"pendingConfirmation,omitempty"`
 }

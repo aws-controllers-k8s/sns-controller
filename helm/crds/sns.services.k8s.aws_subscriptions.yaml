@@ -54,6 +54,7 @@ spec:
               A wrapper type for the attributes of an Amazon SNS subscription.
             properties:
               deliveryPolicy:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               endpoint:
                 description: |-
@@ -83,8 +84,10 @@ spec:
                       Data Firehose delivery stream.
                 type: string
               filterPolicy:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               filterPolicyScope:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               protocol:
                 description: |-
@@ -111,10 +114,13 @@ spec:
                       Firehose delivery stream.
                 type: string
               rawMessageDelivery:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               redrivePolicy:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               subscriptionRoleARN:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               topicARN:
                 description: The ARN of the topic you want to subscribe to.
@@ -207,12 +213,16 @@ spec:
                   type: object
                 type: array
               confirmationWasAuthenticated:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               effectiveDeliveryPolicy:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               owner:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
               pendingConfirmation:
+                description: For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
                 type: string
             type: object
         type: object

@@ -22,12 +22,16 @@ import (
 
 // PlatformEndpointSpec defines the desired state of PlatformEndpoint.
 type PlatformEndpointSpec struct {
+
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
 	CustomUserData *string `json:"customUserData,omitempty"`
-	Enabled        *string `json:"enabled,omitempty"`
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
+	Enabled *string `json:"enabled,omitempty"`
 	// PlatformApplicationArn returned from CreatePlatformApplication is used to
 	// create a an endpoint.
 	// +kubebuilder:validation:Required
 	PlatformApplicationARN *string `json:"platformApplicationARN"`
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
 	// +kubebuilder:validation:Required
 	Token *string `json:"token"`
 }

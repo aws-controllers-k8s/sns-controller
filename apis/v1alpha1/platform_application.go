@@ -24,6 +24,8 @@ import (
 //
 // Platform application object.
 type PlatformApplicationSpec struct {
+
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
 	EventDeliveryFailure    *string                                  `json:"eventDeliveryFailure,omitempty"`
 	EventEndpointCreated    *string                                  `json:"eventEndpointCreated,omitempty"`
 	EventEndpointCreatedRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"eventEndpointCreatedRef,omitempty"`
@@ -42,12 +44,15 @@ type PlatformApplicationSpec struct {
 	// (Apple Push Notification Service), APNS_SANDBOX, and GCM (Firebase Cloud
 	// Messaging).
 	// +kubebuilder:validation:Required
-	Platform                  *string                                  `json:"platform"`
-	PlatformCredential        *string                                  `json:"platformCredential,omitempty"`
-	PlatformPrincipal         *string                                  `json:"platformPrincipal,omitempty"`
-	SuccessFeedbackRoleARN    *string                                  `json:"successFeedbackRoleARN,omitempty"`
-	SuccessFeedbackRoleRef    *ackv1alpha1.AWSResourceReferenceWrapper `json:"successFeedbackRoleRef,omitempty"`
-	SuccessFeedbackSampleRate *string                                  `json:"successFeedbackSampleRate,omitempty"`
+	Platform *string `json:"platform"`
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
+	PlatformCredential *string `json:"platformCredential,omitempty"`
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
+	PlatformPrincipal      *string                                  `json:"platformPrincipal,omitempty"`
+	SuccessFeedbackRoleARN *string                                  `json:"successFeedbackRoleARN,omitempty"`
+	SuccessFeedbackRoleRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"successFeedbackRoleRef,omitempty"`
+	// For a list of attributes, see SetEndpointAttributes (https://docs.aws.amazon.com/sns/latest/api/API_SetEndpointAttributes.html).
+	SuccessFeedbackSampleRate *string `json:"successFeedbackSampleRate,omitempty"`
 }
 
 // PlatformApplicationStatus defines the observed state of PlatformApplication
