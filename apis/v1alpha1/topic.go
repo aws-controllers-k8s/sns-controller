@@ -25,6 +25,58 @@ import (
 // A wrapper type for the topic's Amazon Resource Name (ARN). To retrieve a
 // topic's attributes, use GetTopicAttributes.
 type TopicSpec struct {
+
+	// A map of attributes with their corresponding values.
+	//
+	// The following lists the names, descriptions, and values of the special request
+	// parameters that the Subscribe action uses:
+	//
+	//   - DeliveryPolicy – The policy that defines how Amazon SNS retries failed
+	//     deliveries to HTTP/S endpoints.
+	//
+	//   - FilterPolicy – The simple JSON object that lets your subscriber receive
+	//     only a subset of messages, rather than receiving every message published
+	//     to the topic.
+	//
+	//   - FilterPolicyScope – This attribute lets you choose the filtering scope
+	//     by using one of the following string value types: MessageAttributes (default)
+	//     – The filter is applied on the message attributes. MessageBody – The
+	//     filter is applied on the message body.
+	//
+	//   - RawMessageDelivery – When set to true, enables raw message delivery
+	//     to Amazon SQS or HTTP/S endpoints. This eliminates the need for the endpoints
+	//     to process JSON formatting, which is otherwise created for Amazon SNS
+	//     metadata.
+	//
+	//   - RedrivePolicy – When specified, sends undeliverable messages to the
+	//     specified Amazon SQS dead-letter queue. Messages that can't be delivered
+	//     due to client errors (for example, when the subscribed endpoint is unreachable)
+	//     or server errors (for example, when the service that powers the subscribed
+	//     endpoint becomes unavailable) are held in the dead-letter queue for further
+	//     analysis or reprocessing.
+	//
+	// The following attribute applies only to Amazon Data Firehose delivery stream
+	// subscriptions:
+	//
+	//   - SubscriptionRoleArn – The ARN of the IAM role that has the following:
+	//     Permission to write to the Firehose delivery stream Amazon SNS listed
+	//     as a trusted entity Specifying a valid ARN for this attribute is required
+	//     for Firehose delivery stream subscriptions. For more information, see
+	//     Fanout to Firehose delivery streams (https://docs.aws.amazon.com/sns/latest/dg/sns-firehose-as-subscriber.html)
+	//     in the Amazon SNS Developer Guide.
+	//
+	// The following attributes apply only to FIFO topics (https://docs.aws.amazon.com/sns/latest/dg/sns-fifo-topics.html):
+	//
+	//   - ReplayPolicy – Adds or updates an inline policy document for a subscription
+	//     to replay messages stored in the specified Amazon SNS topic.
+	//
+	//   - ReplayStatus – Retrieves the status of the subscription message replay,
+	//     which can be one of the following: Completed – The replay has successfully
+	//     redelivered all messages, and is now delivering newly published messages.
+	//     If an ending point was specified in the ReplayPolicy then the subscription
+	//     will no longer receive newly published messages. In progress – The replay
+	//     is currently replaying the selected messages. Failed – The replay was
+	//     unable to complete. Pending – The default state while the replay initiates.
 	ContentBasedDeduplication *string `json:"contentBasedDeduplication,omitempty"`
 	// The body of the policy document you want to use for this topic.
 	//
@@ -33,12 +85,165 @@ type TopicSpec struct {
 	// The policy must be in JSON string format.
 	//
 	// Length Constraints: Maximum length of 30,720.
-	DataProtectionPolicy *string                                  `json:"dataProtectionPolicy,omitempty"`
-	DeliveryPolicy       *string                                  `json:"deliveryPolicy,omitempty"`
-	DisplayName          *string                                  `json:"displayName,omitempty"`
-	FIFOTopic            *string                                  `json:"fifoTopic,omitempty"`
-	KMSMasterKeyID       *string                                  `json:"kmsMasterKeyID,omitempty"`
-	KMSMasterKeyRef      *ackv1alpha1.AWSResourceReferenceWrapper `json:"kmsMasterKeyRef,omitempty"`
+	DataProtectionPolicy *string `json:"dataProtectionPolicy,omitempty"`
+	// A map of attributes with their corresponding values.
+	//
+	// The following lists the names, descriptions, and values of the special request
+	// parameters that the Subscribe action uses:
+	//
+	//   - DeliveryPolicy – The policy that defines how Amazon SNS retries failed
+	//     deliveries to HTTP/S endpoints.
+	//
+	//   - FilterPolicy – The simple JSON object that lets your subscriber receive
+	//     only a subset of messages, rather than receiving every message published
+	//     to the topic.
+	//
+	//   - FilterPolicyScope – This attribute lets you choose the filtering scope
+	//     by using one of the following string value types: MessageAttributes (default)
+	//     – The filter is applied on the message attributes. MessageBody – The
+	//     filter is applied on the message body.
+	//
+	//   - RawMessageDelivery – When set to true, enables raw message delivery
+	//     to Amazon SQS or HTTP/S endpoints. This eliminates the need for the endpoints
+	//     to process JSON formatting, which is otherwise created for Amazon SNS
+	//     metadata.
+	//
+	//   - RedrivePolicy – When specified, sends undeliverable messages to the
+	//     specified Amazon SQS dead-letter queue. Messages that can't be delivered
+	//     due to client errors (for example, when the subscribed endpoint is unreachable)
+	//     or server errors (for example, when the service that powers the subscribed
+	//     endpoint becomes unavailable) are held in the dead-letter queue for further
+	//     analysis or reprocessing.
+	//
+	// The following attribute applies only to Amazon Data Firehose delivery stream
+	// subscriptions:
+	//
+	//   - SubscriptionRoleArn – The ARN of the IAM role that has the following:
+	//     Permission to write to the Firehose delivery stream Amazon SNS listed
+	//     as a trusted entity Specifying a valid ARN for this attribute is required
+	//     for Firehose delivery stream subscriptions. For more information, see
+	//     Fanout to Firehose delivery streams (https://docs.aws.amazon.com/sns/latest/dg/sns-firehose-as-subscriber.html)
+	//     in the Amazon SNS Developer Guide.
+	//
+	// The following attributes apply only to FIFO topics (https://docs.aws.amazon.com/sns/latest/dg/sns-fifo-topics.html):
+	//
+	//   - ReplayPolicy – Adds or updates an inline policy document for a subscription
+	//     to replay messages stored in the specified Amazon SNS topic.
+	//
+	//   - ReplayStatus – Retrieves the status of the subscription message replay,
+	//     which can be one of the following: Completed – The replay has successfully
+	//     redelivered all messages, and is now delivering newly published messages.
+	//     If an ending point was specified in the ReplayPolicy then the subscription
+	//     will no longer receive newly published messages. In progress – The replay
+	//     is currently replaying the selected messages. Failed – The replay was
+	//     unable to complete. Pending – The default state while the replay initiates.
+	DeliveryPolicy *string `json:"deliveryPolicy,omitempty"`
+	// A map of attributes with their corresponding values.
+	//
+	// The following lists the names, descriptions, and values of the special request
+	// parameters that the Subscribe action uses:
+	//
+	//   - DeliveryPolicy – The policy that defines how Amazon SNS retries failed
+	//     deliveries to HTTP/S endpoints.
+	//
+	//   - FilterPolicy – The simple JSON object that lets your subscriber receive
+	//     only a subset of messages, rather than receiving every message published
+	//     to the topic.
+	//
+	//   - FilterPolicyScope – This attribute lets you choose the filtering scope
+	//     by using one of the following string value types: MessageAttributes (default)
+	//     – The filter is applied on the message attributes. MessageBody – The
+	//     filter is applied on the message body.
+	//
+	//   - RawMessageDelivery – When set to true, enables raw message delivery
+	//     to Amazon SQS or HTTP/S endpoints. This eliminates the need for the endpoints
+	//     to process JSON formatting, which is otherwise created for Amazon SNS
+	//     metadata.
+	//
+	//   - RedrivePolicy – When specified, sends undeliverable messages to the
+	//     specified Amazon SQS dead-letter queue. Messages that can't be delivered
+	//     due to client errors (for example, when the subscribed endpoint is unreachable)
+	//     or server errors (for example, when the service that powers the subscribed
+	//     endpoint becomes unavailable) are held in the dead-letter queue for further
+	//     analysis or reprocessing.
+	//
+	// The following attribute applies only to Amazon Data Firehose delivery stream
+	// subscriptions:
+	//
+	//   - SubscriptionRoleArn – The ARN of the IAM role that has the following:
+	//     Permission to write to the Firehose delivery stream Amazon SNS listed
+	//     as a trusted entity Specifying a valid ARN for this attribute is required
+	//     for Firehose delivery stream subscriptions. For more information, see
+	//     Fanout to Firehose delivery streams (https://docs.aws.amazon.com/sns/latest/dg/sns-firehose-as-subscriber.html)
+	//     in the Amazon SNS Developer Guide.
+	//
+	// The following attributes apply only to FIFO topics (https://docs.aws.amazon.com/sns/latest/dg/sns-fifo-topics.html):
+	//
+	//   - ReplayPolicy – Adds or updates an inline policy document for a subscription
+	//     to replay messages stored in the specified Amazon SNS topic.
+	//
+	//   - ReplayStatus – Retrieves the status of the subscription message replay,
+	//     which can be one of the following: Completed – The replay has successfully
+	//     redelivered all messages, and is now delivering newly published messages.
+	//     If an ending point was specified in the ReplayPolicy then the subscription
+	//     will no longer receive newly published messages. In progress – The replay
+	//     is currently replaying the selected messages. Failed – The replay was
+	//     unable to complete. Pending – The default state while the replay initiates.
+	DisplayName *string `json:"displayName,omitempty"`
+	// A map of attributes with their corresponding values.
+	//
+	// The following lists the names, descriptions, and values of the special request
+	// parameters that the Subscribe action uses:
+	//
+	//   - DeliveryPolicy – The policy that defines how Amazon SNS retries failed
+	//     deliveries to HTTP/S endpoints.
+	//
+	//   - FilterPolicy – The simple JSON object that lets your subscriber receive
+	//     only a subset of messages, rather than receiving every message published
+	//     to the topic.
+	//
+	//   - FilterPolicyScope – This attribute lets you choose the filtering scope
+	//     by using one of the following string value types: MessageAttributes (default)
+	//     – The filter is applied on the message attributes. MessageBody – The
+	//     filter is applied on the message body.
+	//
+	//   - RawMessageDelivery – When set to true, enables raw message delivery
+	//     to Amazon SQS or HTTP/S endpoints. This eliminates the need for the endpoints
+	//     to process JSON formatting, which is otherwise created for Amazon SNS
+	//     metadata.
+	//
+	//   - RedrivePolicy – When specified, sends undeliverable messages to the
+	//     specified Amazon SQS dead-letter queue. Messages that can't be delivered
+	//     due to client errors (for example, when the subscribed endpoint is unreachable)
+	//     or server errors (for example, when the service that powers the subscribed
+	//     endpoint becomes unavailable) are held in the dead-letter queue for further
+	//     analysis or reprocessing.
+	//
+	// The following attribute applies only to Amazon Data Firehose delivery stream
+	// subscriptions:
+	//
+	//   - SubscriptionRoleArn – The ARN of the IAM role that has the following:
+	//     Permission to write to the Firehose delivery stream Amazon SNS listed
+	//     as a trusted entity Specifying a valid ARN for this attribute is required
+	//     for Firehose delivery stream subscriptions. For more information, see
+	//     Fanout to Firehose delivery streams (https://docs.aws.amazon.com/sns/latest/dg/sns-firehose-as-subscriber.html)
+	//     in the Amazon SNS Developer Guide.
+	//
+	// The following attributes apply only to FIFO topics (https://docs.aws.amazon.com/sns/latest/dg/sns-fifo-topics.html):
+	//
+	//   - ReplayPolicy – Adds or updates an inline policy document for a subscription
+	//     to replay messages stored in the specified Amazon SNS topic.
+	//
+	//   - ReplayStatus – Retrieves the status of the subscription message replay,
+	//     which can be one of the following: Completed – The replay has successfully
+	//     redelivered all messages, and is now delivering newly published messages.
+	//     If an ending point was specified in the ReplayPolicy then the subscription
+	//     will no longer receive newly published messages. In progress – The replay
+	//     is currently replaying the selected messages. Failed – The replay was
+	//     unable to complete. Pending – The default state while the replay initiates.
+	FIFOTopic       *string                                  `json:"fifoTopic,omitempty"`
+	KMSMasterKeyID  *string                                  `json:"kmsMasterKeyID,omitempty"`
+	KMSMasterKeyRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"kmsMasterKeyRef,omitempty"`
 	// The name of the topic you want to create.
 	//
 	// Constraints: Topic names must be made up of only uppercase and lowercase
@@ -48,15 +253,117 @@ type TopicSpec struct {
 	// For a FIFO (first-in-first-out) topic, the name must end with the .fifo suffix.
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Value is immutable once set"
 	// +kubebuilder:validation:Required
-	Name             *string                                  `json:"name"`
-	Policy           *string                                  `json:"policy,omitempty"`
-	PolicyRef        *ackv1alpha1.AWSResourceReferenceWrapper `json:"policyRef,omitempty"`
-	SignatureVersion *string                                  `json:"signatureVersion,omitempty"`
+	Name      *string                                  `json:"name"`
+	Policy    *string                                  `json:"policy,omitempty"`
+	PolicyRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"policyRef,omitempty"`
+	// A map of attributes with their corresponding values.
+	//
+	// The following lists the names, descriptions, and values of the special request
+	// parameters that the Subscribe action uses:
+	//
+	//   - DeliveryPolicy – The policy that defines how Amazon SNS retries failed
+	//     deliveries to HTTP/S endpoints.
+	//
+	//   - FilterPolicy – The simple JSON object that lets your subscriber receive
+	//     only a subset of messages, rather than receiving every message published
+	//     to the topic.
+	//
+	//   - FilterPolicyScope – This attribute lets you choose the filtering scope
+	//     by using one of the following string value types: MessageAttributes (default)
+	//     – The filter is applied on the message attributes. MessageBody – The
+	//     filter is applied on the message body.
+	//
+	//   - RawMessageDelivery – When set to true, enables raw message delivery
+	//     to Amazon SQS or HTTP/S endpoints. This eliminates the need for the endpoints
+	//     to process JSON formatting, which is otherwise created for Amazon SNS
+	//     metadata.
+	//
+	//   - RedrivePolicy – When specified, sends undeliverable messages to the
+	//     specified Amazon SQS dead-letter queue. Messages that can't be delivered
+	//     due to client errors (for example, when the subscribed endpoint is unreachable)
+	//     or server errors (for example, when the service that powers the subscribed
+	//     endpoint becomes unavailable) are held in the dead-letter queue for further
+	//     analysis or reprocessing.
+	//
+	// The following attribute applies only to Amazon Data Firehose delivery stream
+	// subscriptions:
+	//
+	//   - SubscriptionRoleArn – The ARN of the IAM role that has the following:
+	//     Permission to write to the Firehose delivery stream Amazon SNS listed
+	//     as a trusted entity Specifying a valid ARN for this attribute is required
+	//     for Firehose delivery stream subscriptions. For more information, see
+	//     Fanout to Firehose delivery streams (https://docs.aws.amazon.com/sns/latest/dg/sns-firehose-as-subscriber.html)
+	//     in the Amazon SNS Developer Guide.
+	//
+	// The following attributes apply only to FIFO topics (https://docs.aws.amazon.com/sns/latest/dg/sns-fifo-topics.html):
+	//
+	//   - ReplayPolicy – Adds or updates an inline policy document for a subscription
+	//     to replay messages stored in the specified Amazon SNS topic.
+	//
+	//   - ReplayStatus – Retrieves the status of the subscription message replay,
+	//     which can be one of the following: Completed – The replay has successfully
+	//     redelivered all messages, and is now delivering newly published messages.
+	//     If an ending point was specified in the ReplayPolicy then the subscription
+	//     will no longer receive newly published messages. In progress – The replay
+	//     is currently replaying the selected messages. Failed – The replay was
+	//     unable to complete. Pending – The default state while the replay initiates.
+	SignatureVersion *string `json:"signatureVersion,omitempty"`
 	// The list of tags to add to a new topic.
 	//
 	// To be able to tag a topic on creation, you must have the sns:CreateTopic
 	// and sns:TagResource permissions.
-	Tags          []*Tag  `json:"tags,omitempty"`
+	Tags []*Tag `json:"tags,omitempty"`
+	// A map of attributes with their corresponding values.
+	//
+	// The following lists the names, descriptions, and values of the special request
+	// parameters that the Subscribe action uses:
+	//
+	//   - DeliveryPolicy – The policy that defines how Amazon SNS retries failed
+	//     deliveries to HTTP/S endpoints.
+	//
+	//   - FilterPolicy – The simple JSON object that lets your subscriber receive
+	//     only a subset of messages, rather than receiving every message published
+	//     to the topic.
+	//
+	//   - FilterPolicyScope – This attribute lets you choose the filtering scope
+	//     by using one of the following string value types: MessageAttributes (default)
+	//     – The filter is applied on the message attributes. MessageBody – The
+	//     filter is applied on the message body.
+	//
+	//   - RawMessageDelivery – When set to true, enables raw message delivery
+	//     to Amazon SQS or HTTP/S endpoints. This eliminates the need for the endpoints
+	//     to process JSON formatting, which is otherwise created for Amazon SNS
+	//     metadata.
+	//
+	//   - RedrivePolicy – When specified, sends undeliverable messages to the
+	//     specified Amazon SQS dead-letter queue. Messages that can't be delivered
+	//     due to client errors (for example, when the subscribed endpoint is unreachable)
+	//     or server errors (for example, when the service that powers the subscribed
+	//     endpoint becomes unavailable) are held in the dead-letter queue for further
+	//     analysis or reprocessing.
+	//
+	// The following attribute applies only to Amazon Data Firehose delivery stream
+	// subscriptions:
+	//
+	//   - SubscriptionRoleArn – The ARN of the IAM role that has the following:
+	//     Permission to write to the Firehose delivery stream Amazon SNS listed
+	//     as a trusted entity Specifying a valid ARN for this attribute is required
+	//     for Firehose delivery stream subscriptions. For more information, see
+	//     Fanout to Firehose delivery streams (https://docs.aws.amazon.com/sns/latest/dg/sns-firehose-as-subscriber.html)
+	//     in the Amazon SNS Developer Guide.
+	//
+	// The following attributes apply only to FIFO topics (https://docs.aws.amazon.com/sns/latest/dg/sns-fifo-topics.html):
+	//
+	//   - ReplayPolicy – Adds or updates an inline policy document for a subscription
+	//     to replay messages stored in the specified Amazon SNS topic.
+	//
+	//   - ReplayStatus – Retrieves the status of the subscription message replay,
+	//     which can be one of the following: Completed – The replay has successfully
+	//     redelivered all messages, and is now delivering newly published messages.
+	//     If an ending point was specified in the ReplayPolicy then the subscription
+	//     will no longer receive newly published messages. In progress – The replay
+	//     is currently replaying the selected messages. Failed – The replay was
+	//     unable to complete. Pending – The default state while the replay initiates.
 	TracingConfig *string `json:"tracingConfig,omitempty"`
 }
 
@@ -73,8 +380,110 @@ type TopicStatus struct {
 	// resource
 	// +kubebuilder:validation:Optional
 	Conditions []*ackv1alpha1.Condition `json:"conditions"`
+	// A map of attributes with their corresponding values.
+	//
+	// The following lists the names, descriptions, and values of the special request
+	// parameters that the Subscribe action uses:
+	//
+	//    * DeliveryPolicy – The policy that defines how Amazon SNS retries failed
+	//    deliveries to HTTP/S endpoints.
+	//
+	//    * FilterPolicy – The simple JSON object that lets your subscriber receive
+	//    only a subset of messages, rather than receiving every message published
+	//    to the topic.
+	//
+	//    * FilterPolicyScope – This attribute lets you choose the filtering scope
+	//    by using one of the following string value types: MessageAttributes (default)
+	//    – The filter is applied on the message attributes. MessageBody – The
+	//    filter is applied on the message body.
+	//
+	//    * RawMessageDelivery – When set to true, enables raw message delivery
+	//    to Amazon SQS or HTTP/S endpoints. This eliminates the need for the endpoints
+	//    to process JSON formatting, which is otherwise created for Amazon SNS
+	//    metadata.
+	//
+	//    * RedrivePolicy – When specified, sends undeliverable messages to the
+	//    specified Amazon SQS dead-letter queue. Messages that can't be delivered
+	//    due to client errors (for example, when the subscribed endpoint is unreachable)
+	//    or server errors (for example, when the service that powers the subscribed
+	//    endpoint becomes unavailable) are held in the dead-letter queue for further
+	//    analysis or reprocessing.
+	//
+	// The following attribute applies only to Amazon Data Firehose delivery stream
+	// subscriptions:
+	//
+	//    * SubscriptionRoleArn – The ARN of the IAM role that has the following:
+	//    Permission to write to the Firehose delivery stream Amazon SNS listed
+	//    as a trusted entity Specifying a valid ARN for this attribute is required
+	//    for Firehose delivery stream subscriptions. For more information, see
+	//    Fanout to Firehose delivery streams (https://docs.aws.amazon.com/sns/latest/dg/sns-firehose-as-subscriber.html)
+	//    in the Amazon SNS Developer Guide.
+	//
+	// The following attributes apply only to FIFO topics (https://docs.aws.amazon.com/sns/latest/dg/sns-fifo-topics.html):
+	//
+	//    * ReplayPolicy – Adds or updates an inline policy document for a subscription
+	//    to replay messages stored in the specified Amazon SNS topic.
+	//
+	//    * ReplayStatus – Retrieves the status of the subscription message replay,
+	//    which can be one of the following: Completed – The replay has successfully
+	//    redelivered all messages, and is now delivering newly published messages.
+	//    If an ending point was specified in the ReplayPolicy then the subscription
+	//    will no longer receive newly published messages. In progress – The replay
+	//    is currently replaying the selected messages. Failed – The replay was
+	//    unable to complete. Pending – The default state while the replay initiates.
 	// +kubebuilder:validation:Optional
 	EffectiveDeliveryPolicy *string `json:"effectiveDeliveryPolicy,omitempty"`
+	// A map of attributes with their corresponding values.
+	//
+	// The following lists the names, descriptions, and values of the special request
+	// parameters that the Subscribe action uses:
+	//
+	//    * DeliveryPolicy – The policy that defines how Amazon SNS retries failed
+	//    deliveries to HTTP/S endpoints.
+	//
+	//    * FilterPolicy – The simple JSON object that lets your subscriber receive
+	//    only a subset of messages, rather than receiving every message published
+	//    to the topic.
+	//
+	//    * FilterPolicyScope – This attribute lets you choose the filtering scope
+	//    by using one of the following string value types: MessageAttributes (default)
+	//    – The filter is applied on the message attributes. MessageBody – The
+	//    filter is applied on the message body.
+	//
+	//    * RawMessageDelivery – When set to true, enables raw message delivery
+	//    to Amazon SQS or HTTP/S endpoints. This eliminates the need for the endpoints
+	//    to process JSON formatting, which is otherwise created for Amazon SNS
+	//    metadata.
+	//
+	//    * RedrivePolicy – When specified, sends undeliverable messages to the
+	//    specified Amazon SQS dead-letter queue. Messages that can't be delivered
+	//    due to client errors (for example, when the subscribed endpoint is unreachable)
+	//    or server errors (for example, when the service that powers the subscribed
+	//    endpoint becomes unavailable) are held in the dead-letter queue for further
+	//    analysis or reprocessing.
+	//
+	// The following attribute applies only to Amazon Data Firehose delivery stream
+	// subscriptions:
+	//
+	//    * SubscriptionRoleArn – The ARN of the IAM role that has the following:
+	//    Permission to write to the Firehose delivery stream Amazon SNS listed
+	//    as a trusted entity Specifying a valid ARN for this attribute is required
+	//    for Firehose delivery stream subscriptions. For more information, see
+	//    Fanout to Firehose delivery streams (https://docs.aws.amazon.com/sns/latest/dg/sns-firehose-as-subscriber.html)
+	//    in the Amazon SNS Developer Guide.
+	//
+	// The following attributes apply only to FIFO topics (https://docs.aws.amazon.com/sns/latest/dg/sns-fifo-topics.html):
+	//
+	//    * ReplayPolicy – Adds or updates an inline policy document for a subscription
+	//    to replay messages stored in the specified Amazon SNS topic.
+	//
+	//    * ReplayStatus – Retrieves the status of the subscription message replay,
+	//    which can be one of the following: Completed – The replay has successfully
+	//    redelivered all messages, and is now delivering newly published messages.
+	//    If an ending point was specified in the ReplayPolicy then the subscription
+	//    will no longer receive newly published messages. In progress – The replay
+	//    is currently replaying the selected messages. Failed – The replay was
+	//    unable to complete. Pending – The default state while the replay initiates.
 	// +kubebuilder:validation:Optional
 	Owner *string `json:"owner,omitempty"`
 	// +kubebuilder:validation:Optional
