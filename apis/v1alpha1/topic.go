@@ -33,18 +33,12 @@ type TopicSpec struct {
 	// The policy must be in JSON string format.
 	//
 	// Length Constraints: Maximum length of 30,720.
-
-	DataProtectionPolicy *string `json:"dataProtectionPolicy,omitempty"`
-
-	DeliveryPolicy *string `json:"deliveryPolicy,omitempty"`
-
-	DisplayName *string `json:"displayName,omitempty"`
-
-	FIFOTopic *string `json:"fifoTopic,omitempty"`
-
-	KMSMasterKeyID *string `json:"kmsMasterKeyID,omitempty"`
-
-	KMSMasterKeyRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"kmsMasterKeyRef,omitempty"`
+	DataProtectionPolicy *string                                  `json:"dataProtectionPolicy,omitempty"`
+	DeliveryPolicy       *string                                  `json:"deliveryPolicy,omitempty"`
+	DisplayName          *string                                  `json:"displayName,omitempty"`
+	FIFOTopic            *string                                  `json:"fifoTopic,omitempty"`
+	KMSMasterKeyID       *string                                  `json:"kmsMasterKeyID,omitempty"`
+	KMSMasterKeyRef      *ackv1alpha1.AWSResourceReferenceWrapper `json:"kmsMasterKeyRef,omitempty"`
 	// The name of the topic you want to create.
 	//
 	// Constraints: Topic names must be made up of only uppercase and lowercase
@@ -52,24 +46,17 @@ type TopicSpec struct {
 	// 256 characters long.
 	//
 	// For a FIFO (first-in-first-out) topic, the name must end with the .fifo suffix.
-
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Value is immutable once set"
 	// +kubebuilder:validation:Required
-
-	Name *string `json:"name"`
-
-	Policy *string `json:"policy,omitempty"`
-
-	PolicyRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"policyRef,omitempty"`
-
-	SignatureVersion *string `json:"signatureVersion,omitempty"`
+	Name             *string                                  `json:"name"`
+	Policy           *string                                  `json:"policy,omitempty"`
+	PolicyRef        *ackv1alpha1.AWSResourceReferenceWrapper `json:"policyRef,omitempty"`
+	SignatureVersion *string                                  `json:"signatureVersion,omitempty"`
 	// The list of tags to add to a new topic.
 	//
 	// To be able to tag a topic on creation, you must have the sns:CreateTopic
 	// and sns:TagResource permissions.
-
-	Tags []*Tag `json:"tags,omitempty"`
-
+	Tags          []*Tag  `json:"tags,omitempty"`
 	TracingConfig *string `json:"tracingConfig,omitempty"`
 }
 

@@ -27,69 +27,60 @@ type SubscriptionSpec struct {
 	DeliveryPolicy *string `json:"deliveryPolicy,omitempty"`
 	// The endpoint that you want to receive notifications. Endpoints vary by protocol:
 	//
-	//    * For the http protocol, the (public) endpoint is a URL beginning with
-	//    http://.
+	//   - For the http protocol, the (public) endpoint is a URL beginning with
+	//     http://.
 	//
-	//    * For the https protocol, the (public) endpoint is a URL beginning with
-	//    https://.
+	//   - For the https protocol, the (public) endpoint is a URL beginning with
+	//     https://.
 	//
-	//    * For the email protocol, the endpoint is an email address.
+	//   - For the email protocol, the endpoint is an email address.
 	//
-	//    * For the email-json protocol, the endpoint is an email address.
+	//   - For the email-json protocol, the endpoint is an email address.
 	//
-	//    * For the sms protocol, the endpoint is a phone number of an SMS-enabled
-	//    device.
+	//   - For the sms protocol, the endpoint is a phone number of an SMS-enabled
+	//     device.
 	//
-	//    * For the sqs protocol, the endpoint is the ARN of an Amazon SQS queue.
+	//   - For the sqs protocol, the endpoint is the ARN of an Amazon SQS queue.
 	//
-	//    * For the application protocol, the endpoint is the EndpointArn of a mobile
-	//    app and device.
+	//   - For the application protocol, the endpoint is the EndpointArn of a mobile
+	//     app and device.
 	//
-	//    * For the lambda protocol, the endpoint is the ARN of an Lambda function.
+	//   - For the lambda protocol, the endpoint is the ARN of an Lambda function.
 	//
-	//    * For the firehose protocol, the endpoint is the ARN of an Amazon Kinesis
-	//    Data Firehose delivery stream.
-
-	Endpoint *string `json:"endpoint,omitempty"`
-
-	FilterPolicy *string `json:"filterPolicy,omitempty"`
-
+	//   - For the firehose protocol, the endpoint is the ARN of an Amazon Kinesis
+	//     Data Firehose delivery stream.
+	Endpoint          *string `json:"endpoint,omitempty"`
+	FilterPolicy      *string `json:"filterPolicy,omitempty"`
 	FilterPolicyScope *string `json:"filterPolicyScope,omitempty"`
 	// The protocol that you want to use. Supported protocols include:
 	//
-	//    * http – delivery of JSON-encoded message via HTTP POST
+	//   - http – delivery of JSON-encoded message via HTTP POST
 	//
-	//    * https – delivery of JSON-encoded message via HTTPS POST
+	//   - https – delivery of JSON-encoded message via HTTPS POST
 	//
-	//    * email – delivery of message via SMTP
+	//   - email – delivery of message via SMTP
 	//
-	//    * email-json – delivery of JSON-encoded message via SMTP
+	//   - email-json – delivery of JSON-encoded message via SMTP
 	//
-	//    * sms – delivery of message via SMS
+	//   - sms – delivery of message via SMS
 	//
-	//    * sqs – delivery of JSON-encoded message to an Amazon SQS queue
+	//   - sqs – delivery of JSON-encoded message to an Amazon SQS queue
 	//
-	//    * application – delivery of JSON-encoded message to an EndpointArn for
-	//    a mobile app and device
+	//   - application – delivery of JSON-encoded message to an EndpointArn for
+	//     a mobile app and device
 	//
-	//    * lambda – delivery of JSON-encoded message to an Lambda function
+	//   - lambda – delivery of JSON-encoded message to an Lambda function
 	//
-	//    * firehose – delivery of JSON-encoded message to an Amazon Kinesis Data
-	//    Firehose delivery stream.
-
+	//   - firehose – delivery of JSON-encoded message to an Amazon Kinesis Data
+	//     Firehose delivery stream.
+	//
 	// +kubebuilder:validation:Required
-
-	Protocol *string `json:"protocol"`
-
-	RawMessageDelivery *string `json:"rawMessageDelivery,omitempty"`
-
-	RedrivePolicy *string `json:"redrivePolicy,omitempty"`
-
+	Protocol            *string `json:"protocol"`
+	RawMessageDelivery  *string `json:"rawMessageDelivery,omitempty"`
+	RedrivePolicy       *string `json:"redrivePolicy,omitempty"`
 	SubscriptionRoleARN *string `json:"subscriptionRoleARN,omitempty"`
 	// The ARN of the topic you want to subscribe to.
-
-	TopicARN *string `json:"topicARN,omitempty"`
-
+	TopicARN *string                                  `json:"topicARN,omitempty"`
 	TopicRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"topicRef,omitempty"`
 }
 

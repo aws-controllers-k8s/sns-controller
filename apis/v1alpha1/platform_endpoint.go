@@ -23,17 +23,12 @@ import (
 // PlatformEndpointSpec defines the desired state of PlatformEndpoint.
 type PlatformEndpointSpec struct {
 	CustomUserData *string `json:"customUserData,omitempty"`
-
-	Enabled *string `json:"enabled,omitempty"`
+	Enabled        *string `json:"enabled,omitempty"`
 	// PlatformApplicationArn returned from CreatePlatformApplication is used to
 	// create a an endpoint.
-
 	// +kubebuilder:validation:Required
-
 	PlatformApplicationARN *string `json:"platformApplicationARN"`
-
 	// +kubebuilder:validation:Required
-
 	Token *string `json:"token"`
 }
 
