@@ -25,7 +25,10 @@ import (
 // A wrapper type for the topic's Amazon Resource Name (ARN). To retrieve a
 // topic's attributes, use GetTopicAttributes.
 type TopicSpec struct {
-	ContentBasedDeduplication *string `json:"contentBasedDeduplication,omitempty"`
+	ApplicationFailureFeedbackRoleARN    *string `json:"applicationFailureFeedbackRoleARN,omitempty"`
+	ApplicationSuccessFeedbackRoleARN    *string `json:"applicationSuccessFeedbackRoleARN,omitempty"`
+	ApplicationSuccessFeedbackSampleRate *string `json:"applicationSuccessFeedbackSampleRate,omitempty"`
+	ContentBasedDeduplication            *string `json:"contentBasedDeduplication,omitempty"`
 	// The body of the policy document you want to use for this topic.
 	//
 	// You can only add one policy per topic.
@@ -33,12 +36,21 @@ type TopicSpec struct {
 	// The policy must be in JSON string format.
 	//
 	// Length Constraints: Maximum length of 30,720.
-	DataProtectionPolicy *string                                  `json:"dataProtectionPolicy,omitempty"`
-	DeliveryPolicy       *string                                  `json:"deliveryPolicy,omitempty"`
-	DisplayName          *string                                  `json:"displayName,omitempty"`
-	FIFOTopic            *string                                  `json:"fifoTopic,omitempty"`
-	KMSMasterKeyID       *string                                  `json:"kmsMasterKeyID,omitempty"`
-	KMSMasterKeyRef      *ackv1alpha1.AWSResourceReferenceWrapper `json:"kmsMasterKeyRef,omitempty"`
+	DataProtectionPolicy              *string                                  `json:"dataProtectionPolicy,omitempty"`
+	DeliveryPolicy                    *string                                  `json:"deliveryPolicy,omitempty"`
+	DisplayName                       *string                                  `json:"displayName,omitempty"`
+	FIFOTopic                         *string                                  `json:"fifoTopic,omitempty"`
+	FirehoseFailureFeedbackRoleARN    *string                                  `json:"firehoseFailureFeedbackRoleARN,omitempty"`
+	FirehoseSuccessFeedbackRoleARN    *string                                  `json:"firehoseSuccessFeedbackRoleARN,omitempty"`
+	FirehoseSuccessFeedbackSampleRate *string                                  `json:"firehoseSuccessFeedbackSampleRate,omitempty"`
+	HTTPFailureFeedbackRoleARN        *string                                  `json:"httpFailureFeedbackRoleARN,omitempty"`
+	HTTPSuccessFeedbackRoleARN        *string                                  `json:"httpSuccessFeedbackRoleARN,omitempty"`
+	HTTPSuccessFeedbackSampleRate     *string                                  `json:"httpSuccessFeedbackSampleRate,omitempty"`
+	KMSMasterKeyID                    *string                                  `json:"kmsMasterKeyID,omitempty"`
+	KMSMasterKeyRef                   *ackv1alpha1.AWSResourceReferenceWrapper `json:"kmsMasterKeyRef,omitempty"`
+	LambdaFailureFeedbackRoleARN      *string                                  `json:"lambdaFailureFeedbackRoleARN,omitempty"`
+	LambdaSuccessFeedbackRoleARN      *string                                  `json:"lambdaSuccessFeedbackRoleARN,omitempty"`
+	LambdaSuccessFeedbackSampleRate   *string                                  `json:"lambdaSuccessFeedbackSampleRate,omitempty"`
 	// The name of the topic you want to create.
 	//
 	// Constraints: Topic names must be made up of only uppercase and lowercase
@@ -48,10 +60,13 @@ type TopicSpec struct {
 	// For a FIFO (first-in-first-out) topic, the name must end with the .fifo suffix.
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Value is immutable once set"
 	// +kubebuilder:validation:Required
-	Name             *string                                  `json:"name"`
-	Policy           *string                                  `json:"policy,omitempty"`
-	PolicyRef        *ackv1alpha1.AWSResourceReferenceWrapper `json:"policyRef,omitempty"`
-	SignatureVersion *string                                  `json:"signatureVersion,omitempty"`
+	Name                         *string                                  `json:"name"`
+	Policy                       *string                                  `json:"policy,omitempty"`
+	PolicyRef                    *ackv1alpha1.AWSResourceReferenceWrapper `json:"policyRef,omitempty"`
+	SQSFailureFeedbackRoleARN    *string                                  `json:"sqsFailureFeedbackRoleARN,omitempty"`
+	SQSSuccessFeedbackRoleARN    *string                                  `json:"sqsSuccessFeedbackRoleARN,omitempty"`
+	SQSSuccessFeedbackSampleRate *string                                  `json:"sqsSuccessFeedbackSampleRate,omitempty"`
+	SignatureVersion             *string                                  `json:"signatureVersion,omitempty"`
 	// The list of tags to add to a new topic.
 	//
 	// To be able to tag a topic on creation, you must have the sns:CreateTopic

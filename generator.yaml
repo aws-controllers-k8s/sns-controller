@@ -8,7 +8,7 @@ operations:
   # name of the API Resource :( grrrr...
   GetEndpointAttributes:
     resource_name: PlatformEndpoint
-    operation_type: GET_ATTRIBUTES 
+    operation_type: GET_ATTRIBUTES
   SetEndpointAttributes:
     resource_name: PlatformEndpoint
     operation_type: SET_ATTRIBUTES
@@ -108,6 +108,36 @@ resources:
       Tags:
         compare:
           is_ignored: true
+      HTTPSuccessFeedbackRoleArn:
+        is_attribute: true
+      HTTPSuccessFeedbackSampleRate:
+        is_attribute: true
+      HTTPFailureFeedbackRoleArn:
+        is_attribute: true
+      FirehoseSuccessFeedbackRoleArn:
+        is_attribute: true
+      FirehoseSuccessFeedbackSampleRate:
+        is_attribute: true
+      FirehoseFailureFeedbackRoleArn:
+        is_attribute: true
+      LambdaSuccessFeedbackRoleArn:
+        is_attribute: true
+      LambdaSuccessFeedbackSampleRate:
+        is_attribute: true
+      LambdaFailureFeedbackRoleArn:
+        is_attribute: true
+      ApplicationSuccessFeedbackRoleArn:
+        is_attribute: true
+      ApplicationSuccessFeedbackSampleRate:
+        is_attribute: true
+      ApplicationFailureFeedbackRoleArn:
+        is_attribute: true
+      SQSSuccessFeedbackRoleArn:
+        is_attribute: true
+      SQSSuccessFeedbackSampleRate:
+        is_attribute: true
+      SQSFailureFeedbackRoleArn:
+        is_attribute: true
   PlatformApplication:
     is_arn_primary_key: true
     unpack_attributes_map:
