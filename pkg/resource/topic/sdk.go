@@ -89,64 +89,154 @@ func (rm *resourceManager) sdkFind(
 	// the original Kubernetes object we passed to the function
 	ko := r.ko.DeepCopy()
 
-	f0, ok := resp.Attributes["ContentBasedDeduplication"]
+	f0, ok := resp.Attributes["ApplicationFailureFeedbackRoleArn"]
 	if ok {
-		ko.Spec.ContentBasedDeduplication = &f0
+		ko.Spec.ApplicationFailureFeedbackRoleARN = &f0
+	} else {
+		ko.Spec.ApplicationFailureFeedbackRoleARN = nil
+	}
+	f1, ok := resp.Attributes["ApplicationSuccessFeedbackRoleArn"]
+	if ok {
+		ko.Spec.ApplicationSuccessFeedbackRoleARN = &f1
+	} else {
+		ko.Spec.ApplicationSuccessFeedbackRoleARN = nil
+	}
+	f2, ok := resp.Attributes["ApplicationSuccessFeedbackSampleRate"]
+	if ok {
+		ko.Spec.ApplicationSuccessFeedbackSampleRate = &f2
+	} else {
+		ko.Spec.ApplicationSuccessFeedbackSampleRate = nil
+	}
+	f3, ok := resp.Attributes["ContentBasedDeduplication"]
+	if ok {
+		ko.Spec.ContentBasedDeduplication = &f3
 	} else {
 		ko.Spec.ContentBasedDeduplication = nil
 	}
-	f1, ok := resp.Attributes["DeliveryPolicy"]
+	f4, ok := resp.Attributes["DeliveryPolicy"]
 	if ok {
-		ko.Spec.DeliveryPolicy = &f1
+		ko.Spec.DeliveryPolicy = &f4
 	} else {
 		ko.Spec.DeliveryPolicy = nil
 	}
-	f2, ok := resp.Attributes["DisplayName"]
+	f5, ok := resp.Attributes["DisplayName"]
 	if ok {
-		ko.Spec.DisplayName = &f2
+		ko.Spec.DisplayName = &f5
 	} else {
 		ko.Spec.DisplayName = nil
 	}
-	f3, ok := resp.Attributes["EffectiveDeliveryPolicy"]
+	f6, ok := resp.Attributes["EffectiveDeliveryPolicy"]
 	if ok {
-		ko.Status.EffectiveDeliveryPolicy = &f3
+		ko.Status.EffectiveDeliveryPolicy = &f6
 	} else {
 		ko.Status.EffectiveDeliveryPolicy = nil
 	}
-	f4, ok := resp.Attributes["FifoTopic"]
+	f7, ok := resp.Attributes["FifoTopic"]
 	if ok {
-		ko.Spec.FIFOTopic = &f4
+		ko.Spec.FIFOTopic = &f7
 	} else {
 		ko.Spec.FIFOTopic = nil
 	}
-	f5, ok := resp.Attributes["KmsMasterKeyId"]
+	f8, ok := resp.Attributes["FirehoseFailureFeedbackRoleArn"]
 	if ok {
-		ko.Spec.KMSMasterKeyID = &f5
+		ko.Spec.FirehoseFailureFeedbackRoleARN = &f8
+	} else {
+		ko.Spec.FirehoseFailureFeedbackRoleARN = nil
+	}
+	f9, ok := resp.Attributes["FirehoseSuccessFeedbackRoleArn"]
+	if ok {
+		ko.Spec.FirehoseSuccessFeedbackRoleARN = &f9
+	} else {
+		ko.Spec.FirehoseSuccessFeedbackRoleARN = nil
+	}
+	f10, ok := resp.Attributes["FirehoseSuccessFeedbackSampleRate"]
+	if ok {
+		ko.Spec.FirehoseSuccessFeedbackSampleRate = &f10
+	} else {
+		ko.Spec.FirehoseSuccessFeedbackSampleRate = nil
+	}
+	f11, ok := resp.Attributes["HTTPFailureFeedbackRoleArn"]
+	if ok {
+		ko.Spec.HTTPFailureFeedbackRoleARN = &f11
+	} else {
+		ko.Spec.HTTPFailureFeedbackRoleARN = nil
+	}
+	f12, ok := resp.Attributes["HTTPSuccessFeedbackRoleArn"]
+	if ok {
+		ko.Spec.HTTPSuccessFeedbackRoleARN = &f12
+	} else {
+		ko.Spec.HTTPSuccessFeedbackRoleARN = nil
+	}
+	f13, ok := resp.Attributes["HTTPSuccessFeedbackSampleRate"]
+	if ok {
+		ko.Spec.HTTPSuccessFeedbackSampleRate = &f13
+	} else {
+		ko.Spec.HTTPSuccessFeedbackSampleRate = nil
+	}
+	f14, ok := resp.Attributes["KmsMasterKeyId"]
+	if ok {
+		ko.Spec.KMSMasterKeyID = &f14
 	} else {
 		ko.Spec.KMSMasterKeyID = nil
+	}
+	f15, ok := resp.Attributes["LambdaFailureFeedbackRoleArn"]
+	if ok {
+		ko.Spec.LambdaFailureFeedbackRoleARN = &f15
+	} else {
+		ko.Spec.LambdaFailureFeedbackRoleARN = nil
+	}
+	f16, ok := resp.Attributes["LambdaSuccessFeedbackRoleArn"]
+	if ok {
+		ko.Spec.LambdaSuccessFeedbackRoleARN = &f16
+	} else {
+		ko.Spec.LambdaSuccessFeedbackRoleARN = nil
+	}
+	f17, ok := resp.Attributes["LambdaSuccessFeedbackSampleRate"]
+	if ok {
+		ko.Spec.LambdaSuccessFeedbackSampleRate = &f17
+	} else {
+		ko.Spec.LambdaSuccessFeedbackSampleRate = nil
 	}
 	if ko.Status.ACKResourceMetadata == nil {
 		ko.Status.ACKResourceMetadata = &ackv1alpha1.ResourceMetadata{}
 	}
 	tmpOwnerID := ackv1alpha1.AWSAccountID(resp.Attributes["Owner"])
 	ko.Status.ACKResourceMetadata.OwnerAccountID = &tmpOwnerID
-	f7, ok := resp.Attributes["Policy"]
+	f19, ok := resp.Attributes["Policy"]
 	if ok {
-		ko.Spec.Policy = &f7
+		ko.Spec.Policy = &f19
 	} else {
 		ko.Spec.Policy = nil
 	}
-	f8, ok := resp.Attributes["SignatureVersion"]
+	f20, ok := resp.Attributes["SQSFailureFeedbackRoleArn"]
 	if ok {
-		ko.Spec.SignatureVersion = &f8
+		ko.Spec.SQSFailureFeedbackRoleARN = &f20
+	} else {
+		ko.Spec.SQSFailureFeedbackRoleARN = nil
+	}
+	f21, ok := resp.Attributes["SQSSuccessFeedbackRoleArn"]
+	if ok {
+		ko.Spec.SQSSuccessFeedbackRoleARN = &f21
+	} else {
+		ko.Spec.SQSSuccessFeedbackRoleARN = nil
+	}
+	f22, ok := resp.Attributes["SQSSuccessFeedbackSampleRate"]
+	if ok {
+		ko.Spec.SQSSuccessFeedbackSampleRate = &f22
+	} else {
+		ko.Spec.SQSSuccessFeedbackSampleRate = nil
+	}
+	f23, ok := resp.Attributes["SignatureVersion"]
+	if ok {
+		ko.Spec.SignatureVersion = &f23
 	} else {
 		ko.Spec.SignatureVersion = nil
 	}
 	tmpARN := ackv1alpha1.AWSResourceName(resp.Attributes["TopicArn"])
 	ko.Status.ACKResourceMetadata.ARN = &tmpARN
-	f10, ok := resp.Attributes["TracingConfig"]
+	f25, ok := resp.Attributes["TracingConfig"]
 	if ok {
-		ko.Spec.TracingConfig = &f10
+		ko.Spec.TracingConfig = &f25
 	} else {
 		ko.Spec.TracingConfig = nil
 	}
@@ -246,6 +336,15 @@ func (rm *resourceManager) newCreateRequestPayload(
 	res := &svcsdk.CreateTopicInput{}
 
 	attrMap := map[string]string{}
+	if r.ko.Spec.ApplicationFailureFeedbackRoleARN != nil {
+		attrMap["ApplicationFailureFeedbackRoleArn"] = *r.ko.Spec.ApplicationFailureFeedbackRoleARN
+	}
+	if r.ko.Spec.ApplicationSuccessFeedbackRoleARN != nil {
+		attrMap["ApplicationSuccessFeedbackRoleArn"] = *r.ko.Spec.ApplicationSuccessFeedbackRoleARN
+	}
+	if r.ko.Spec.ApplicationSuccessFeedbackSampleRate != nil {
+		attrMap["ApplicationSuccessFeedbackSampleRate"] = *r.ko.Spec.ApplicationSuccessFeedbackSampleRate
+	}
 	if r.ko.Spec.ContentBasedDeduplication != nil {
 		attrMap["ContentBasedDeduplication"] = *r.ko.Spec.ContentBasedDeduplication
 	}
@@ -258,11 +357,47 @@ func (rm *resourceManager) newCreateRequestPayload(
 	if r.ko.Spec.FIFOTopic != nil {
 		attrMap["FifoTopic"] = *r.ko.Spec.FIFOTopic
 	}
+	if r.ko.Spec.FirehoseFailureFeedbackRoleARN != nil {
+		attrMap["FirehoseFailureFeedbackRoleArn"] = *r.ko.Spec.FirehoseFailureFeedbackRoleARN
+	}
+	if r.ko.Spec.FirehoseSuccessFeedbackRoleARN != nil {
+		attrMap["FirehoseSuccessFeedbackRoleArn"] = *r.ko.Spec.FirehoseSuccessFeedbackRoleARN
+	}
+	if r.ko.Spec.FirehoseSuccessFeedbackSampleRate != nil {
+		attrMap["FirehoseSuccessFeedbackSampleRate"] = *r.ko.Spec.FirehoseSuccessFeedbackSampleRate
+	}
+	if r.ko.Spec.HTTPFailureFeedbackRoleARN != nil {
+		attrMap["HTTPFailureFeedbackRoleArn"] = *r.ko.Spec.HTTPFailureFeedbackRoleARN
+	}
+	if r.ko.Spec.HTTPSuccessFeedbackRoleARN != nil {
+		attrMap["HTTPSuccessFeedbackRoleArn"] = *r.ko.Spec.HTTPSuccessFeedbackRoleARN
+	}
+	if r.ko.Spec.HTTPSuccessFeedbackSampleRate != nil {
+		attrMap["HTTPSuccessFeedbackSampleRate"] = *r.ko.Spec.HTTPSuccessFeedbackSampleRate
+	}
 	if r.ko.Spec.KMSMasterKeyID != nil {
 		attrMap["KmsMasterKeyId"] = *r.ko.Spec.KMSMasterKeyID
 	}
+	if r.ko.Spec.LambdaFailureFeedbackRoleARN != nil {
+		attrMap["LambdaFailureFeedbackRoleArn"] = *r.ko.Spec.LambdaFailureFeedbackRoleARN
+	}
+	if r.ko.Spec.LambdaSuccessFeedbackRoleARN != nil {
+		attrMap["LambdaSuccessFeedbackRoleArn"] = *r.ko.Spec.LambdaSuccessFeedbackRoleARN
+	}
+	if r.ko.Spec.LambdaSuccessFeedbackSampleRate != nil {
+		attrMap["LambdaSuccessFeedbackSampleRate"] = *r.ko.Spec.LambdaSuccessFeedbackSampleRate
+	}
 	if r.ko.Spec.Policy != nil {
 		attrMap["Policy"] = *r.ko.Spec.Policy
+	}
+	if r.ko.Spec.SQSFailureFeedbackRoleARN != nil {
+		attrMap["SQSFailureFeedbackRoleArn"] = *r.ko.Spec.SQSFailureFeedbackRoleARN
+	}
+	if r.ko.Spec.SQSSuccessFeedbackRoleARN != nil {
+		attrMap["SQSSuccessFeedbackRoleArn"] = *r.ko.Spec.SQSSuccessFeedbackRoleARN
+	}
+	if r.ko.Spec.SQSSuccessFeedbackSampleRate != nil {
+		attrMap["SQSSuccessFeedbackSampleRate"] = *r.ko.Spec.SQSSuccessFeedbackSampleRate
 	}
 	if r.ko.Spec.SignatureVersion != nil {
 		attrMap["SignatureVersion"] = *r.ko.Spec.SignatureVersion
