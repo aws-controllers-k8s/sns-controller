@@ -106,7 +106,7 @@ class TestTopic:
     def test_crud(self, simple_topic):
         ref, res = simple_topic
 
-        condition.assert_synced(ref)
+        condition.assert_ready(ref)
 
         # Before we update the Topic CR below, let's check to see that the
         # DisplayName field in the CR is still what we set in the original
@@ -180,7 +180,7 @@ class TestTopic:
     def test_crud_fifo(self, fifo_topic):
         ref, res = fifo_topic
 
-        condition.assert_synced(ref)
+        condition.assert_ready(ref)
 
         # Before we update the Topic CR below, let's check to see that the
         # DisplayName field in the CR is still what we set in the original
