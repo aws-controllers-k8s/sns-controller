@@ -231,6 +231,8 @@ resources:
       EffectiveDeliveryPolicy:
         is_attribute: true
         is_read_only: true
+      Endpoint:
+       is_immutable: true
       FilterPolicy:
         is_attribute: true
       FilterPolicyScope:
