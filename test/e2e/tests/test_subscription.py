@@ -88,7 +88,7 @@ class TestSubscription:
 
         subscription.wait_until_exists(sub_arn)
 
-        condition.assert_synced(sub_ref)
+        condition.assert_ready(sub_ref)
 
         # Before we update the Topic CR below, let's check to see that the
         # DisplayName field in the CR is still what we set in the original
