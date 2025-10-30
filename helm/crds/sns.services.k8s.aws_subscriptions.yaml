@@ -82,6 +82,9 @@ spec:
                     - For the firehose protocol, the endpoint is the ARN of an Amazon Kinesis
                       Data Firehose delivery stream.
                 type: string
+                x-kubernetes-validations:
+                - message: Value is immutable once set
+                  rule: self == oldSelf
               filterPolicy:
                 type: string
               filterPolicyScope:

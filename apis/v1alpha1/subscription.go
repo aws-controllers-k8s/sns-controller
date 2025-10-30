@@ -49,6 +49,8 @@ type SubscriptionSpec struct {
 	//
 	//   - For the firehose protocol, the endpoint is the ARN of an Amazon Kinesis
 	//     Data Firehose delivery stream.
+	//
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Value is immutable once set"
 	Endpoint          *string `json:"endpoint,omitempty"`
 	FilterPolicy      *string `json:"filterPolicy,omitempty"`
 	FilterPolicyScope *string `json:"filterPolicyScope,omitempty"`
