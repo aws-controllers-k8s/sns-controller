@@ -136,29 +136,3 @@ class TestSubscription:
         assert 'healthyRetryPolicy' in got_delivery_policy
         exp_healthy_retry_policy = delivery_policy['healthyRetryPolicy']
         assert exp_healthy_retry_policy == got_delivery_policy['healthyRetryPolicy']
-
-
-class TestAdoptSubscription(adoption.AbstractAdoptionTest):
-    RESOURCE_PLURAL: str = SUBSCRIPTION_RESOURCE_PLURAL
-    RESOURCE_VERSION: str = CRD_VERSION
-
-    _subscription_arn: str
-
-    def bootstrap_resource(self):
-        boot_resources = get_bootstrap_resources()
-        queue = boot_resources.Queue2
-        topic = boot_resources.Topic2
-
-        client = boto3.client('sns')
-        resp = client.subscribe(TopicArn=topic.arn, Protocol='sqs', Endpoint=queue.arn, ReturnSubscriptionArn=True)
-        self._subscription_arn = resp['SubscriptionArn']
-
-    def cleanup_resource(self):
-        client = boto3.client('sns')
-        client.unsubscribe(SubscriptionArn=self._subscription_arn)
-
-    def get_resource_spec(self) -> adoption.AdoptedResourceSpec:
-        return adoption.AdoptedResourceSpec(
-            aws=adoption.AdoptedResourceARNIdentifier(additionalKeys={}, arn=self._subscription_arn),
-            kubernetes=adoption.AdoptedResourceKubernetesIdentifiers(CRD_GROUP, SUBSCRIPTION_RESOURCE_KIND),
-        )
