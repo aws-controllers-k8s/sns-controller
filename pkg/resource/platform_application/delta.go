@@ -17,16 +17,15 @@ package platform_application
 
 import (
 	"bytes"
-	"reflect"
 
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	acktags "github.com/aws-controllers-k8s/runtime/pkg/tags"
+	"k8s.io/apimachinery/pkg/api/equality"
 )
 
 // Hack to avoid import errors during build...
 var (
 	_ = &bytes.Buffer{}
-	_ = &reflect.Method{}
 	_ = &acktags.Tags{}
 )
 
@@ -57,7 +56,7 @@ func newResourceDelta(
 			delta.Add("Spec.EventEndpointCreated", a.ko.Spec.EventEndpointCreated, b.ko.Spec.EventEndpointCreated)
 		}
 	}
-	if !reflect.DeepEqual(a.ko.Spec.EventEndpointCreatedRef, b.ko.Spec.EventEndpointCreatedRef) {
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.EventEndpointCreatedRef, b.ko.Spec.EventEndpointCreatedRef) {
 		delta.Add("Spec.EventEndpointCreatedRef", a.ko.Spec.EventEndpointCreatedRef, b.ko.Spec.EventEndpointCreatedRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.EventEndpointDeleted, b.ko.Spec.EventEndpointDeleted) {
@@ -67,7 +66,7 @@ func newResourceDelta(
 			delta.Add("Spec.EventEndpointDeleted", a.ko.Spec.EventEndpointDeleted, b.ko.Spec.EventEndpointDeleted)
 		}
 	}
-	if !reflect.DeepEqual(a.ko.Spec.EventEndpointDeletedRef, b.ko.Spec.EventEndpointDeletedRef) {
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.EventEndpointDeletedRef, b.ko.Spec.EventEndpointDeletedRef) {
 		delta.Add("Spec.EventEndpointDeletedRef", a.ko.Spec.EventEndpointDeletedRef, b.ko.Spec.EventEndpointDeletedRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.EventEndpointUpdated, b.ko.Spec.EventEndpointUpdated) {
@@ -77,7 +76,7 @@ func newResourceDelta(
 			delta.Add("Spec.EventEndpointUpdated", a.ko.Spec.EventEndpointUpdated, b.ko.Spec.EventEndpointUpdated)
 		}
 	}
-	if !reflect.DeepEqual(a.ko.Spec.EventEndpointUpdatedRef, b.ko.Spec.EventEndpointUpdatedRef) {
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.EventEndpointUpdatedRef, b.ko.Spec.EventEndpointUpdatedRef) {
 		delta.Add("Spec.EventEndpointUpdatedRef", a.ko.Spec.EventEndpointUpdatedRef, b.ko.Spec.EventEndpointUpdatedRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.FailureFeedbackRoleARN, b.ko.Spec.FailureFeedbackRoleARN) {
@@ -87,7 +86,7 @@ func newResourceDelta(
 			delta.Add("Spec.FailureFeedbackRoleARN", a.ko.Spec.FailureFeedbackRoleARN, b.ko.Spec.FailureFeedbackRoleARN)
 		}
 	}
-	if !reflect.DeepEqual(a.ko.Spec.FailureFeedbackRoleRef, b.ko.Spec.FailureFeedbackRoleRef) {
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.FailureFeedbackRoleRef, b.ko.Spec.FailureFeedbackRoleRef) {
 		delta.Add("Spec.FailureFeedbackRoleRef", a.ko.Spec.FailureFeedbackRoleRef, b.ko.Spec.FailureFeedbackRoleRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.Name, b.ko.Spec.Name) {
@@ -125,7 +124,7 @@ func newResourceDelta(
 			delta.Add("Spec.SuccessFeedbackRoleARN", a.ko.Spec.SuccessFeedbackRoleARN, b.ko.Spec.SuccessFeedbackRoleARN)
 		}
 	}
-	if !reflect.DeepEqual(a.ko.Spec.SuccessFeedbackRoleRef, b.ko.Spec.SuccessFeedbackRoleRef) {
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.SuccessFeedbackRoleRef, b.ko.Spec.SuccessFeedbackRoleRef) {
 		delta.Add("Spec.SuccessFeedbackRoleRef", a.ko.Spec.SuccessFeedbackRoleRef, b.ko.Spec.SuccessFeedbackRoleRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.SuccessFeedbackSampleRate, b.ko.Spec.SuccessFeedbackSampleRate) {
