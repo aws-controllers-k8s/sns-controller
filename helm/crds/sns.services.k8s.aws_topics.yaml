@@ -79,6 +79,8 @@ spec:
                 type: string
               displayName:
                 type: string
+              fifoThroughputScope:
+                type: string
               fifoTopic:
                 type: string
               firehoseFailureFeedbackRoleARN:

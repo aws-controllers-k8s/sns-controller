@@ -73,6 +73,8 @@ resources:
         is_attribute: true
       ContentBasedDeduplication:
         is_attribute: true
+      FifoThroughputScope:
+        is_attribute: true
       TracingConfig:
         is_attribute: true
       DeliveryPolicy:

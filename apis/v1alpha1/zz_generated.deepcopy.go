@@ -878,6 +878,11 @@ func (in *TopicSpec) DeepCopyInto(out *TopicSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.FIFOThroughputScope != nil {
+		in, out := &in.FIFOThroughputScope, &out.FIFOThroughputScope
+		*out = new(string)
+		**out = **in
+	}
 	if in.FIFOTopic != nil {
 		in, out := &in.FIFOTopic, &out.FIFOTopic
 		*out = new(string)

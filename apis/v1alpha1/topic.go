@@ -39,6 +39,7 @@ type TopicSpec struct {
 	DataProtectionPolicy              *string                                  `json:"dataProtectionPolicy,omitempty"`
 	DeliveryPolicy                    *string                                  `json:"deliveryPolicy,omitempty"`
 	DisplayName                       *string                                  `json:"displayName,omitempty"`
+	FIFOThroughputScope               *string                                  `json:"fifoThroughputScope,omitempty"`
 	FIFOTopic                         *string                                  `json:"fifoTopic,omitempty"`
 	FirehoseFailureFeedbackRoleARN    *string                                  `json:"firehoseFailureFeedbackRoleARN,omitempty"`
 	FirehoseSuccessFeedbackRoleARN    *string                                  `json:"firehoseSuccessFeedbackRoleARN,omitempty"`

@@ -43,6 +43,7 @@ var (
 		"KMSMasterKeyID",
 		"SignatureVersion",
 		"ContentBasedDeduplication",
+		"FIFOThroughputScope",
 	}
 )
 
@@ -176,6 +177,9 @@ func (rm *resourceManager) newSetAttributesRequestPayload(
 	case "ContentBasedDeduplication":
 		res.AttributeName = aws.String("ContentBasedDeduplication")
 		res.AttributeValue = r.ko.Spec.ContentBasedDeduplication
+	case "FIFOThroughputScope":
+		res.AttributeName = aws.String("FifoThroughputScope")
+		res.AttributeValue = r.ko.Spec.FIFOThroughputScope
 	}
 	return res
 }

@@ -16,7 +16,6 @@
 import time
 
 import pytest
-import boto3
 
 from acktest.k8s import condition
 from acktest.k8s import resource as k8s
@@ -78,6 +77,41 @@ def fifo_topic():
 
     resource_data = load_resource(
         "topic_fifo",
+        additional_replacements=replacements,
+    )
+
+    ref = k8s.CustomResourceReference(
+        CRD_GROUP, CRD_VERSION, TOPIC_RESOURCE_PLURAL,
+        topic_name, namespace="default",
+    )
+    k8s.create_custom_resource(ref, resource_data)
+    cr = k8s.wait_resource_consumed_by_controller(ref)
+
+    assert cr is not None
+    assert k8s.get_resource_exists(ref)
+
+    yield (ref, cr)
+
+    _, deleted = k8s.delete_custom_resource(
+        ref,
+        period_length=DELETE_WAIT_AFTER_SECONDS,
+    )
+    assert deleted
+
+
+@pytest.fixture(scope="module")
+def fifo_topic_throughput_scope():
+    topic_name = random_suffix_name("my-fifo-tps", 16)
+    # NOTE: FIFO Topics must have a name that ends in ".fifo"
+    topic_name += ".fifo"
+    display_name = "a fifo throughput scope topic"
+
+    replacements = REPLACEMENT_VALUES.copy()
+    replacements['TOPIC_NAME'] = topic_name
+    replacements['DISPLAY_NAME'] = display_name
+
+    resource_data = load_resource(
+        "topic_fifo_throughput_scope",
         additional_replacements=replacements,
     )
 
@@ -207,3 +241,48 @@ class TestTopic:
         assert bool(attrs['FifoTopic']) == True
         assert 'ContentBasedDeduplication' in attrs
         assert bool(attrs['ContentBasedDeduplication']) == True
+
+    def test_crud_fifo_throughput_scope(self, fifo_topic_throughput_scope):
+        ref, res = fifo_topic_throughput_scope
+
+        condition.assert_synced(ref)
+
+        cr = k8s.get_resource(ref)
+        assert cr is not None
+        assert 'spec' in cr
+        assert cr['spec']['fifoThroughputScope'] == "Topic"
+
+        assert 'status' in cr
+        assert 'ackResourceMetadata' in cr['status']
+        assert 'arn' in cr['status']['ackResourceMetadata']
+        topic_arn = cr['status']['ackResourceMetadata']['arn']
+
+        attrs = topic.get_attributes(topic_arn)
+        assert attrs is not None
+        assert 'FifoThroughputScope' in attrs
+        assert attrs['FifoThroughputScope'] == "Topic"
+
+    def test_update_fifo_throughput_scope(self, fifo_topic_throughput_scope):
+        ref, res = fifo_topic_throughput_scope
+
+        condition.assert_synced(ref)
+
+        # Update fifoThroughputScope from "Topic" to "MessageGroup"
+        # NOTE: AWS only allows Topic -> MessageGroup, not the reverse.
+        updates = {
+            "spec": {"fifoThroughputScope": "MessageGroup"},
+        }
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
+
+        # Verify AWS reflects the updated value
+        cr = k8s.get_resource(ref)
+        assert cr is not None
+        topic_arn = cr['status']['ackResourceMetadata']['arn']
+
+        attrs = topic.get_attributes(topic_arn)
+        assert attrs is not None
+        assert attrs['FifoThroughputScope'] == "MessageGroup"
+
+        # Verify CR spec reflects the updated value
+        assert cr['spec']['fifoThroughputScope'] == "MessageGroup"

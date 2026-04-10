@@ -92,6 +92,13 @@ func newResourceDelta(
 			delta.Add("Spec.DisplayName", a.ko.Spec.DisplayName, b.ko.Spec.DisplayName)
 		}
 	}
+	if ackcompare.HasNilDifference(a.ko.Spec.FIFOThroughputScope, b.ko.Spec.FIFOThroughputScope) {
+		delta.Add("Spec.FIFOThroughputScope", a.ko.Spec.FIFOThroughputScope, b.ko.Spec.FIFOThroughputScope)
+	} else if a.ko.Spec.FIFOThroughputScope != nil && b.ko.Spec.FIFOThroughputScope != nil {
+		if *a.ko.Spec.FIFOThroughputScope != *b.ko.Spec.FIFOThroughputScope {
+			delta.Add("Spec.FIFOThroughputScope", a.ko.Spec.FIFOThroughputScope, b.ko.Spec.FIFOThroughputScope)
+		}
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.FIFOTopic, b.ko.Spec.FIFOTopic) {
 		delta.Add("Spec.FIFOTopic", a.ko.Spec.FIFOTopic, b.ko.Spec.FIFOTopic)
 	} else if a.ko.Spec.FIFOTopic != nil && b.ko.Spec.FIFOTopic != nil {
