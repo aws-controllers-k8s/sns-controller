@@ -82,6 +82,7 @@ resources:
       DisplayName:
         is_attribute: true
       Policy:
+        is_iam_policy: true
         is_attribute: true
         type: string
         references:
