@@ -81,6 +81,8 @@ resources:
         is_attribute: true
       DisplayName:
         is_attribute: true
+        compare:
+          nil_equals_zero_value: true
       Policy:
         is_iam_policy: true
         is_attribute: true

@@ -12,6 +12,7 @@ require (
 	github.com/aws/smithy-go v1.22.2
 	github.com/go-logr/logr v1.4.3
 	github.com/spf13/pflag v1.0.9
+	github.com/stretchr/testify v1.11.1
 	k8s.io/api v0.35.0
 	k8s.io/apimachinery v0.35.0
 	k8s.io/client-go v0.35.0
@@ -89,3 +90,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
+
+replace github.com/aws-controllers-k8s/runtime => ../runtime
