@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/aws-controllers-k8s/iam-controller v1.1.1
 	github.com/aws-controllers-k8s/kms-controller v1.0.2
-	github.com/aws-controllers-k8s/runtime v0.58.0
+	github.com/aws-controllers-k8s/runtime v0.58.2-0.20260508231111-2345cb4c58b1
 	github.com/aws/aws-sdk-go v1.49.0
 	github.com/aws/aws-sdk-go-v2 v1.34.0
 	github.com/aws/aws-sdk-go-v2/service/sns v1.33.15
@@ -90,5 +90,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
-
-replace github.com/aws-controllers-k8s/runtime => ../runtime
