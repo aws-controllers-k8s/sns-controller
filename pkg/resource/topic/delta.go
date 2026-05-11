@@ -86,7 +86,9 @@ func newResourceDelta(
 		}
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.DisplayName, b.ko.Spec.DisplayName) {
-		delta.Add("Spec.DisplayName", a.ko.Spec.DisplayName, b.ko.Spec.DisplayName)
+		if !ackcompare.IsNilEqualsZero(a.ko.Spec.DisplayName, b.ko.Spec.DisplayName) {
+			delta.Add("Spec.DisplayName", a.ko.Spec.DisplayName, b.ko.Spec.DisplayName)
+		}
 	} else if a.ko.Spec.DisplayName != nil && b.ko.Spec.DisplayName != nil {
 		if *a.ko.Spec.DisplayName != *b.ko.Spec.DisplayName {
 			delta.Add("Spec.DisplayName", a.ko.Spec.DisplayName, b.ko.Spec.DisplayName)

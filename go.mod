@@ -5,13 +5,14 @@ go 1.25.0
 require (
 	github.com/aws-controllers-k8s/iam-controller v1.1.1
 	github.com/aws-controllers-k8s/kms-controller v1.0.2
-	github.com/aws-controllers-k8s/runtime v0.58.0
+	github.com/aws-controllers-k8s/runtime v0.58.2-0.20260508231111-2345cb4c58b1
 	github.com/aws/aws-sdk-go v1.49.0
 	github.com/aws/aws-sdk-go-v2 v1.34.0
 	github.com/aws/aws-sdk-go-v2/service/sns v1.33.15
 	github.com/aws/smithy-go v1.22.2
 	github.com/go-logr/logr v1.4.3
 	github.com/spf13/pflag v1.0.9
+	github.com/stretchr/testify v1.11.1
 	k8s.io/api v0.35.0
 	k8s.io/apimachinery v0.35.0
 	k8s.io/client-go v0.35.0
