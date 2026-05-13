@@ -240,6 +240,7 @@ resources:
        is_immutable: true
       FilterPolicy:
         is_attribute: true
+        is_document: true
       FilterPolicyScope:
         is_attribute: true
       Owner:
