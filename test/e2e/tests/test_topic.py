@@ -337,21 +337,24 @@ class TestTopic:
         assert 'ArchivePolicy' in attrs
 
         # IMPORTANT: compare semantically, not as raw strings. SNS may return
-        # the JSON with differen whitespace/key ordering than we submitted.
+        # the JSON with different whitespace/key ordering than we submitted.
         assert json.loads(attrs['ArchivePolicy']) == {"MessageRetentionPeriod": "30"}
 
     def test_update_archive_policy(self, fifo_archive_policy_topic):
-          ref, res = fifo_archive_policy_topic
-          condition.assert_synced(ref)
+        # NOTE: this test shares the module-scoped fifo_archive_policy_topic
+        # fixture with test_crud_fifo_archive_policy and intentionally runs
+        # after it (pytest preserves source order), mutating retention 30 -> 60.
+        ref, res = fifo_archive_policy_topic
+        condition.assert_synced(ref)
 
-          updates = {
-              "spec": {"archivePolicy": '{"MessageRetentionPeriod":"60"}'},
-          }
-          k8s.patch_custom_resource(ref, updates)
-          time.sleep(MODIFY_WAIT_AFTER_SECONDS)
+        updates = {
+            "spec": {"archivePolicy": '{"MessageRetentionPeriod":"60"}'},
+        }
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
 
-          cr = k8s.get_resource(ref)
-          topic_arn = cr['status']['ackResourceMetadata']['arn']
-          attrs = topic.get_attributes(topic_arn)
-          assert attrs is not None
-          assert json.loads(attrs['ArchivePolicy']) == {"MessageRetentionPeriod": "60"}
+        cr = k8s.get_resource(ref)
+        topic_arn = cr['status']['ackResourceMetadata']['arn']
+        attrs = topic.get_attributes(topic_arn)
+        assert attrs is not None
+        assert json.loads(attrs['ArchivePolicy']) == {"MessageRetentionPeriod": "60"}

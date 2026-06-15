@@ -114,3 +114,100 @@ func TestNewResourceDelta_DisplayName_NilEqualsZeroValue(t *testing.T) {
 		})
 	}
 }
+
+func TestNewResourceDelta_ArchivePolicy_SemanticJSON(t *testing.T) {
+	tests := []struct {
+		name            string
+		desiredPolicy   *string
+		latestPolicy    *string
+		expectDifferent bool
+	}{
+		{
+			name:            "both nil - no drift",
+			desiredPolicy:   nil,
+			latestPolicy:    nil,
+			expectDifferent: false,
+		},
+		{
+			name:            "desired set, latest nil - drift detected",
+			desiredPolicy:   strPtr(`{"MessageRetentionPeriod":"30"}`),
+			latestPolicy:    nil,
+			expectDifferent: true,
+		},
+		{
+			name:            "identical string - no drift",
+			desiredPolicy:   strPtr(`{"MessageRetentionPeriod":"30"}`),
+			latestPolicy:    strPtr(`{"MessageRetentionPeriod":"30"}`),
+			expectDifferent: false,
+		},
+		{
+			// The key perpetual-reconcile scenario: SNS echoes the policy back
+			// with extra whitespace. Must NOT be treated as drift.
+			name:            "same JSON, different whitespace - no drift",
+			desiredPolicy:   strPtr(`{"MessageRetentionPeriod":"30"}`),
+			latestPolicy:    strPtr(`{ "MessageRetentionPeriod": "30" }`),
+			expectDifferent: false,
+		},
+		{
+			name:            "same JSON, different key ordering - no drift",
+			desiredPolicy:   strPtr(`{"a":"1","b":"2"}`),
+			latestPolicy:    strPtr(`{"b":"2","a":"1"}`),
+			expectDifferent: false,
+		},
+		{
+			name:            "semantically different JSON - drift detected",
+			desiredPolicy:   strPtr(`{"MessageRetentionPeriod":"30"}`),
+			latestPolicy:    strPtr(`{"MessageRetentionPeriod":"60"}`),
+			expectDifferent: true,
+		},
+		{
+			name:            "invalid JSON, identical strings - no drift",
+			desiredPolicy:   strPtr("not-json"),
+			latestPolicy:    strPtr("not-json"),
+			expectDifferent: false,
+		},
+		{
+			name:            "invalid JSON, different strings - drift detected",
+			desiredPolicy:   strPtr("not-json-a"),
+			latestPolicy:    strPtr("not-json-b"),
+			expectDifferent: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			require := require.New(t)
+			assert := assert.New(t)
+
+			desired := &resource{
+				ko: &svcapitypes.Topic{
+					Spec: svcapitypes.TopicSpec{
+						ArchivePolicy: tc.desiredPolicy,
+					},
+				},
+			}
+			latest := &resource{
+				ko: &svcapitypes.Topic{
+					Spec: svcapitypes.TopicSpec{
+						ArchivePolicy: tc.latestPolicy,
+					},
+				},
+			}
+
+			delta := newResourceDelta(desired, latest)
+			require.NotNil(delta)
+
+			if tc.expectDifferent {
+				assert.True(
+					delta.DifferentAt("Spec.ArchivePolicy"),
+					"expected drift at Spec.ArchivePolicy but none detected",
+				)
+			} else {
+				assert.False(
+					delta.DifferentAt("Spec.ArchivePolicy"),
+					"expected no drift at Spec.ArchivePolicy but drift was detected",
+				)
+			}
+		})
+	}
+}

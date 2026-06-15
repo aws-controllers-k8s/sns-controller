@@ -56,7 +56,9 @@ resources:
         - InvalidParameter
     hooks:
       delta_pre_compare:
-        code: compareTags(delta, a, b)
+        code: |
+          compareTags(delta, a, b)
+          compareArchivePolicy(delta, a, b)
       sdk_delete_pre_build_request:
         template_path: hooks/topic/sdk_delete_pre_build_request.go.tpl
       sdk_get_attributes_pre_set_output:
@@ -84,6 +86,13 @@ resources:
       ArchivePolicy:
         is_attribute: true
         type: string
+        # ArchivePolicy is a JSON document. SNS may return it with different
+        # whitespace/key ordering than submitted, so the default raw-string
+        # delta compare would loop forever. We ignore the generated compare
+        # and compare semantically in the delta_pre_compare hook
+        # (compareArchivePolicy).
+        compare:
+          is_ignored: true
       DisplayName:
         is_attribute: true
         compare:
