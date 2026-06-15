@@ -858,6 +858,11 @@ func (in *TopicSpec) DeepCopyInto(out *TopicSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ArchivePolicy != nil {
+		in, out := &in.ArchivePolicy, &out.ArchivePolicy
+		*out = new(string)
+		**out = **in
+	}
 	if in.ContentBasedDeduplication != nil {
 		in, out := &in.ContentBasedDeduplication, &out.ContentBasedDeduplication
 		*out = new(string)

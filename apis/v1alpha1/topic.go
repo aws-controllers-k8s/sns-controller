@@ -28,6 +28,7 @@ type TopicSpec struct {
 	ApplicationFailureFeedbackRoleARN    *string `json:"applicationFailureFeedbackRoleARN,omitempty"`
 	ApplicationSuccessFeedbackRoleARN    *string `json:"applicationSuccessFeedbackRoleARN,omitempty"`
 	ApplicationSuccessFeedbackSampleRate *string `json:"applicationSuccessFeedbackSampleRate,omitempty"`
+	ArchivePolicy                        *string `json:"archivePolicy,omitempty"`
 	ContentBasedDeduplication            *string `json:"contentBasedDeduplication,omitempty"`
 	// The body of the policy document you want to use for this topic.
 	//

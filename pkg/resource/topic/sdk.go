@@ -107,99 +107,105 @@ func (rm *resourceManager) sdkFind(
 	} else {
 		ko.Spec.ApplicationSuccessFeedbackSampleRate = nil
 	}
-	f3, ok := resp.Attributes["ContentBasedDeduplication"]
+	f3, ok := resp.Attributes["ArchivePolicy"]
 	if ok {
-		ko.Spec.ContentBasedDeduplication = &f3
+		ko.Spec.ArchivePolicy = &f3
+	} else {
+		ko.Spec.ArchivePolicy = nil
+	}
+	f4, ok := resp.Attributes["ContentBasedDeduplication"]
+	if ok {
+		ko.Spec.ContentBasedDeduplication = &f4
 	} else {
 		ko.Spec.ContentBasedDeduplication = nil
 	}
-	f4, ok := resp.Attributes["DeliveryPolicy"]
+	f5, ok := resp.Attributes["DeliveryPolicy"]
 	if ok {
-		ko.Spec.DeliveryPolicy = &f4
+		ko.Spec.DeliveryPolicy = &f5
 	} else {
 		ko.Spec.DeliveryPolicy = nil
 	}
-	f5, ok := resp.Attributes["DisplayName"]
+	f6, ok := resp.Attributes["DisplayName"]
 	if ok {
-		ko.Spec.DisplayName = &f5
+		ko.Spec.DisplayName = &f6
 	} else {
 		ko.Spec.DisplayName = nil
 	}
-	f6, ok := resp.Attributes["EffectiveDeliveryPolicy"]
+	f7, ok := resp.Attributes["EffectiveDeliveryPolicy"]
 	if ok {
-		ko.Status.EffectiveDeliveryPolicy = &f6
+		ko.Status.EffectiveDeliveryPolicy = &f7
 	} else {
 		ko.Status.EffectiveDeliveryPolicy = nil
 	}
-	f7, ok := resp.Attributes["FifoThroughputScope"]
+	f8, ok := resp.Attributes["FifoThroughputScope"]
 	if ok {
-		ko.Spec.FIFOThroughputScope = &f7
+		ko.Spec.FIFOThroughputScope = &f8
 	} else {
 		ko.Spec.FIFOThroughputScope = nil
 	}
-	f8, ok := resp.Attributes["FifoTopic"]
+	f9, ok := resp.Attributes["FifoTopic"]
 	if ok {
-		ko.Spec.FIFOTopic = &f8
+		ko.Spec.FIFOTopic = &f9
 	} else {
 		ko.Spec.FIFOTopic = nil
 	}
-	f9, ok := resp.Attributes["FirehoseFailureFeedbackRoleArn"]
+	f10, ok := resp.Attributes["FirehoseFailureFeedbackRoleArn"]
 	if ok {
-		ko.Spec.FirehoseFailureFeedbackRoleARN = &f9
+		ko.Spec.FirehoseFailureFeedbackRoleARN = &f10
 	} else {
 		ko.Spec.FirehoseFailureFeedbackRoleARN = nil
 	}
-	f10, ok := resp.Attributes["FirehoseSuccessFeedbackRoleArn"]
+	f11, ok := resp.Attributes["FirehoseSuccessFeedbackRoleArn"]
 	if ok {
-		ko.Spec.FirehoseSuccessFeedbackRoleARN = &f10
+		ko.Spec.FirehoseSuccessFeedbackRoleARN = &f11
 	} else {
 		ko.Spec.FirehoseSuccessFeedbackRoleARN = nil
 	}
-	f11, ok := resp.Attributes["FirehoseSuccessFeedbackSampleRate"]
+	f12, ok := resp.Attributes["FirehoseSuccessFeedbackSampleRate"]
 	if ok {
-		ko.Spec.FirehoseSuccessFeedbackSampleRate = &f11
+		ko.Spec.FirehoseSuccessFeedbackSampleRate = &f12
 	} else {
 		ko.Spec.FirehoseSuccessFeedbackSampleRate = nil
 	}
-	f12, ok := resp.Attributes["HTTPFailureFeedbackRoleArn"]
+	f13, ok := resp.Attributes["HTTPFailureFeedbackRoleArn"]
 	if ok {
-		ko.Spec.HTTPFailureFeedbackRoleARN = &f12
+		ko.Spec.HTTPFailureFeedbackRoleARN = &f13
 	} else {
 		ko.Spec.HTTPFailureFeedbackRoleARN = nil
 	}
-	f13, ok := resp.Attributes["HTTPSuccessFeedbackRoleArn"]
+	f14, ok := resp.Attributes["HTTPSuccessFeedbackRoleArn"]
 	if ok {
-		ko.Spec.HTTPSuccessFeedbackRoleARN = &f13
+		ko.Spec.HTTPSuccessFeedbackRoleARN = &f14
 	} else {
 		ko.Spec.HTTPSuccessFeedbackRoleARN = nil
 	}
-	f14, ok := resp.Attributes["HTTPSuccessFeedbackSampleRate"]
+	f15, ok := resp.Attributes["HTTPSuccessFeedbackSampleRate"]
 	if ok {
-		ko.Spec.HTTPSuccessFeedbackSampleRate = &f14
+		ko.Spec.HTTPSuccessFeedbackSampleRate = &f15
 	} else {
 		ko.Spec.HTTPSuccessFeedbackSampleRate = nil
 	}
-	f15, ok := resp.Attributes["KmsMasterKeyId"]
+	f16, ok := resp.Attributes["KmsMasterKeyId"]
 	if ok {
-		ko.Spec.KMSMasterKeyID = &f15
+		ko.Spec.KMSMasterKeyID = &f16
 	} else {
 		ko.Spec.KMSMasterKeyID = nil
 	}
-	f16, ok := resp.Attributes["LambdaFailureFeedbackRoleArn"]
+	f17, ok := resp.Attributes["LambdaFailureFeedbackRoleArn"]
 	if ok {
-		ko.Spec.LambdaFailureFeedbackRoleARN = &f16
+		ko.Spec.LambdaFailureFeedbackRoleARN = &f17
 	} else {
 		ko.Spec.LambdaFailureFeedbackRoleARN = nil
 	}
-	f17, ok := resp.Attributes["LambdaSuccessFeedbackRoleArn"]
+	f18, ok := resp.Attributes["LambdaSuccessFeedbackRoleArn"]
 	if ok {
-		ko.Spec.LambdaSuccessFeedbackRoleARN = &f17
+		ko.Spec.LambdaSuccessFeedbackRoleARN = &f18
 	} else {
 		ko.Spec.LambdaSuccessFeedbackRoleARN = nil
 	}
-	f18, ok := resp.Attributes["LambdaSuccessFeedbackSampleRate"]
+	f19, ok := resp.Attributes["LambdaSuccessFeedbackSampleRate"]
 	if ok {
-		ko.Spec.LambdaSuccessFeedbackSampleRate = &f18
+		ko.Spec.LambdaSuccessFeedbackSampleRate = &f19
 	} else {
 		ko.Spec.LambdaSuccessFeedbackSampleRate = nil
 	}
@@ -208,41 +214,41 @@ func (rm *resourceManager) sdkFind(
 	}
 	tmpOwnerID := ackv1alpha1.AWSAccountID(resp.Attributes["Owner"])
 	ko.Status.ACKResourceMetadata.OwnerAccountID = &tmpOwnerID
-	f20, ok := resp.Attributes["Policy"]
+	f21, ok := resp.Attributes["Policy"]
 	if ok {
-		ko.Spec.Policy = &f20
+		ko.Spec.Policy = &f21
 	} else {
 		ko.Spec.Policy = nil
 	}
-	f21, ok := resp.Attributes["SQSFailureFeedbackRoleArn"]
+	f22, ok := resp.Attributes["SQSFailureFeedbackRoleArn"]
 	if ok {
-		ko.Spec.SQSFailureFeedbackRoleARN = &f21
+		ko.Spec.SQSFailureFeedbackRoleARN = &f22
 	} else {
 		ko.Spec.SQSFailureFeedbackRoleARN = nil
 	}
-	f22, ok := resp.Attributes["SQSSuccessFeedbackRoleArn"]
+	f23, ok := resp.Attributes["SQSSuccessFeedbackRoleArn"]
 	if ok {
-		ko.Spec.SQSSuccessFeedbackRoleARN = &f22
+		ko.Spec.SQSSuccessFeedbackRoleARN = &f23
 	} else {
 		ko.Spec.SQSSuccessFeedbackRoleARN = nil
 	}
-	f23, ok := resp.Attributes["SQSSuccessFeedbackSampleRate"]
+	f24, ok := resp.Attributes["SQSSuccessFeedbackSampleRate"]
 	if ok {
-		ko.Spec.SQSSuccessFeedbackSampleRate = &f23
+		ko.Spec.SQSSuccessFeedbackSampleRate = &f24
 	} else {
 		ko.Spec.SQSSuccessFeedbackSampleRate = nil
 	}
-	f24, ok := resp.Attributes["SignatureVersion"]
+	f25, ok := resp.Attributes["SignatureVersion"]
 	if ok {
-		ko.Spec.SignatureVersion = &f24
+		ko.Spec.SignatureVersion = &f25
 	} else {
 		ko.Spec.SignatureVersion = nil
 	}
 	tmpARN := ackv1alpha1.AWSResourceName(resp.Attributes["TopicArn"])
 	ko.Status.ACKResourceMetadata.ARN = &tmpARN
-	f26, ok := resp.Attributes["TracingConfig"]
+	f27, ok := resp.Attributes["TracingConfig"]
 	if ok {
-		ko.Spec.TracingConfig = &f26
+		ko.Spec.TracingConfig = &f27
 	} else {
 		ko.Spec.TracingConfig = nil
 	}
@@ -350,6 +356,9 @@ func (rm *resourceManager) newCreateRequestPayload(
 	}
 	if r.ko.Spec.ApplicationSuccessFeedbackSampleRate != nil {
 		attrMap["ApplicationSuccessFeedbackSampleRate"] = *r.ko.Spec.ApplicationSuccessFeedbackSampleRate
+	}
+	if r.ko.Spec.ArchivePolicy != nil {
+		attrMap["ArchivePolicy"] = *r.ko.Spec.ArchivePolicy
 	}
 	if r.ko.Spec.ContentBasedDeduplication != nil {
 		attrMap["ContentBasedDeduplication"] = *r.ko.Spec.ContentBasedDeduplication
@@ -462,6 +471,25 @@ func (rm *resourceManager) sdkDelete(
 	defer func() {
 		exit(err)
 	}()
+	// SNS does not allow deleting a FIFO topic that still has an active
+	// message archive policy: DeleteTopic returns
+	// "InvalidState: Cannot delete a topic with an ArchivePolicy".
+	// The archive policy must be deactivated first by setting the
+	// ArchivePolicy attribute to an empty value. Deactivating the policy
+	// also deletes any archived messages, which is the expected behavior
+	// when the topic itself is being deleted.
+	if r.ko.Spec.ArchivePolicy != nil {
+		_, err = rm.sdkapi.SetTopicAttributes(ctx, &svcsdk.SetTopicAttributesInput{
+			TopicArn:       (*string)(r.ko.Status.ACKResourceMetadata.ARN),
+			AttributeName:  aws.String("ArchivePolicy"),
+			AttributeValue: aws.String("{}"),
+		})
+		rm.metrics.RecordAPICall("SET_ATTRIBUTES", "SetTopicAttributes", err)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	input, err := rm.newDeleteRequestPayload(r)
 	if err != nil {
 		return nil, err

@@ -36,6 +36,7 @@ var (
 	// settableAttributesNames is a list of normalized CRD field names that may
 	// be set in a SetTopicAttribute API call
 	settableAttributeNames = []string{
+		"ArchivePolicy",
 		"DeliveryPolicy",
 		"DisplayName",
 		"Policy",
@@ -156,6 +157,9 @@ func (rm *resourceManager) newSetAttributesRequestPayload(
 	res := &svcsdk.SetTopicAttributesInput{}
 	res.TopicArn = aws.String(string(*r.ko.Status.ACKResourceMetadata.ARN))
 	switch crdFieldName {
+	case "ArchivePolicy":
+		res.AttributeName = aws.String("ArchivePolicy")
+		res.AttributeValue = r.ko.Spec.ArchivePolicy
 	case "DeliveryPolicy":
 		res.AttributeName = aws.String("DeliveryPolicy")
 		res.AttributeValue = r.ko.Spec.DeliveryPolicy

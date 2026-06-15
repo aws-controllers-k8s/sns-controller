@@ -63,6 +63,8 @@ spec:
                 type: string
               applicationSuccessFeedbackSampleRate:
                 type: string
+              archivePolicy:
+                type: string
               contentBasedDeduplication:
                 type: string
               dataProtectionPolicy:
