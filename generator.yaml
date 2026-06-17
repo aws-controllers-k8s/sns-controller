@@ -233,6 +233,7 @@ resources:
         is_read_only: true
       DeliveryPolicy:
         is_attribute: true
+        is_document: true
       EffectiveDeliveryPolicy:
         is_attribute: true
         is_read_only: true
@@ -254,6 +255,7 @@ resources:
         is_attribute: true
       RedrivePolicy:
         is_attribute: true
+        is_document: true
       SubscriptionRoleArn:
         is_attribute: true
       TopicArn:
