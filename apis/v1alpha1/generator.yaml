@@ -79,6 +79,7 @@ resources:
         is_attribute: true
       DeliveryPolicy:
         is_attribute: true
+        is_document: true
       DisplayName:
         is_attribute: true
         compare:
