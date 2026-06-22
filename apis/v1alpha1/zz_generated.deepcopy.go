@@ -202,6 +202,11 @@ func (in *PlatformApplicationSpec) DeepCopyInto(out *PlatformApplicationSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.EventDeliveryFailureRef != nil {
+		in, out := &in.EventDeliveryFailureRef, &out.EventDeliveryFailureRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.EventEndpointCreated != nil {
 		in, out := &in.EventEndpointCreated, &out.EventEndpointCreated
 		*out = new(string)
@@ -433,6 +438,11 @@ func (in *PlatformEndpointSpec) DeepCopyInto(out *PlatformEndpointSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.PlatformApplicationRef != nil {
+		in, out := &in.PlatformApplicationRef, &out.PlatformApplicationRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Token != nil {
 		in, out := &in.Token, &out.Token
 		*out = new(string)
@@ -643,6 +653,11 @@ func (in *SubscriptionSpec) DeepCopyInto(out *SubscriptionSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.SubscriptionRoleRef != nil {
+		in, out := &in.SubscriptionRoleRef, &out.SubscriptionRoleRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.TopicARN != nil {
 		in, out := &in.TopicARN, &out.TopicARN
 		*out = new(string)
@@ -848,10 +863,20 @@ func (in *TopicSpec) DeepCopyInto(out *TopicSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ApplicationFailureFeedbackRoleRef != nil {
+		in, out := &in.ApplicationFailureFeedbackRoleRef, &out.ApplicationFailureFeedbackRoleRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.ApplicationSuccessFeedbackRoleARN != nil {
 		in, out := &in.ApplicationSuccessFeedbackRoleARN, &out.ApplicationSuccessFeedbackRoleARN
 		*out = new(string)
 		**out = **in
+	}
+	if in.ApplicationSuccessFeedbackRoleRef != nil {
+		in, out := &in.ApplicationSuccessFeedbackRoleRef, &out.ApplicationSuccessFeedbackRoleRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.ApplicationSuccessFeedbackSampleRate != nil {
 		in, out := &in.ApplicationSuccessFeedbackSampleRate, &out.ApplicationSuccessFeedbackSampleRate
@@ -893,10 +918,20 @@ func (in *TopicSpec) DeepCopyInto(out *TopicSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.FirehoseFailureFeedbackRoleRef != nil {
+		in, out := &in.FirehoseFailureFeedbackRoleRef, &out.FirehoseFailureFeedbackRoleRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.FirehoseSuccessFeedbackRoleARN != nil {
 		in, out := &in.FirehoseSuccessFeedbackRoleARN, &out.FirehoseSuccessFeedbackRoleARN
 		*out = new(string)
 		**out = **in
+	}
+	if in.FirehoseSuccessFeedbackRoleRef != nil {
+		in, out := &in.FirehoseSuccessFeedbackRoleRef, &out.FirehoseSuccessFeedbackRoleRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.FirehoseSuccessFeedbackSampleRate != nil {
 		in, out := &in.FirehoseSuccessFeedbackSampleRate, &out.FirehoseSuccessFeedbackSampleRate
@@ -908,10 +943,20 @@ func (in *TopicSpec) DeepCopyInto(out *TopicSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.HTTPFailureFeedbackRoleRef != nil {
+		in, out := &in.HTTPFailureFeedbackRoleRef, &out.HTTPFailureFeedbackRoleRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.HTTPSuccessFeedbackRoleARN != nil {
 		in, out := &in.HTTPSuccessFeedbackRoleARN, &out.HTTPSuccessFeedbackRoleARN
 		*out = new(string)
 		**out = **in
+	}
+	if in.HTTPSuccessFeedbackRoleRef != nil {
+		in, out := &in.HTTPSuccessFeedbackRoleRef, &out.HTTPSuccessFeedbackRoleRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.HTTPSuccessFeedbackSampleRate != nil {
 		in, out := &in.HTTPSuccessFeedbackSampleRate, &out.HTTPSuccessFeedbackSampleRate
@@ -933,10 +978,20 @@ func (in *TopicSpec) DeepCopyInto(out *TopicSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.LambdaFailureFeedbackRoleRef != nil {
+		in, out := &in.LambdaFailureFeedbackRoleRef, &out.LambdaFailureFeedbackRoleRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.LambdaSuccessFeedbackRoleARN != nil {
 		in, out := &in.LambdaSuccessFeedbackRoleARN, &out.LambdaSuccessFeedbackRoleARN
 		*out = new(string)
 		**out = **in
+	}
+	if in.LambdaSuccessFeedbackRoleRef != nil {
+		in, out := &in.LambdaSuccessFeedbackRoleRef, &out.LambdaSuccessFeedbackRoleRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.LambdaSuccessFeedbackSampleRate != nil {
 		in, out := &in.LambdaSuccessFeedbackSampleRate, &out.LambdaSuccessFeedbackSampleRate
@@ -963,10 +1018,20 @@ func (in *TopicSpec) DeepCopyInto(out *TopicSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.SQSFailureFeedbackRoleRef != nil {
+		in, out := &in.SQSFailureFeedbackRoleRef, &out.SQSFailureFeedbackRoleRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.SQSSuccessFeedbackRoleARN != nil {
 		in, out := &in.SQSSuccessFeedbackRoleARN, &out.SQSSuccessFeedbackRoleARN
 		*out = new(string)
 		**out = **in
+	}
+	if in.SQSSuccessFeedbackRoleRef != nil {
+		in, out := &in.SQSSuccessFeedbackRoleRef, &out.SQSSuccessFeedbackRoleRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.SQSSuccessFeedbackSampleRate != nil {
 		in, out := &in.SQSSuccessFeedbackSampleRate, &out.SQSSuccessFeedbackSampleRate

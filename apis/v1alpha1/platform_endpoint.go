@@ -29,8 +29,8 @@ type PlatformEndpointSpec struct {
 	Enabled        *string `json:"enabled,omitempty"`
 	// PlatformApplicationArn returned from CreatePlatformApplication is used to
 	// create a an endpoint.
-	// +kubebuilder:validation:Required
-	PlatformApplicationARN *string `json:"platformApplicationARN"`
+	PlatformApplicationARN *string                                  `json:"platformApplicationARN,omitempty"`
+	PlatformApplicationRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"platformApplicationRef,omitempty"`
 	// Unique identifier created by the notification service for an app on a device.
 	// The specific name for Token will vary, depending on which notification service
 	// is being used. For example, when using APNS as the notification service,

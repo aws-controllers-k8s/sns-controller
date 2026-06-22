@@ -27,16 +27,47 @@ import (
 	kmsapitypes "github.com/aws-controllers-k8s/kms-controller/apis/v1alpha1"
 	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
 	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
+	ackrt "github.com/aws-controllers-k8s/runtime/pkg/runtime"
 	acktypes "github.com/aws-controllers-k8s/runtime/pkg/types"
 
 	svcapitypes "github.com/aws-controllers-k8s/sns-controller/apis/v1alpha1"
 )
 
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
+
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
+
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
+
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
+
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
+
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
+
 // +kubebuilder:rbac:groups=kms.services.k8s.aws,resources=keys,verbs=get;list
 // +kubebuilder:rbac:groups=kms.services.k8s.aws,resources=keys/status,verbs=get;list
 
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
+
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
+
 // +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=policies,verbs=get;list
 // +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=policies/status,verbs=get;list
+
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
+
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
 
 // ClearResolvedReferences removes any reference values that were made
 // concrete in the spec. It returns a copy of the input AWSResource which
@@ -45,12 +76,52 @@ import (
 func (rm *resourceManager) ClearResolvedReferences(res acktypes.AWSResource) acktypes.AWSResource {
 	ko := rm.concreteResource(res).ko.DeepCopy()
 
+	if ko.Spec.ApplicationFailureFeedbackRoleRef != nil {
+		ko.Spec.ApplicationFailureFeedbackRoleARN = nil
+	}
+
+	if ko.Spec.ApplicationSuccessFeedbackRoleRef != nil {
+		ko.Spec.ApplicationSuccessFeedbackRoleARN = nil
+	}
+
+	if ko.Spec.FirehoseFailureFeedbackRoleRef != nil {
+		ko.Spec.FirehoseFailureFeedbackRoleARN = nil
+	}
+
+	if ko.Spec.FirehoseSuccessFeedbackRoleRef != nil {
+		ko.Spec.FirehoseSuccessFeedbackRoleARN = nil
+	}
+
+	if ko.Spec.HTTPFailureFeedbackRoleRef != nil {
+		ko.Spec.HTTPFailureFeedbackRoleARN = nil
+	}
+
+	if ko.Spec.HTTPSuccessFeedbackRoleRef != nil {
+		ko.Spec.HTTPSuccessFeedbackRoleARN = nil
+	}
+
 	if ko.Spec.KMSMasterKeyRef != nil {
 		ko.Spec.KMSMasterKeyID = nil
 	}
 
+	if ko.Spec.LambdaFailureFeedbackRoleRef != nil {
+		ko.Spec.LambdaFailureFeedbackRoleARN = nil
+	}
+
+	if ko.Spec.LambdaSuccessFeedbackRoleRef != nil {
+		ko.Spec.LambdaSuccessFeedbackRoleARN = nil
+	}
+
 	if ko.Spec.PolicyRef != nil {
 		ko.Spec.Policy = nil
+	}
+
+	if ko.Spec.SQSFailureFeedbackRoleRef != nil {
+		ko.Spec.SQSFailureFeedbackRoleARN = nil
+	}
+
+	if ko.Spec.SQSSuccessFeedbackRoleRef != nil {
+		ko.Spec.SQSSuccessFeedbackRoleARN = nil
 	}
 
 	return &resource{ko}
@@ -72,13 +143,73 @@ func (rm *resourceManager) ResolveReferences(
 
 	resourceHasReferences := false
 	err := validateReferenceFields(ko)
+	if fieldHasReferences, err := rm.resolveReferenceForApplicationFailureFeedbackRoleARN(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
+	if fieldHasReferences, err := rm.resolveReferenceForApplicationSuccessFeedbackRoleARN(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
+	if fieldHasReferences, err := rm.resolveReferenceForFirehoseFailureFeedbackRoleARN(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
+	if fieldHasReferences, err := rm.resolveReferenceForFirehoseSuccessFeedbackRoleARN(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
+	if fieldHasReferences, err := rm.resolveReferenceForHTTPFailureFeedbackRoleARN(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
+	if fieldHasReferences, err := rm.resolveReferenceForHTTPSuccessFeedbackRoleARN(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
 	if fieldHasReferences, err := rm.resolveReferenceForKMSMasterKeyID(ctx, apiReader, ko); err != nil {
 		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
 	} else {
 		resourceHasReferences = resourceHasReferences || fieldHasReferences
 	}
 
+	if fieldHasReferences, err := rm.resolveReferenceForLambdaFailureFeedbackRoleARN(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
+	if fieldHasReferences, err := rm.resolveReferenceForLambdaSuccessFeedbackRoleARN(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
 	if fieldHasReferences, err := rm.resolveReferenceForPolicy(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
+	if fieldHasReferences, err := rm.resolveReferenceForSQSFailureFeedbackRoleARN(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
+	if fieldHasReferences, err := rm.resolveReferenceForSQSSuccessFeedbackRoleARN(ctx, apiReader, ko); err != nil {
 		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
 	} else {
 		resourceHasReferences = resourceHasReferences || fieldHasReferences
@@ -91,14 +222,330 @@ func (rm *resourceManager) ResolveReferences(
 // identifier field.
 func validateReferenceFields(ko *svcapitypes.Topic) error {
 
+	if ko.Spec.ApplicationFailureFeedbackRoleRef != nil && ko.Spec.ApplicationFailureFeedbackRoleARN != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("ApplicationFailureFeedbackRoleARN", "ApplicationFailureFeedbackRoleRef")
+	}
+
+	if ko.Spec.ApplicationSuccessFeedbackRoleRef != nil && ko.Spec.ApplicationSuccessFeedbackRoleARN != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("ApplicationSuccessFeedbackRoleARN", "ApplicationSuccessFeedbackRoleRef")
+	}
+
+	if ko.Spec.FirehoseFailureFeedbackRoleRef != nil && ko.Spec.FirehoseFailureFeedbackRoleARN != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("FirehoseFailureFeedbackRoleARN", "FirehoseFailureFeedbackRoleRef")
+	}
+
+	if ko.Spec.FirehoseSuccessFeedbackRoleRef != nil && ko.Spec.FirehoseSuccessFeedbackRoleARN != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("FirehoseSuccessFeedbackRoleARN", "FirehoseSuccessFeedbackRoleRef")
+	}
+
+	if ko.Spec.HTTPFailureFeedbackRoleRef != nil && ko.Spec.HTTPFailureFeedbackRoleARN != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("HTTPFailureFeedbackRoleARN", "HTTPFailureFeedbackRoleRef")
+	}
+
+	if ko.Spec.HTTPSuccessFeedbackRoleRef != nil && ko.Spec.HTTPSuccessFeedbackRoleARN != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("HTTPSuccessFeedbackRoleARN", "HTTPSuccessFeedbackRoleRef")
+	}
+
 	if ko.Spec.KMSMasterKeyRef != nil && ko.Spec.KMSMasterKeyID != nil {
 		return ackerr.ResourceReferenceAndIDNotSupportedFor("KMSMasterKeyID", "KMSMasterKeyRef")
+	}
+
+	if ko.Spec.LambdaFailureFeedbackRoleRef != nil && ko.Spec.LambdaFailureFeedbackRoleARN != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("LambdaFailureFeedbackRoleARN", "LambdaFailureFeedbackRoleRef")
+	}
+
+	if ko.Spec.LambdaSuccessFeedbackRoleRef != nil && ko.Spec.LambdaSuccessFeedbackRoleARN != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("LambdaSuccessFeedbackRoleARN", "LambdaSuccessFeedbackRoleRef")
 	}
 
 	if ko.Spec.PolicyRef != nil && ko.Spec.Policy != nil {
 		return ackerr.ResourceReferenceAndIDNotSupportedFor("Policy", "PolicyRef")
 	}
+
+	if ko.Spec.SQSFailureFeedbackRoleRef != nil && ko.Spec.SQSFailureFeedbackRoleARN != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("SQSFailureFeedbackRoleARN", "SQSFailureFeedbackRoleRef")
+	}
+
+	if ko.Spec.SQSSuccessFeedbackRoleRef != nil && ko.Spec.SQSSuccessFeedbackRoleARN != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("SQSSuccessFeedbackRoleARN", "SQSSuccessFeedbackRoleRef")
+	}
 	return nil
+}
+
+// resolveReferenceForApplicationFailureFeedbackRoleARN reads the resource referenced
+// from ApplicationFailureFeedbackRoleRef field and sets the ApplicationFailureFeedbackRoleARN
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForApplicationFailureFeedbackRoleARN(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.Topic,
+) (hasReferences bool, err error) {
+	if ko.Spec.ApplicationFailureFeedbackRoleRef != nil && ko.Spec.ApplicationFailureFeedbackRoleRef.From != nil {
+		hasReferences = true
+		arr := ko.Spec.ApplicationFailureFeedbackRoleRef.From
+		if arr.Name == nil || *arr.Name == "" {
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: ApplicationFailureFeedbackRoleRef")
+		}
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
+		}
+		obj := &iamapitypes.Role{}
+		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return hasReferences, err
+		}
+		ko.Spec.ApplicationFailureFeedbackRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return hasReferences, nil
+}
+
+// getReferencedResourceState_Role looks up whether a referenced resource
+// exists and is in a ACK.ResourceSynced=True state. If the referenced resource does exist and is
+// in a Synced state, returns nil, otherwise returns `ackerr.ResourceReferenceTerminalFor` or
+// `ResourceReferenceNotSyncedFor` depending on if the resource is in a Terminal state.
+func getReferencedResourceState_Role(
+	ctx context.Context,
+	apiReader client.Reader,
+	obj *iamapitypes.Role,
+	name string, // the Kubernetes name of the referenced resource
+	namespace string, // the Kubernetes namespace of the referenced resource
+) error {
+	namespacedName := types.NamespacedName{
+		Namespace: namespace,
+		Name:      name,
+	}
+	err := apiReader.Get(ctx, namespacedName, obj)
+	if err != nil {
+		return err
+	}
+	var refResourceTerminal bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeTerminal &&
+			cond.Status == corev1.ConditionTrue {
+			return ackerr.ResourceReferenceTerminalFor(
+				"Role",
+				namespace, name)
+		}
+	}
+	if refResourceTerminal {
+		return ackerr.ResourceReferenceTerminalFor(
+			"Role",
+			namespace, name)
+	}
+	var refResourceSynced bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeResourceSynced &&
+			cond.Status == corev1.ConditionTrue {
+			refResourceSynced = true
+		}
+	}
+	if !refResourceSynced {
+		return ackerr.ResourceReferenceNotSyncedFor(
+			"Role",
+			namespace, name)
+	}
+	if obj.Status.ACKResourceMetadata == nil || obj.Status.ACKResourceMetadata.ARN == nil {
+		return ackerr.ResourceReferenceMissingTargetFieldFor(
+			"Role",
+			namespace, name,
+			"Status.ACKResourceMetadata.ARN")
+	}
+	return nil
+}
+
+// resolveReferenceForApplicationSuccessFeedbackRoleARN reads the resource referenced
+// from ApplicationSuccessFeedbackRoleRef field and sets the ApplicationSuccessFeedbackRoleARN
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForApplicationSuccessFeedbackRoleARN(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.Topic,
+) (hasReferences bool, err error) {
+	if ko.Spec.ApplicationSuccessFeedbackRoleRef != nil && ko.Spec.ApplicationSuccessFeedbackRoleRef.From != nil {
+		hasReferences = true
+		arr := ko.Spec.ApplicationSuccessFeedbackRoleRef.From
+		if arr.Name == nil || *arr.Name == "" {
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: ApplicationSuccessFeedbackRoleRef")
+		}
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
+		}
+		obj := &iamapitypes.Role{}
+		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return hasReferences, err
+		}
+		ko.Spec.ApplicationSuccessFeedbackRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return hasReferences, nil
+}
+
+// resolveReferenceForFirehoseFailureFeedbackRoleARN reads the resource referenced
+// from FirehoseFailureFeedbackRoleRef field and sets the FirehoseFailureFeedbackRoleARN
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForFirehoseFailureFeedbackRoleARN(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.Topic,
+) (hasReferences bool, err error) {
+	if ko.Spec.FirehoseFailureFeedbackRoleRef != nil && ko.Spec.FirehoseFailureFeedbackRoleRef.From != nil {
+		hasReferences = true
+		arr := ko.Spec.FirehoseFailureFeedbackRoleRef.From
+		if arr.Name == nil || *arr.Name == "" {
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: FirehoseFailureFeedbackRoleRef")
+		}
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
+		}
+		obj := &iamapitypes.Role{}
+		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return hasReferences, err
+		}
+		ko.Spec.FirehoseFailureFeedbackRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return hasReferences, nil
+}
+
+// resolveReferenceForFirehoseSuccessFeedbackRoleARN reads the resource referenced
+// from FirehoseSuccessFeedbackRoleRef field and sets the FirehoseSuccessFeedbackRoleARN
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForFirehoseSuccessFeedbackRoleARN(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.Topic,
+) (hasReferences bool, err error) {
+	if ko.Spec.FirehoseSuccessFeedbackRoleRef != nil && ko.Spec.FirehoseSuccessFeedbackRoleRef.From != nil {
+		hasReferences = true
+		arr := ko.Spec.FirehoseSuccessFeedbackRoleRef.From
+		if arr.Name == nil || *arr.Name == "" {
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: FirehoseSuccessFeedbackRoleRef")
+		}
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
+		}
+		obj := &iamapitypes.Role{}
+		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return hasReferences, err
+		}
+		ko.Spec.FirehoseSuccessFeedbackRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return hasReferences, nil
+}
+
+// resolveReferenceForHTTPFailureFeedbackRoleARN reads the resource referenced
+// from HTTPFailureFeedbackRoleRef field and sets the HTTPFailureFeedbackRoleARN
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForHTTPFailureFeedbackRoleARN(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.Topic,
+) (hasReferences bool, err error) {
+	if ko.Spec.HTTPFailureFeedbackRoleRef != nil && ko.Spec.HTTPFailureFeedbackRoleRef.From != nil {
+		hasReferences = true
+		arr := ko.Spec.HTTPFailureFeedbackRoleRef.From
+		if arr.Name == nil || *arr.Name == "" {
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: HTTPFailureFeedbackRoleRef")
+		}
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
+		}
+		obj := &iamapitypes.Role{}
+		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return hasReferences, err
+		}
+		ko.Spec.HTTPFailureFeedbackRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return hasReferences, nil
+}
+
+// resolveReferenceForHTTPSuccessFeedbackRoleARN reads the resource referenced
+// from HTTPSuccessFeedbackRoleRef field and sets the HTTPSuccessFeedbackRoleARN
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForHTTPSuccessFeedbackRoleARN(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.Topic,
+) (hasReferences bool, err error) {
+	if ko.Spec.HTTPSuccessFeedbackRoleRef != nil && ko.Spec.HTTPSuccessFeedbackRoleRef.From != nil {
+		hasReferences = true
+		arr := ko.Spec.HTTPSuccessFeedbackRoleRef.From
+		if arr.Name == nil || *arr.Name == "" {
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: HTTPSuccessFeedbackRoleRef")
+		}
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
+		}
+		obj := &iamapitypes.Role{}
+		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return hasReferences, err
+		}
+		ko.Spec.HTTPSuccessFeedbackRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return hasReferences, nil
 }
 
 // resolveReferenceForKMSMasterKeyID reads the resource referenced
@@ -116,9 +563,17 @@ func (rm *resourceManager) resolveReferenceForKMSMasterKeyID(
 		if arr.Name == nil || *arr.Name == "" {
 			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: KMSMasterKeyRef")
 		}
-		namespace := ko.ObjectMeta.GetNamespace()
-		if arr.Namespace != nil && *arr.Namespace != "" {
-			namespace = *arr.Namespace
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
 		}
 		obj := &kmsapitypes.Key{}
 		if err := getReferencedResourceState_Key(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
@@ -184,6 +639,80 @@ func getReferencedResourceState_Key(
 	return nil
 }
 
+// resolveReferenceForLambdaFailureFeedbackRoleARN reads the resource referenced
+// from LambdaFailureFeedbackRoleRef field and sets the LambdaFailureFeedbackRoleARN
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForLambdaFailureFeedbackRoleARN(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.Topic,
+) (hasReferences bool, err error) {
+	if ko.Spec.LambdaFailureFeedbackRoleRef != nil && ko.Spec.LambdaFailureFeedbackRoleRef.From != nil {
+		hasReferences = true
+		arr := ko.Spec.LambdaFailureFeedbackRoleRef.From
+		if arr.Name == nil || *arr.Name == "" {
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: LambdaFailureFeedbackRoleRef")
+		}
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
+		}
+		obj := &iamapitypes.Role{}
+		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return hasReferences, err
+		}
+		ko.Spec.LambdaFailureFeedbackRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return hasReferences, nil
+}
+
+// resolveReferenceForLambdaSuccessFeedbackRoleARN reads the resource referenced
+// from LambdaSuccessFeedbackRoleRef field and sets the LambdaSuccessFeedbackRoleARN
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForLambdaSuccessFeedbackRoleARN(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.Topic,
+) (hasReferences bool, err error) {
+	if ko.Spec.LambdaSuccessFeedbackRoleRef != nil && ko.Spec.LambdaSuccessFeedbackRoleRef.From != nil {
+		hasReferences = true
+		arr := ko.Spec.LambdaSuccessFeedbackRoleRef.From
+		if arr.Name == nil || *arr.Name == "" {
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: LambdaSuccessFeedbackRoleRef")
+		}
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
+		}
+		obj := &iamapitypes.Role{}
+		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return hasReferences, err
+		}
+		ko.Spec.LambdaSuccessFeedbackRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return hasReferences, nil
+}
+
 // resolveReferenceForPolicy reads the resource referenced
 // from PolicyRef field and sets the Policy
 // from referenced resource. Returns a boolean indicating whether a reference
@@ -199,9 +728,17 @@ func (rm *resourceManager) resolveReferenceForPolicy(
 		if arr.Name == nil || *arr.Name == "" {
 			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: PolicyRef")
 		}
-		namespace := ko.ObjectMeta.GetNamespace()
-		if arr.Namespace != nil && *arr.Namespace != "" {
-			namespace = *arr.Namespace
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
 		}
 		obj := &iamapitypes.Policy{}
 		if err := getReferencedResourceState_Policy(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
@@ -265,4 +802,78 @@ func getReferencedResourceState_Policy(
 			"Spec.PolicyDocument")
 	}
 	return nil
+}
+
+// resolveReferenceForSQSFailureFeedbackRoleARN reads the resource referenced
+// from SQSFailureFeedbackRoleRef field and sets the SQSFailureFeedbackRoleARN
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForSQSFailureFeedbackRoleARN(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.Topic,
+) (hasReferences bool, err error) {
+	if ko.Spec.SQSFailureFeedbackRoleRef != nil && ko.Spec.SQSFailureFeedbackRoleRef.From != nil {
+		hasReferences = true
+		arr := ko.Spec.SQSFailureFeedbackRoleRef.From
+		if arr.Name == nil || *arr.Name == "" {
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: SQSFailureFeedbackRoleRef")
+		}
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
+		}
+		obj := &iamapitypes.Role{}
+		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return hasReferences, err
+		}
+		ko.Spec.SQSFailureFeedbackRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return hasReferences, nil
+}
+
+// resolveReferenceForSQSSuccessFeedbackRoleARN reads the resource referenced
+// from SQSSuccessFeedbackRoleRef field and sets the SQSSuccessFeedbackRoleARN
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForSQSSuccessFeedbackRoleARN(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.Topic,
+) (hasReferences bool, err error) {
+	if ko.Spec.SQSSuccessFeedbackRoleRef != nil && ko.Spec.SQSSuccessFeedbackRoleRef.From != nil {
+		hasReferences = true
+		arr := ko.Spec.SQSSuccessFeedbackRoleRef.From
+		if arr.Name == nil || *arr.Name == "" {
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: SQSSuccessFeedbackRoleRef")
+		}
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
+		}
+		obj := &iamapitypes.Role{}
+		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return hasReferences, err
+		}
+		ko.Spec.SQSSuccessFeedbackRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return hasReferences, nil
 }

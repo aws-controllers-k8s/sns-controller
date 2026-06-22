@@ -25,6 +25,7 @@ import (
 // Platform application object.
 type PlatformApplicationSpec struct {
 	EventDeliveryFailure    *string                                  `json:"eventDeliveryFailure,omitempty"`
+	EventDeliveryFailureRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"eventDeliveryFailureRef,omitempty"`
 	EventEndpointCreated    *string                                  `json:"eventEndpointCreated,omitempty"`
 	EventEndpointCreatedRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"eventEndpointCreatedRef,omitempty"`
 	EventEndpointDeleted    *string                                  `json:"eventEndpointDeleted,omitempty"`

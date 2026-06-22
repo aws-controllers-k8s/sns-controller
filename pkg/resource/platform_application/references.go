@@ -26,6 +26,7 @@ import (
 	iamapitypes "github.com/aws-controllers-k8s/iam-controller/apis/v1alpha1"
 	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
 	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
+	ackrt "github.com/aws-controllers-k8s/runtime/pkg/runtime"
 	acktypes "github.com/aws-controllers-k8s/runtime/pkg/types"
 
 	svcapitypes "github.com/aws-controllers-k8s/sns-controller/apis/v1alpha1"
@@ -43,6 +44,10 @@ import (
 // values.
 func (rm *resourceManager) ClearResolvedReferences(res acktypes.AWSResource) acktypes.AWSResource {
 	ko := rm.concreteResource(res).ko.DeepCopy()
+
+	if ko.Spec.EventDeliveryFailureRef != nil {
+		ko.Spec.EventDeliveryFailure = nil
+	}
 
 	if ko.Spec.EventEndpointCreatedRef != nil {
 		ko.Spec.EventEndpointCreated = nil
@@ -83,6 +88,12 @@ func (rm *resourceManager) ResolveReferences(
 
 	resourceHasReferences := false
 	err := validateReferenceFields(ko)
+	if fieldHasReferences, err := rm.resolveReferenceForEventDeliveryFailure(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
 	if fieldHasReferences, err := rm.resolveReferenceForEventEndpointCreated(ctx, apiReader, ko); err != nil {
 		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
 	} else {
@@ -120,6 +131,10 @@ func (rm *resourceManager) ResolveReferences(
 // identifier field.
 func validateReferenceFields(ko *svcapitypes.PlatformApplication) error {
 
+	if ko.Spec.EventDeliveryFailureRef != nil && ko.Spec.EventDeliveryFailure != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("EventDeliveryFailure", "EventDeliveryFailureRef")
+	}
+
 	if ko.Spec.EventEndpointCreatedRef != nil && ko.Spec.EventEndpointCreated != nil {
 		return ackerr.ResourceReferenceAndIDNotSupportedFor("EventEndpointCreated", "EventEndpointCreatedRef")
 	}
@@ -142,30 +157,38 @@ func validateReferenceFields(ko *svcapitypes.PlatformApplication) error {
 	return nil
 }
 
-// resolveReferenceForEventEndpointCreated reads the resource referenced
-// from EventEndpointCreatedRef field and sets the EventEndpointCreated
+// resolveReferenceForEventDeliveryFailure reads the resource referenced
+// from EventDeliveryFailureRef field and sets the EventDeliveryFailure
 // from referenced resource. Returns a boolean indicating whether a reference
 // contains references, or an error
-func (rm *resourceManager) resolveReferenceForEventEndpointCreated(
+func (rm *resourceManager) resolveReferenceForEventDeliveryFailure(
 	ctx context.Context,
 	apiReader client.Reader,
 	ko *svcapitypes.PlatformApplication,
 ) (hasReferences bool, err error) {
-	if ko.Spec.EventEndpointCreatedRef != nil && ko.Spec.EventEndpointCreatedRef.From != nil {
+	if ko.Spec.EventDeliveryFailureRef != nil && ko.Spec.EventDeliveryFailureRef.From != nil {
 		hasReferences = true
-		arr := ko.Spec.EventEndpointCreatedRef.From
+		arr := ko.Spec.EventDeliveryFailureRef.From
 		if arr.Name == nil || *arr.Name == "" {
-			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: EventEndpointCreatedRef")
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: EventDeliveryFailureRef")
 		}
-		namespace := ko.ObjectMeta.GetNamespace()
-		if arr.Namespace != nil && *arr.Namespace != "" {
-			namespace = *arr.Namespace
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
 		}
 		obj := &svcapitypes.Topic{}
 		if err := getReferencedResourceState_Topic(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
 			return hasReferences, err
 		}
-		ko.Spec.EventEndpointCreated = (*string)(obj.Status.ACKResourceMetadata.ARN)
+		ko.Spec.EventDeliveryFailure = (*string)(obj.Status.ACKResourceMetadata.ARN)
 	}
 
 	return hasReferences, nil
@@ -225,6 +248,43 @@ func getReferencedResourceState_Topic(
 	return nil
 }
 
+// resolveReferenceForEventEndpointCreated reads the resource referenced
+// from EventEndpointCreatedRef field and sets the EventEndpointCreated
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForEventEndpointCreated(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.PlatformApplication,
+) (hasReferences bool, err error) {
+	if ko.Spec.EventEndpointCreatedRef != nil && ko.Spec.EventEndpointCreatedRef.From != nil {
+		hasReferences = true
+		arr := ko.Spec.EventEndpointCreatedRef.From
+		if arr.Name == nil || *arr.Name == "" {
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: EventEndpointCreatedRef")
+		}
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
+		}
+		obj := &svcapitypes.Topic{}
+		if err := getReferencedResourceState_Topic(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return hasReferences, err
+		}
+		ko.Spec.EventEndpointCreated = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return hasReferences, nil
+}
+
 // resolveReferenceForEventEndpointDeleted reads the resource referenced
 // from EventEndpointDeletedRef field and sets the EventEndpointDeleted
 // from referenced resource. Returns a boolean indicating whether a reference
@@ -240,9 +300,17 @@ func (rm *resourceManager) resolveReferenceForEventEndpointDeleted(
 		if arr.Name == nil || *arr.Name == "" {
 			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: EventEndpointDeletedRef")
 		}
-		namespace := ko.ObjectMeta.GetNamespace()
-		if arr.Namespace != nil && *arr.Namespace != "" {
-			namespace = *arr.Namespace
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
 		}
 		obj := &svcapitypes.Topic{}
 		if err := getReferencedResourceState_Topic(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
@@ -269,9 +337,17 @@ func (rm *resourceManager) resolveReferenceForEventEndpointUpdated(
 		if arr.Name == nil || *arr.Name == "" {
 			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: EventEndpointUpdatedRef")
 		}
-		namespace := ko.ObjectMeta.GetNamespace()
-		if arr.Namespace != nil && *arr.Namespace != "" {
-			namespace = *arr.Namespace
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
 		}
 		obj := &svcapitypes.Topic{}
 		if err := getReferencedResourceState_Topic(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
@@ -298,9 +374,17 @@ func (rm *resourceManager) resolveReferenceForFailureFeedbackRoleARN(
 		if arr.Name == nil || *arr.Name == "" {
 			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: FailureFeedbackRoleRef")
 		}
-		namespace := ko.ObjectMeta.GetNamespace()
-		if arr.Namespace != nil && *arr.Namespace != "" {
-			namespace = *arr.Namespace
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
 		}
 		obj := &iamapitypes.Role{}
 		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
@@ -381,9 +465,17 @@ func (rm *resourceManager) resolveReferenceForSuccessFeedbackRoleARN(
 		if arr.Name == nil || *arr.Name == "" {
 			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: SuccessFeedbackRoleRef")
 		}
-		namespace := ko.ObjectMeta.GetNamespace()
-		if arr.Namespace != nil && *arr.Namespace != "" {
-			namespace = *arr.Namespace
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
 		}
 		obj := &iamapitypes.Role{}
 		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {

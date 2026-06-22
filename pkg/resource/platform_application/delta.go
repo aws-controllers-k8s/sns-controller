@@ -49,6 +49,9 @@ func newResourceDelta(
 			delta.Add("Spec.EventDeliveryFailure", a.ko.Spec.EventDeliveryFailure, b.ko.Spec.EventDeliveryFailure)
 		}
 	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.EventDeliveryFailureRef, b.ko.Spec.EventDeliveryFailureRef) {
+		delta.Add("Spec.EventDeliveryFailureRef", a.ko.Spec.EventDeliveryFailureRef, b.ko.Spec.EventDeliveryFailureRef)
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.EventEndpointCreated, b.ko.Spec.EventEndpointCreated) {
 		delta.Add("Spec.EventEndpointCreated", a.ko.Spec.EventEndpointCreated, b.ko.Spec.EventEndpointCreated)
 	} else if a.ko.Spec.EventEndpointCreated != nil && b.ko.Spec.EventEndpointCreated != nil {

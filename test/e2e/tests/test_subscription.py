@@ -136,3 +136,26 @@ class TestSubscription:
         assert 'healthyRetryPolicy' in got_delivery_policy
         exp_healthy_retry_policy = delivery_policy['healthyRetryPolicy']
         assert exp_healthy_retry_policy == got_delivery_policy['healthyRetryPolicy']
+
+        # Verify semantic JSON comparison (is_document): patch with the same
+        # logical JSON but different key ordering. With DocumentEqual, this
+        # should NOT trigger a reconciliation loop or unnecessary update.
+        reordered_policy = {
+            "healthyRetryPolicy": {
+                "backoffFunction": "exponential",
+                "numMaxDelayRetries": 35,
+                "numMinDelayRetries": 2,
+                "numNoDelayRetries": 3,
+                "numRetries": 50,
+                "maxDelayTarget": 60,
+                "minDelayTarget": 1
+            }
+        }
+        updates = {
+            "spec": {"deliveryPolicy": json.dumps(reordered_policy)},
+        }
+        k8s.patch_custom_resource(sub_ref, updates)
+        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
+
+        # Should still be synced — no unnecessary update triggered
+        condition.assert_synced(sub_ref)

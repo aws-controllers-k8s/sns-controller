@@ -20,6 +20,7 @@ import (
 
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	acktags "github.com/aws-controllers-k8s/runtime/pkg/tags"
+	"k8s.io/apimachinery/pkg/api/equality"
 )
 
 // Hack to avoid import errors during build...
@@ -61,6 +62,9 @@ func newResourceDelta(
 		if *a.ko.Spec.PlatformApplicationARN != *b.ko.Spec.PlatformApplicationARN {
 			delta.Add("Spec.PlatformApplicationARN", a.ko.Spec.PlatformApplicationARN, b.ko.Spec.PlatformApplicationARN)
 		}
+	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.PlatformApplicationRef, b.ko.Spec.PlatformApplicationRef) {
+		delta.Add("Spec.PlatformApplicationRef", a.ko.Spec.PlatformApplicationRef, b.ko.Spec.PlatformApplicationRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.Token, b.ko.Spec.Token) {
 		delta.Add("Spec.Token", a.ko.Spec.Token, b.ko.Spec.Token)

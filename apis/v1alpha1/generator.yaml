@@ -79,6 +79,7 @@ resources:
         is_attribute: true
       DeliveryPolicy:
         is_attribute: true
+        is_document: true
       DisplayName:
         is_attribute: true
         compare:
@@ -115,34 +116,84 @@ resources:
           is_ignored: true
       HTTPSuccessFeedbackRoleArn:
         is_attribute: true
+        type: string
+        references:
+          service_name: iam
+          resource: Role
+          path: Status.ACKResourceMetadata.ARN
       HTTPSuccessFeedbackSampleRate:
         is_attribute: true
       HTTPFailureFeedbackRoleArn:
         is_attribute: true
+        type: string
+        references:
+          service_name: iam
+          resource: Role
+          path: Status.ACKResourceMetadata.ARN
       FirehoseSuccessFeedbackRoleArn:
         is_attribute: true
+        type: string
+        references:
+          service_name: iam
+          resource: Role
+          path: Status.ACKResourceMetadata.ARN
       FirehoseSuccessFeedbackSampleRate:
         is_attribute: true
       FirehoseFailureFeedbackRoleArn:
         is_attribute: true
+        type: string
+        references:
+          service_name: iam
+          resource: Role
+          path: Status.ACKResourceMetadata.ARN
       LambdaSuccessFeedbackRoleArn:
         is_attribute: true
+        type: string
+        references:
+          service_name: iam
+          resource: Role
+          path: Status.ACKResourceMetadata.ARN
       LambdaSuccessFeedbackSampleRate:
         is_attribute: true
       LambdaFailureFeedbackRoleArn:
         is_attribute: true
+        type: string
+        references:
+          service_name: iam
+          resource: Role
+          path: Status.ACKResourceMetadata.ARN
       ApplicationSuccessFeedbackRoleArn:
         is_attribute: true
+        type: string
+        references:
+          service_name: iam
+          resource: Role
+          path: Status.ACKResourceMetadata.ARN
       ApplicationSuccessFeedbackSampleRate:
         is_attribute: true
       ApplicationFailureFeedbackRoleArn:
         is_attribute: true
+        type: string
+        references:
+          service_name: iam
+          resource: Role
+          path: Status.ACKResourceMetadata.ARN
       SQSSuccessFeedbackRoleArn:
         is_attribute: true
+        type: string
+        references:
+          service_name: iam
+          resource: Role
+          path: Status.ACKResourceMetadata.ARN
       SQSSuccessFeedbackSampleRate:
         is_attribute: true
       SQSFailureFeedbackRoleArn:
         is_attribute: true
+        type: string
+        references:
+          service_name: iam
+          resource: Role
+          path: Status.ACKResourceMetadata.ARN
   PlatformApplication:
     is_arn_primary_key: true
     unpack_attributes_map:
@@ -172,6 +223,10 @@ resources:
           path: Status.ACKResourceMetadata.ARN
       EventDeliveryFailure:
         is_attribute: true
+        type: string
+        references:
+          resource: Topic
+          path: Status.ACKResourceMetadata.ARN
       SuccessFeedbackRoleArn:
         is_attribute: true
         type: string
@@ -195,6 +250,10 @@ resources:
     unpack_attributes_map:
       set_attributes_single_attribute: false
     fields:
+      PlatformApplicationArn:
+        references:
+          resource: PlatformApplication
+          path: Status.ACKResourceMetadata.ARN
       CustomUserData:
         is_attribute: true
       Enabled:
@@ -233,6 +292,7 @@ resources:
         is_read_only: true
       DeliveryPolicy:
         is_attribute: true
+        is_document: true
       EffectiveDeliveryPolicy:
         is_attribute: true
         is_read_only: true
@@ -254,8 +314,14 @@ resources:
         is_attribute: true
       RedrivePolicy:
         is_attribute: true
+        is_document: true
       SubscriptionRoleArn:
         is_attribute: true
+        type: string
+        references:
+          service_name: iam
+          resource: Role
+          path: Status.ACKResourceMetadata.ARN
       TopicArn:
         references:
           resource: Topic

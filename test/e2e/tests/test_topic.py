@@ -177,6 +177,16 @@ class TestTopic:
         assert 'DisplayName' in latest
         assert latest['DisplayName'] == new_display_name
 
+        # Update deliveryPolicy with a different retry configuration to verify
+        # updates work correctly with is_document comparison
+        updated_delivery_policy = '{"http":{"defaultHealthyRetryPolicy":{"minDelayTarget":30,"maxDelayTarget":60,"numRetries":5,"numMaxDelayRetries":2,"numNoDelayRetries":0,"numMinDelayRetries":0,"backoffFunction":"exponential"},"disableSubscriptionOverrides":false}}'
+        updates = {
+            "spec": {"deliveryPolicy": updated_delivery_policy},
+        }
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
+        assert k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=5)
+
         # Same update code path check for tags...
         latest_tags = topic.get_tags(topic_arn)
         expect_before_update_tags = [
