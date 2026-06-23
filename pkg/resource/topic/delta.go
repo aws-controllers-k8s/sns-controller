@@ -50,12 +50,18 @@ func newResourceDelta(
 			delta.Add("Spec.ApplicationFailureFeedbackRoleARN", a.ko.Spec.ApplicationFailureFeedbackRoleARN, b.ko.Spec.ApplicationFailureFeedbackRoleARN)
 		}
 	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.ApplicationFailureFeedbackRoleRef, b.ko.Spec.ApplicationFailureFeedbackRoleRef) {
+		delta.Add("Spec.ApplicationFailureFeedbackRoleRef", a.ko.Spec.ApplicationFailureFeedbackRoleRef, b.ko.Spec.ApplicationFailureFeedbackRoleRef)
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.ApplicationSuccessFeedbackRoleARN, b.ko.Spec.ApplicationSuccessFeedbackRoleARN) {
 		delta.Add("Spec.ApplicationSuccessFeedbackRoleARN", a.ko.Spec.ApplicationSuccessFeedbackRoleARN, b.ko.Spec.ApplicationSuccessFeedbackRoleARN)
 	} else if a.ko.Spec.ApplicationSuccessFeedbackRoleARN != nil && b.ko.Spec.ApplicationSuccessFeedbackRoleARN != nil {
 		if *a.ko.Spec.ApplicationSuccessFeedbackRoleARN != *b.ko.Spec.ApplicationSuccessFeedbackRoleARN {
 			delta.Add("Spec.ApplicationSuccessFeedbackRoleARN", a.ko.Spec.ApplicationSuccessFeedbackRoleARN, b.ko.Spec.ApplicationSuccessFeedbackRoleARN)
 		}
+	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.ApplicationSuccessFeedbackRoleRef, b.ko.Spec.ApplicationSuccessFeedbackRoleRef) {
+		delta.Add("Spec.ApplicationSuccessFeedbackRoleRef", a.ko.Spec.ApplicationSuccessFeedbackRoleRef, b.ko.Spec.ApplicationSuccessFeedbackRoleRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.ApplicationSuccessFeedbackSampleRate, b.ko.Spec.ApplicationSuccessFeedbackSampleRate) {
 		delta.Add("Spec.ApplicationSuccessFeedbackSampleRate", a.ko.Spec.ApplicationSuccessFeedbackSampleRate, b.ko.Spec.ApplicationSuccessFeedbackSampleRate)
@@ -115,12 +121,18 @@ func newResourceDelta(
 			delta.Add("Spec.FirehoseFailureFeedbackRoleARN", a.ko.Spec.FirehoseFailureFeedbackRoleARN, b.ko.Spec.FirehoseFailureFeedbackRoleARN)
 		}
 	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.FirehoseFailureFeedbackRoleRef, b.ko.Spec.FirehoseFailureFeedbackRoleRef) {
+		delta.Add("Spec.FirehoseFailureFeedbackRoleRef", a.ko.Spec.FirehoseFailureFeedbackRoleRef, b.ko.Spec.FirehoseFailureFeedbackRoleRef)
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.FirehoseSuccessFeedbackRoleARN, b.ko.Spec.FirehoseSuccessFeedbackRoleARN) {
 		delta.Add("Spec.FirehoseSuccessFeedbackRoleARN", a.ko.Spec.FirehoseSuccessFeedbackRoleARN, b.ko.Spec.FirehoseSuccessFeedbackRoleARN)
 	} else if a.ko.Spec.FirehoseSuccessFeedbackRoleARN != nil && b.ko.Spec.FirehoseSuccessFeedbackRoleARN != nil {
 		if *a.ko.Spec.FirehoseSuccessFeedbackRoleARN != *b.ko.Spec.FirehoseSuccessFeedbackRoleARN {
 			delta.Add("Spec.FirehoseSuccessFeedbackRoleARN", a.ko.Spec.FirehoseSuccessFeedbackRoleARN, b.ko.Spec.FirehoseSuccessFeedbackRoleARN)
 		}
+	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.FirehoseSuccessFeedbackRoleRef, b.ko.Spec.FirehoseSuccessFeedbackRoleRef) {
+		delta.Add("Spec.FirehoseSuccessFeedbackRoleRef", a.ko.Spec.FirehoseSuccessFeedbackRoleRef, b.ko.Spec.FirehoseSuccessFeedbackRoleRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.FirehoseSuccessFeedbackSampleRate, b.ko.Spec.FirehoseSuccessFeedbackSampleRate) {
 		delta.Add("Spec.FirehoseSuccessFeedbackSampleRate", a.ko.Spec.FirehoseSuccessFeedbackSampleRate, b.ko.Spec.FirehoseSuccessFeedbackSampleRate)
@@ -136,12 +148,18 @@ func newResourceDelta(
 			delta.Add("Spec.HTTPFailureFeedbackRoleARN", a.ko.Spec.HTTPFailureFeedbackRoleARN, b.ko.Spec.HTTPFailureFeedbackRoleARN)
 		}
 	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.HTTPFailureFeedbackRoleRef, b.ko.Spec.HTTPFailureFeedbackRoleRef) {
+		delta.Add("Spec.HTTPFailureFeedbackRoleRef", a.ko.Spec.HTTPFailureFeedbackRoleRef, b.ko.Spec.HTTPFailureFeedbackRoleRef)
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.HTTPSuccessFeedbackRoleARN, b.ko.Spec.HTTPSuccessFeedbackRoleARN) {
 		delta.Add("Spec.HTTPSuccessFeedbackRoleARN", a.ko.Spec.HTTPSuccessFeedbackRoleARN, b.ko.Spec.HTTPSuccessFeedbackRoleARN)
 	} else if a.ko.Spec.HTTPSuccessFeedbackRoleARN != nil && b.ko.Spec.HTTPSuccessFeedbackRoleARN != nil {
 		if *a.ko.Spec.HTTPSuccessFeedbackRoleARN != *b.ko.Spec.HTTPSuccessFeedbackRoleARN {
 			delta.Add("Spec.HTTPSuccessFeedbackRoleARN", a.ko.Spec.HTTPSuccessFeedbackRoleARN, b.ko.Spec.HTTPSuccessFeedbackRoleARN)
 		}
+	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.HTTPSuccessFeedbackRoleRef, b.ko.Spec.HTTPSuccessFeedbackRoleRef) {
+		delta.Add("Spec.HTTPSuccessFeedbackRoleRef", a.ko.Spec.HTTPSuccessFeedbackRoleRef, b.ko.Spec.HTTPSuccessFeedbackRoleRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.HTTPSuccessFeedbackSampleRate, b.ko.Spec.HTTPSuccessFeedbackSampleRate) {
 		delta.Add("Spec.HTTPSuccessFeedbackSampleRate", a.ko.Spec.HTTPSuccessFeedbackSampleRate, b.ko.Spec.HTTPSuccessFeedbackSampleRate)
@@ -167,12 +185,18 @@ func newResourceDelta(
 			delta.Add("Spec.LambdaFailureFeedbackRoleARN", a.ko.Spec.LambdaFailureFeedbackRoleARN, b.ko.Spec.LambdaFailureFeedbackRoleARN)
 		}
 	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.LambdaFailureFeedbackRoleRef, b.ko.Spec.LambdaFailureFeedbackRoleRef) {
+		delta.Add("Spec.LambdaFailureFeedbackRoleRef", a.ko.Spec.LambdaFailureFeedbackRoleRef, b.ko.Spec.LambdaFailureFeedbackRoleRef)
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.LambdaSuccessFeedbackRoleARN, b.ko.Spec.LambdaSuccessFeedbackRoleARN) {
 		delta.Add("Spec.LambdaSuccessFeedbackRoleARN", a.ko.Spec.LambdaSuccessFeedbackRoleARN, b.ko.Spec.LambdaSuccessFeedbackRoleARN)
 	} else if a.ko.Spec.LambdaSuccessFeedbackRoleARN != nil && b.ko.Spec.LambdaSuccessFeedbackRoleARN != nil {
 		if *a.ko.Spec.LambdaSuccessFeedbackRoleARN != *b.ko.Spec.LambdaSuccessFeedbackRoleARN {
 			delta.Add("Spec.LambdaSuccessFeedbackRoleARN", a.ko.Spec.LambdaSuccessFeedbackRoleARN, b.ko.Spec.LambdaSuccessFeedbackRoleARN)
 		}
+	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.LambdaSuccessFeedbackRoleRef, b.ko.Spec.LambdaSuccessFeedbackRoleRef) {
+		delta.Add("Spec.LambdaSuccessFeedbackRoleRef", a.ko.Spec.LambdaSuccessFeedbackRoleRef, b.ko.Spec.LambdaSuccessFeedbackRoleRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.LambdaSuccessFeedbackSampleRate, b.ko.Spec.LambdaSuccessFeedbackSampleRate) {
 		delta.Add("Spec.LambdaSuccessFeedbackSampleRate", a.ko.Spec.LambdaSuccessFeedbackSampleRate, b.ko.Spec.LambdaSuccessFeedbackSampleRate)
@@ -205,12 +229,18 @@ func newResourceDelta(
 			delta.Add("Spec.SQSFailureFeedbackRoleARN", a.ko.Spec.SQSFailureFeedbackRoleARN, b.ko.Spec.SQSFailureFeedbackRoleARN)
 		}
 	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.SQSFailureFeedbackRoleRef, b.ko.Spec.SQSFailureFeedbackRoleRef) {
+		delta.Add("Spec.SQSFailureFeedbackRoleRef", a.ko.Spec.SQSFailureFeedbackRoleRef, b.ko.Spec.SQSFailureFeedbackRoleRef)
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.SQSSuccessFeedbackRoleARN, b.ko.Spec.SQSSuccessFeedbackRoleARN) {
 		delta.Add("Spec.SQSSuccessFeedbackRoleARN", a.ko.Spec.SQSSuccessFeedbackRoleARN, b.ko.Spec.SQSSuccessFeedbackRoleARN)
 	} else if a.ko.Spec.SQSSuccessFeedbackRoleARN != nil && b.ko.Spec.SQSSuccessFeedbackRoleARN != nil {
 		if *a.ko.Spec.SQSSuccessFeedbackRoleARN != *b.ko.Spec.SQSSuccessFeedbackRoleARN {
 			delta.Add("Spec.SQSSuccessFeedbackRoleARN", a.ko.Spec.SQSSuccessFeedbackRoleARN, b.ko.Spec.SQSSuccessFeedbackRoleARN)
 		}
+	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.SQSSuccessFeedbackRoleRef, b.ko.Spec.SQSSuccessFeedbackRoleRef) {
+		delta.Add("Spec.SQSSuccessFeedbackRoleRef", a.ko.Spec.SQSSuccessFeedbackRoleRef, b.ko.Spec.SQSSuccessFeedbackRoleRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.SQSSuccessFeedbackSampleRate, b.ko.Spec.SQSSuccessFeedbackSampleRate) {
 		delta.Add("Spec.SQSSuccessFeedbackSampleRate", a.ko.Spec.SQSSuccessFeedbackSampleRate, b.ko.Spec.SQSSuccessFeedbackSampleRate)

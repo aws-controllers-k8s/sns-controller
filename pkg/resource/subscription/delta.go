@@ -99,6 +99,9 @@ func newResourceDelta(
 			delta.Add("Spec.SubscriptionRoleARN", a.ko.Spec.SubscriptionRoleARN, b.ko.Spec.SubscriptionRoleARN)
 		}
 	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.SubscriptionRoleRef, b.ko.Spec.SubscriptionRoleRef) {
+		delta.Add("Spec.SubscriptionRoleRef", a.ko.Spec.SubscriptionRoleRef, b.ko.Spec.SubscriptionRoleRef)
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.TopicARN, b.ko.Spec.TopicARN) {
 		delta.Add("Spec.TopicARN", a.ko.Spec.TopicARN, b.ko.Spec.TopicARN)
 	} else if a.ko.Spec.TopicARN != nil && b.ko.Spec.TopicARN != nil {
