@@ -77,10 +77,11 @@ type SubscriptionSpec struct {
 	//     Firehose delivery stream.
 	//
 	// +kubebuilder:validation:Required
-	Protocol            *string `json:"protocol"`
-	RawMessageDelivery  *string `json:"rawMessageDelivery,omitempty"`
-	RedrivePolicy       *string `json:"redrivePolicy,omitempty"`
-	SubscriptionRoleARN *string `json:"subscriptionRoleARN,omitempty"`
+	Protocol            *string                                  `json:"protocol"`
+	RawMessageDelivery  *string                                  `json:"rawMessageDelivery,omitempty"`
+	RedrivePolicy       *string                                  `json:"redrivePolicy,omitempty"`
+	SubscriptionRoleARN *string                                  `json:"subscriptionRoleARN,omitempty"`
+	SubscriptionRoleRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"subscriptionRoleRef,omitempty"`
 	// The ARN of the topic you want to subscribe to.
 	TopicARN *string                                  `json:"topicARN,omitempty"`
 	TopicRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"topicRef,omitempty"`
