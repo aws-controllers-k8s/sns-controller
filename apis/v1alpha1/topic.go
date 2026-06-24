@@ -25,11 +25,13 @@ import (
 // A wrapper type for the topic's Amazon Resource Name (ARN). To retrieve a
 // topic's attributes, use GetTopicAttributes.
 type TopicSpec struct {
-	ApplicationFailureFeedbackRoleARN    *string `json:"applicationFailureFeedbackRoleARN,omitempty"`
-	ApplicationSuccessFeedbackRoleARN    *string `json:"applicationSuccessFeedbackRoleARN,omitempty"`
-	ApplicationSuccessFeedbackSampleRate *string `json:"applicationSuccessFeedbackSampleRate,omitempty"`
-	ArchivePolicy                        *string `json:"archivePolicy,omitempty"`
-	ContentBasedDeduplication            *string `json:"contentBasedDeduplication,omitempty"`
+	ApplicationFailureFeedbackRoleARN    *string                                  `json:"applicationFailureFeedbackRoleARN,omitempty"`
+	ApplicationFailureFeedbackRoleRef    *ackv1alpha1.AWSResourceReferenceWrapper `json:"applicationFailureFeedbackRoleRef,omitempty"`
+	ApplicationSuccessFeedbackRoleARN    *string                                  `json:"applicationSuccessFeedbackRoleARN,omitempty"`
+	ApplicationSuccessFeedbackRoleRef    *ackv1alpha1.AWSResourceReferenceWrapper `json:"applicationSuccessFeedbackRoleRef,omitempty"`
+	ApplicationSuccessFeedbackSampleRate *string                                  `json:"applicationSuccessFeedbackSampleRate,omitempty"`
+	ArchivePolicy                        *string                                  `json:"archivePolicy,omitempty"`
+	ContentBasedDeduplication            *string                                  `json:"contentBasedDeduplication,omitempty"`
 	// The body of the policy document you want to use for this topic.
 	//
 	// You can only add one policy per topic.
@@ -43,15 +45,21 @@ type TopicSpec struct {
 	FIFOThroughputScope               *string                                  `json:"fifoThroughputScope,omitempty"`
 	FIFOTopic                         *string                                  `json:"fifoTopic,omitempty"`
 	FirehoseFailureFeedbackRoleARN    *string                                  `json:"firehoseFailureFeedbackRoleARN,omitempty"`
+	FirehoseFailureFeedbackRoleRef    *ackv1alpha1.AWSResourceReferenceWrapper `json:"firehoseFailureFeedbackRoleRef,omitempty"`
 	FirehoseSuccessFeedbackRoleARN    *string                                  `json:"firehoseSuccessFeedbackRoleARN,omitempty"`
+	FirehoseSuccessFeedbackRoleRef    *ackv1alpha1.AWSResourceReferenceWrapper `json:"firehoseSuccessFeedbackRoleRef,omitempty"`
 	FirehoseSuccessFeedbackSampleRate *string                                  `json:"firehoseSuccessFeedbackSampleRate,omitempty"`
 	HTTPFailureFeedbackRoleARN        *string                                  `json:"httpFailureFeedbackRoleARN,omitempty"`
+	HTTPFailureFeedbackRoleRef        *ackv1alpha1.AWSResourceReferenceWrapper `json:"httpFailureFeedbackRoleRef,omitempty"`
 	HTTPSuccessFeedbackRoleARN        *string                                  `json:"httpSuccessFeedbackRoleARN,omitempty"`
+	HTTPSuccessFeedbackRoleRef        *ackv1alpha1.AWSResourceReferenceWrapper `json:"httpSuccessFeedbackRoleRef,omitempty"`
 	HTTPSuccessFeedbackSampleRate     *string                                  `json:"httpSuccessFeedbackSampleRate,omitempty"`
 	KMSMasterKeyID                    *string                                  `json:"kmsMasterKeyID,omitempty"`
 	KMSMasterKeyRef                   *ackv1alpha1.AWSResourceReferenceWrapper `json:"kmsMasterKeyRef,omitempty"`
 	LambdaFailureFeedbackRoleARN      *string                                  `json:"lambdaFailureFeedbackRoleARN,omitempty"`
+	LambdaFailureFeedbackRoleRef      *ackv1alpha1.AWSResourceReferenceWrapper `json:"lambdaFailureFeedbackRoleRef,omitempty"`
 	LambdaSuccessFeedbackRoleARN      *string                                  `json:"lambdaSuccessFeedbackRoleARN,omitempty"`
+	LambdaSuccessFeedbackRoleRef      *ackv1alpha1.AWSResourceReferenceWrapper `json:"lambdaSuccessFeedbackRoleRef,omitempty"`
 	LambdaSuccessFeedbackSampleRate   *string                                  `json:"lambdaSuccessFeedbackSampleRate,omitempty"`
 	// The name of the topic you want to create.
 	//
@@ -66,7 +74,9 @@ type TopicSpec struct {
 	Policy                       *string                                  `json:"policy,omitempty"`
 	PolicyRef                    *ackv1alpha1.AWSResourceReferenceWrapper `json:"policyRef,omitempty"`
 	SQSFailureFeedbackRoleARN    *string                                  `json:"sqsFailureFeedbackRoleARN,omitempty"`
+	SQSFailureFeedbackRoleRef    *ackv1alpha1.AWSResourceReferenceWrapper `json:"sqsFailureFeedbackRoleRef,omitempty"`
 	SQSSuccessFeedbackRoleARN    *string                                  `json:"sqsSuccessFeedbackRoleARN,omitempty"`
+	SQSSuccessFeedbackRoleRef    *ackv1alpha1.AWSResourceReferenceWrapper `json:"sqsSuccessFeedbackRoleRef,omitempty"`
 	SQSSuccessFeedbackSampleRate *string                                  `json:"sqsSuccessFeedbackSampleRate,omitempty"`
 	SignatureVersion             *string                                  `json:"signatureVersion,omitempty"`
 	// The list of tags to add to a new topic.
