@@ -17,6 +17,8 @@ import time
 
 import pytest
 
+import json
+
 from acktest.k8s import condition
 from acktest.k8s import resource as k8s
 from acktest.resources import random_suffix_name
@@ -133,6 +135,39 @@ def fifo_topic_throughput_scope():
     )
     assert deleted
 
+@pytest.fixture(scope="module")
+def fifo_archive_policy_topic():
+    topic_name = random_suffix_name("my-fifo-archive-policy", 40)
+    # NOTE: FIFO Topics must have a name that ends in ".fifo"
+    topic_name += ".fifo"
+    display_name = "a fifo archive policy topic"
+
+    replacements = REPLACEMENT_VALUES.copy()
+    replacements['TOPIC_NAME'] = topic_name
+    replacements['DISPLAY_NAME'] = display_name
+
+    resource_data = load_resource(
+        "topic_fifo_archive_policy",
+        additional_replacements=replacements,
+    )
+
+    ref = k8s.CustomResourceReference(
+        CRD_GROUP, CRD_VERSION, TOPIC_RESOURCE_PLURAL,
+        topic_name, namespace="default",
+    )
+    k8s.create_custom_resource(ref, resource_data)
+    cr = k8s.wait_resource_consumed_by_controller(ref)
+
+    assert cr is not None
+    assert k8s.get_resource_exists(ref)
+
+    yield (ref, cr)
+
+    _, deleted = k8s.delete_custom_resource(
+        ref,
+        period_length=DELETE_WAIT_AFTER_SECONDS,
+    )
+    assert deleted
 
 @service_marker
 @pytest.mark.canary
@@ -296,3 +331,40 @@ class TestTopic:
 
         # Verify CR spec reflects the updated value
         assert cr['spec']['fifoThroughputScope'] == "MessageGroup"
+
+    def test_crud_fifo_archive_policy(self, fifo_archive_policy_topic):
+        ref, res = fifo_archive_policy_topic
+        condition.assert_synced(ref)
+
+        cr = k8s.get_resource(ref)
+        assert cr is not None
+        assert 'spec' in cr
+        assert 'archivePolicy' in cr['spec']
+
+        topic_arn = cr['status']['ackResourceMetadata']['arn']
+        attrs = topic.get_attributes(topic_arn)
+        assert attrs is not None
+        assert 'ArchivePolicy' in attrs
+
+        # IMPORTANT: compare semantically, not as raw strings. SNS may return
+        # the JSON with different whitespace/key ordering than we submitted.
+        assert json.loads(attrs['ArchivePolicy']) == {"MessageRetentionPeriod": "30"}
+
+    def test_update_archive_policy(self, fifo_archive_policy_topic):
+        # NOTE: this test shares the module-scoped fifo_archive_policy_topic
+        # fixture with test_crud_fifo_archive_policy and intentionally runs
+        # after it (pytest preserves source order), mutating retention 30 -> 60.
+        ref, res = fifo_archive_policy_topic
+        condition.assert_synced(ref)
+
+        updates = {
+            "spec": {"archivePolicy": '{"MessageRetentionPeriod":"60"}'},
+        }
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
+
+        cr = k8s.get_resource(ref)
+        topic_arn = cr['status']['ackResourceMetadata']['arn']
+        attrs = topic.get_attributes(topic_arn)
+        assert attrs is not None
+        assert json.loads(attrs['ArchivePolicy']) == {"MessageRetentionPeriod": "60"}

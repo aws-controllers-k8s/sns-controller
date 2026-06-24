@@ -70,6 +70,13 @@ func newResourceDelta(
 			delta.Add("Spec.ApplicationSuccessFeedbackSampleRate", a.ko.Spec.ApplicationSuccessFeedbackSampleRate, b.ko.Spec.ApplicationSuccessFeedbackSampleRate)
 		}
 	}
+	if ackcompare.HasNilDifference(a.ko.Spec.ArchivePolicy, b.ko.Spec.ArchivePolicy) {
+		delta.Add("Spec.ArchivePolicy", a.ko.Spec.ArchivePolicy, b.ko.Spec.ArchivePolicy)
+	} else if a.ko.Spec.ArchivePolicy != nil && b.ko.Spec.ArchivePolicy != nil {
+		if equal, err := ackcompare.DocumentEqual(*a.ko.Spec.ArchivePolicy, *b.ko.Spec.ArchivePolicy); err != nil || !equal {
+			delta.Add("Spec.ArchivePolicy", a.ko.Spec.ArchivePolicy, b.ko.Spec.ArchivePolicy)
+		}
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.ContentBasedDeduplication, b.ko.Spec.ContentBasedDeduplication) {
 		delta.Add("Spec.ContentBasedDeduplication", a.ko.Spec.ContentBasedDeduplication, b.ko.Spec.ContentBasedDeduplication)
 	} else if a.ko.Spec.ContentBasedDeduplication != nil && b.ko.Spec.ContentBasedDeduplication != nil {

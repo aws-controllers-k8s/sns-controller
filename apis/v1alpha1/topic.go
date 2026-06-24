@@ -30,6 +30,7 @@ type TopicSpec struct {
 	ApplicationSuccessFeedbackRoleARN    *string                                  `json:"applicationSuccessFeedbackRoleARN,omitempty"`
 	ApplicationSuccessFeedbackRoleRef    *ackv1alpha1.AWSResourceReferenceWrapper `json:"applicationSuccessFeedbackRoleRef,omitempty"`
 	ApplicationSuccessFeedbackSampleRate *string                                  `json:"applicationSuccessFeedbackSampleRate,omitempty"`
+	ArchivePolicy                        *string                                  `json:"archivePolicy,omitempty"`
 	ContentBasedDeduplication            *string                                  `json:"contentBasedDeduplication,omitempty"`
 	// The body of the policy document you want to use for this topic.
 	//
