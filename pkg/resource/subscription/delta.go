@@ -46,7 +46,7 @@ func newResourceDelta(
 	if ackcompare.HasNilDifference(a.ko.Spec.DeliveryPolicy, b.ko.Spec.DeliveryPolicy) {
 		delta.Add("Spec.DeliveryPolicy", a.ko.Spec.DeliveryPolicy, b.ko.Spec.DeliveryPolicy)
 	} else if a.ko.Spec.DeliveryPolicy != nil && b.ko.Spec.DeliveryPolicy != nil {
-		if *a.ko.Spec.DeliveryPolicy != *b.ko.Spec.DeliveryPolicy {
+		if equal, err := ackcompare.DocumentEqual(*a.ko.Spec.DeliveryPolicy, *b.ko.Spec.DeliveryPolicy); err != nil || !equal {
 			delta.Add("Spec.DeliveryPolicy", a.ko.Spec.DeliveryPolicy, b.ko.Spec.DeliveryPolicy)
 		}
 	}
@@ -88,7 +88,7 @@ func newResourceDelta(
 	if ackcompare.HasNilDifference(a.ko.Spec.RedrivePolicy, b.ko.Spec.RedrivePolicy) {
 		delta.Add("Spec.RedrivePolicy", a.ko.Spec.RedrivePolicy, b.ko.Spec.RedrivePolicy)
 	} else if a.ko.Spec.RedrivePolicy != nil && b.ko.Spec.RedrivePolicy != nil {
-		if *a.ko.Spec.RedrivePolicy != *b.ko.Spec.RedrivePolicy {
+		if equal, err := ackcompare.DocumentEqual(*a.ko.Spec.RedrivePolicy, *b.ko.Spec.RedrivePolicy); err != nil || !equal {
 			delta.Add("Spec.RedrivePolicy", a.ko.Spec.RedrivePolicy, b.ko.Spec.RedrivePolicy)
 		}
 	}
