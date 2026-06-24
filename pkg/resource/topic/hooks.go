@@ -15,10 +15,8 @@ package topic
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"reflect"
 
 	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
@@ -204,46 +202,6 @@ func compareTags(
 			delta.Add("Spec.Tags", a.ko.Spec.Tags, b.ko.Spec.Tags)
 		}
 	}
-}
-
-// compareArchivePolicy is a custom comparison function for the ArchivePolicy
-// attribute. ArchivePolicy is a JSON document and SNS may return it with
-// different whitespace or key ordering than what was submitted. A raw string
-// comparison (the default generated delta) would therefore report a perpetual
-// difference, causing an infinite reconcile loop that repeatedly calls
-// SetTopicAttributes. We instead compare the two values semantically.
-func compareArchivePolicy(
-	delta *ackcompare.Delta,
-	a *resource,
-	b *resource,
-) {
-	if ackcompare.HasNilDifference(a.ko.Spec.ArchivePolicy, b.ko.Spec.ArchivePolicy) {
-		delta.Add("Spec.ArchivePolicy", a.ko.Spec.ArchivePolicy, b.ko.Spec.ArchivePolicy)
-		return
-	}
-	if a.ko.Spec.ArchivePolicy == nil || b.ko.Spec.ArchivePolicy == nil {
-		return
-	}
-	if !equalJSON(*a.ko.Spec.ArchivePolicy, *b.ko.Spec.ArchivePolicy) {
-		delta.Add("Spec.ArchivePolicy", a.ko.Spec.ArchivePolicy, b.ko.Spec.ArchivePolicy)
-	}
-}
-
-// equalJSON reports whether two strings represent semantically equivalent JSON
-// documents, ignoring insignificant whitespace and object key ordering. If
-// either string is not valid JSON it falls back to a raw string comparison.
-func equalJSON(x, y string) bool {
-	if x == y {
-		return true
-	}
-	var xi, yi interface{}
-	if err := json.Unmarshal([]byte(x), &xi); err != nil {
-		return false
-	}
-	if err := json.Unmarshal([]byte(y), &yi); err != nil {
-		return false
-	}
-	return reflect.DeepEqual(xi, yi)
 }
 
 // syncTags examines the Tags in the supplied Topic and calls the

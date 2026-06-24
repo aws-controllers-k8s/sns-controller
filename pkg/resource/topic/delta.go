@@ -42,7 +42,6 @@ func newResourceDelta(
 		return delta
 	}
 	compareTags(delta, a, b)
-	compareArchivePolicy(delta, a, b)
 
 	if ackcompare.HasNilDifference(a.ko.Spec.ApplicationFailureFeedbackRoleARN, b.ko.Spec.ApplicationFailureFeedbackRoleARN) {
 		delta.Add("Spec.ApplicationFailureFeedbackRoleARN", a.ko.Spec.ApplicationFailureFeedbackRoleARN, b.ko.Spec.ApplicationFailureFeedbackRoleARN)
@@ -63,6 +62,13 @@ func newResourceDelta(
 	} else if a.ko.Spec.ApplicationSuccessFeedbackSampleRate != nil && b.ko.Spec.ApplicationSuccessFeedbackSampleRate != nil {
 		if *a.ko.Spec.ApplicationSuccessFeedbackSampleRate != *b.ko.Spec.ApplicationSuccessFeedbackSampleRate {
 			delta.Add("Spec.ApplicationSuccessFeedbackSampleRate", a.ko.Spec.ApplicationSuccessFeedbackSampleRate, b.ko.Spec.ApplicationSuccessFeedbackSampleRate)
+		}
+	}
+	if ackcompare.HasNilDifference(a.ko.Spec.ArchivePolicy, b.ko.Spec.ArchivePolicy) {
+		delta.Add("Spec.ArchivePolicy", a.ko.Spec.ArchivePolicy, b.ko.Spec.ArchivePolicy)
+	} else if a.ko.Spec.ArchivePolicy != nil && b.ko.Spec.ArchivePolicy != nil {
+		if equal, err := ackcompare.DocumentEqual(*a.ko.Spec.ArchivePolicy, *b.ko.Spec.ArchivePolicy); err != nil || !equal {
+			delta.Add("Spec.ArchivePolicy", a.ko.Spec.ArchivePolicy, b.ko.Spec.ArchivePolicy)
 		}
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.ContentBasedDeduplication, b.ko.Spec.ContentBasedDeduplication) {
