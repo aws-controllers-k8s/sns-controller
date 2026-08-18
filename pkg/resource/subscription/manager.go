@@ -271,6 +271,14 @@ func (rm *resourceManager) IsSynced(ctx context.Context, res acktypes.AWSResourc
 		panic("resource manager's IsSynced() method received resource with nil CR object")
 	}
 
+	if r.ko.Status.PendingConfirmation == nil {
+		return false, nil
+	}
+	pendingConfirmationCandidates := []string{"false"}
+	if !ackutil.InStrings(*r.ko.Status.PendingConfirmation, pendingConfirmationCandidates) {
+		return false, nil
+	}
+
 	return true, nil
 }
 

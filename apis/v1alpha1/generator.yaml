@@ -281,6 +281,13 @@ resources:
     exceptions:
       terminal_codes:
         - InvalidParameter
+    # http, https, email and email-json subscriptions are created pending and
+    # deliver nothing until the endpoint owner confirms them.
+    synced:
+      when:
+        - path: Status.PendingConfirmation
+          in:
+            - "false"
     hooks:
       sdk_create_post_build_request:
         template_path: hooks/subscription/sdk_create_post_build_request.go.tpl

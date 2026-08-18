@@ -1,0 +1,13 @@
+apiVersion: sns.services.k8s.aws/v1alpha1
+kind: Subscription
+metadata:
+  name: $SUBSCRIPTION_NAME
+  annotations:
+    # SNS refuses Unsubscribe on a subscription that is pending confirmation, so
+    # the controller cannot delete this resource. Retain lets the CR be removed
+    # at teardown; SNS reaps the unconfirmed subscription itself after 48h.
+    services.k8s.aws/deletion-policy: retain
+spec:
+  topicARN: $TOPIC_ARN
+  endpoint: $ENDPOINT
+  protocol: email

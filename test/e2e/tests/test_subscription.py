@@ -33,6 +33,14 @@ MODIFY_WAIT_AFTER_SECONDS = 10
 CHECK_WAIT_AFTER_REF_RESOLVE_SECONDS = 10
 DELETE_SUBSCRIPTION_TIMEOUT_SECONDS = 10
 
+# PendingConfirmation is unknown until the first read-back, so every
+# Subscription needs one requeue before it can report Synced=True.
+SYNCED_WAIT_PERIODS = 6
+SYNCED_WAIT_PERIOD_LENGTH_SECONDS = 15
+
+# Spans at least one requeue of a not-synced resource.
+REQUEUE_OBSERVE_WAIT_SECONDS = 45
+
 
 @pytest.fixture(scope="module")
 def subscription_sqs():
@@ -88,7 +96,18 @@ class TestSubscription:
 
         subscription.wait_until_exists(sub_arn)
 
-        condition.assert_synced(sub_ref)
+        # sqs is confirmed by SNS on our behalf, but only reaches Synced=True
+        # once PendingConfirmation has been read back.
+        assert k8s.wait_on_condition(
+            sub_ref,
+            condition.CONDITION_TYPE_RESOURCE_SYNCED,
+            "True",
+            wait_periods=SYNCED_WAIT_PERIODS,
+            period_length=SYNCED_WAIT_PERIOD_LENGTH_SECONDS,
+        )
+
+        cr = k8s.get_resource(sub_ref)
+        assert cr['status']['pendingConfirmation'] == "false"
 
         # Before we update the Topic CR below, let's check to see that the
         # DisplayName field in the CR is still what we set in the original
@@ -159,3 +178,100 @@ class TestSubscription:
 
         # Should still be synced — no unnecessary update triggered
         condition.assert_synced(sub_ref)
+
+
+@pytest.fixture(scope="module")
+def subscription_pending():
+    """Creates a Subscription that stays unconfirmed.
+
+    An email endpoint is not reachability-checked at Subscribe time (unlike
+    http/https, which SNS rejects outright with InvalidParameter if the endpoint
+    does not answer its confirmation request), and example.com is reserved by
+    RFC 2606, so nobody ever confirms it.
+    """
+    subscription_name = random_suffix_name("subscription-pending", 28)
+    boot_resources = get_bootstrap_resources()
+    topic = boot_resources.Topic2
+
+    replacements = REPLACEMENT_VALUES.copy()
+    replacements['SUBSCRIPTION_NAME'] = subscription_name
+    replacements['TOPIC_ARN'] = topic.arn
+    replacements['ENDPOINT'] = f"{subscription_name}@example.com"
+
+    resource_data = load_resource(
+        "subscription_pending",
+        additional_replacements=replacements,
+    )
+
+    ref = k8s.CustomResourceReference(
+        CRD_GROUP, CRD_VERSION, SUBSCRIPTION_RESOURCE_PLURAL,
+        subscription_name, namespace="default",
+    )
+    k8s.create_custom_resource(ref, resource_data)
+    cr = k8s.wait_resource_consumed_by_controller(ref)
+
+    assert cr is not None
+    # A real ARN comes back despite being unconfirmed because
+    # ReturnSubscriptionArn is overridden to true in SubscribeInput.
+    assert 'status' in cr
+    assert 'ackResourceMetadata' in cr['status']
+    assert 'arn' in cr['status']['ackResourceMetadata']
+    sub_arn = cr['status']['ackResourceMetadata']['arn']
+
+    yield (ref, sub_arn)
+
+    # The resource carries deletion-policy: retain, so the CR is removed without
+    # calling Unsubscribe -- SNS rejects that for a pending subscription. The
+    # unconfirmed subscription is left for SNS to reap after 48h, so there is no
+    # wait_until_deleted here.
+    _, deleted = k8s.delete_custom_resource(
+        ref,
+        period_length=DELETE_SUBSCRIPTION_TIMEOUT_SECONDS,
+    )
+    assert deleted
+
+
+@service_marker
+class TestSubscriptionPendingConfirmation:
+    def test_pending_confirmation(self, subscription_pending):
+        """An unconfirmed Subscription reports Synced=False and keeps requeueing
+        so a later confirmation is noticed.
+        """
+        sub_ref, sub_arn = subscription_pending
+
+        subscription.wait_until_exists(sub_arn)
+
+        attrs = subscription.get_attributes(sub_arn)
+        assert attrs is not None
+        assert attrs['PendingConfirmation'] == "true"
+
+        assert k8s.wait_on_condition(
+            sub_ref,
+            condition.CONDITION_TYPE_RESOURCE_SYNCED,
+            "False",
+            wait_periods=SYNCED_WAIT_PERIODS,
+            period_length=SYNCED_WAIT_PERIOD_LENGTH_SECONDS,
+        )
+
+        cr = k8s.get_resource(sub_ref)
+        assert cr is not None
+        assert cr['status']['pendingConfirmation'] == "true"
+
+        # Awaiting confirmation is a recoverable wait, not terminal.
+        terminal = k8s.get_resource_condition(
+            sub_ref, condition.CONDITION_TYPE_TERMINAL,
+        )
+        assert terminal is None or terminal['status'] != "True"
+
+        # ACK rewrites lastTransitionTime on every reconcile, so a newer
+        # timestamp proves the resource is still being requeued.
+        before = condition.get_synced_last_transition_time(sub_ref)
+        assert before is not None
+        time.sleep(REQUEUE_OBSERVE_WAIT_SECONDS)
+        after = condition.get_synced_last_transition_time(sub_ref)
+        assert after is not None
+        assert after > before, (
+            "expected the controller to requeue and re-reconcile the pending "
+            f"subscription, but ACK.ResourceSynced still reads {before}"
+        )
+        condition.assert_not_synced(sub_ref)
