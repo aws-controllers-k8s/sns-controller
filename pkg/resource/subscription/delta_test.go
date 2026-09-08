@@ -16,7 +16,7 @@ package subscription
 import (
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/assert"
 
 	svcapitypes "github.com/aws-controllers-k8s/sns-controller/apis/v1alpha1"

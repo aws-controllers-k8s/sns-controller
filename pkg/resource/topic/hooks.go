@@ -23,9 +23,9 @@ import (
 	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws/arn"
 	svcsdk "github.com/aws/aws-sdk-go-v2/service/sns"
 	svcsdktypes "github.com/aws/aws-sdk-go-v2/service/sns/types"
-	"github.com/aws/aws-sdk-go/aws/arn"
 	"github.com/aws/smithy-go"
 
 	svcapitypes "github.com/aws-controllers-k8s/sns-controller/apis/v1alpha1"
