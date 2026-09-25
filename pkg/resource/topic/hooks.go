@@ -29,7 +29,6 @@ import (
 	"github.com/aws/smithy-go"
 
 	svcapitypes "github.com/aws-controllers-k8s/sns-controller/apis/v1alpha1"
-	commonutil "github.com/aws-controllers-k8s/sns-controller/pkg/util"
 )
 
 var (
@@ -191,12 +190,11 @@ func compareTags(
 	a *resource,
 	b *resource,
 ) {
-	if len(a.ko.Spec.Tags) != len(b.ko.Spec.Tags) {
+	aTags, _ := convertToOrderedACKTags(a.ko.Spec.Tags)
+	bTags, _ := convertToOrderedACKTags(b.ko.Spec.Tags)
+	added, _, removed := ackcompare.GetTagsDifference(aTags, bTags)
+	if len(added) > 0 || len(removed) > 0 {
 		delta.Add("Spec.Tags", a.ko.Spec.Tags, b.ko.Spec.Tags)
-	} else if len(a.ko.Spec.Tags) > 0 {
-		if !commonutil.EqualTags(a.ko.Spec.Tags, b.ko.Spec.Tags) {
-			delta.Add("Spec.Tags", a.ko.Spec.Tags, b.ko.Spec.Tags)
-		}
 	}
 }
 
@@ -211,22 +209,16 @@ func (rm *resourceManager) syncTags(
 	rlog := ackrtlog.FromContext(ctx)
 	exit := rlog.Trace("rm.syncTags")
 	defer func() { exit(err) }()
-	toAdd := []*svcapitypes.Tag{}
-	toDelete := []*svcapitypes.Tag{}
 
-	existingTags := latest.ko.Spec.Tags
+	from, _ := convertToOrderedACKTags(latest.ko.Spec.Tags)
+	to, toOrder := convertToOrderedACKTags(desired.ko.Spec.Tags)
 
-	for _, t := range desired.ko.Spec.Tags {
-		if !inTags(*t.Key, *t.Value, existingTags) {
-			toAdd = append(toAdd, t)
-		}
-	}
+	// Tags whose value changed are returned in `added` only: TagResource
+	// overwrites the value of an existing key, so they must not be removed.
+	added, _, removed := ackcompare.GetTagsDifference(from, to)
 
-	for _, t := range existingTags {
-		if !inTags(*t.Key, *t.Value, desired.ko.Spec.Tags) {
-			toDelete = append(toDelete, t)
-		}
-	}
+	toAdd := fromACKTags(added, toOrder)
+	toDelete := fromACKTags(removed, nil)
 
 	if len(toAdd) > 0 {
 		for _, t := range toAdd {
@@ -246,24 +238,6 @@ func (rm *resourceManager) syncTags(
 	}
 
 	return nil
-}
-
-// inTags returns true if the supplied key and value can be found in the
-// supplied list of Tag structs.
-//
-// TODO(jaypipes): When we finally standardize Tag handling in ACK, move this
-// to the ACK common runtime/ or pkg/ repos
-func inTags(
-	key string,
-	value string,
-	tags []*svcapitypes.Tag,
-) bool {
-	for _, t := range tags {
-		if *t.Key == key && *t.Value == value {
-			return true
-		}
-	}
-	return false
 }
 
 // getTags returns the list of tags to the Topic
