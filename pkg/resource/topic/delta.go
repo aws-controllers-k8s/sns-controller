@@ -205,6 +205,13 @@ func newResourceDelta(
 			delta.Add("Spec.LambdaSuccessFeedbackSampleRate", a.ko.Spec.LambdaSuccessFeedbackSampleRate, b.ko.Spec.LambdaSuccessFeedbackSampleRate)
 		}
 	}
+	if ackcompare.HasNilDifference(a.ko.Spec.MaximumMessageSize, b.ko.Spec.MaximumMessageSize) {
+		delta.Add("Spec.MaximumMessageSize", a.ko.Spec.MaximumMessageSize, b.ko.Spec.MaximumMessageSize)
+	} else if a.ko.Spec.MaximumMessageSize != nil && b.ko.Spec.MaximumMessageSize != nil {
+		if *a.ko.Spec.MaximumMessageSize != *b.ko.Spec.MaximumMessageSize {
+			delta.Add("Spec.MaximumMessageSize", a.ko.Spec.MaximumMessageSize, b.ko.Spec.MaximumMessageSize)
+		}
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.Name, b.ko.Spec.Name) {
 		delta.Add("Spec.Name", a.ko.Spec.Name, b.ko.Spec.Name)
 	} else if a.ko.Spec.Name != nil && b.ko.Spec.Name != nil {
