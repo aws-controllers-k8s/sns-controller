@@ -43,6 +43,7 @@ var (
 		"SignatureVersion",
 		"ContentBasedDeduplication",
 		"FIFOThroughputScope",
+		"MaximumMessageSize",
 	}
 )
 
@@ -82,6 +83,10 @@ func (rm *resourceManager) customUpdate(
 
 	for _, crdFieldName := range settableAttributeNames {
 		if !delta.DifferentAt("Spec." + crdFieldName) {
+			continue
+		}
+		if crdFieldName == "MaximumMessageSize" && desired.ko.Spec.MaximumMessageSize == nil {
+			// Preserve the existing value so late initialization can restore it.
 			continue
 		}
 		err = rm.setTopicAttribute(ctx, desired, crdFieldName)
@@ -179,6 +184,9 @@ func (rm *resourceManager) newSetAttributesRequestPayload(
 	case "FIFOThroughputScope":
 		res.AttributeName = aws.String("FifoThroughputScope")
 		res.AttributeValue = r.ko.Spec.FIFOThroughputScope
+	case "MaximumMessageSize":
+		res.AttributeName = aws.String("MaximumMessageSize")
+		res.AttributeValue = r.ko.Spec.MaximumMessageSize
 	}
 	return res
 }

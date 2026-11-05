@@ -75,6 +75,11 @@ resources:
         is_attribute: true
       FifoThroughputScope:
         is_attribute: true
+      MaximumMessageSize:
+        is_attribute: true
+        type: string
+        late_initialize:
+          skip_incomplete_check: {}
       TracingConfig:
         is_attribute: true
       DataProtectionPolicy:

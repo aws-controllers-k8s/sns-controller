@@ -60,6 +60,7 @@ type TopicSpec struct {
 	LambdaSuccessFeedbackRoleARN      *string                                  `json:"lambdaSuccessFeedbackRoleARN,omitempty"`
 	LambdaSuccessFeedbackRoleRef      *ackv1alpha1.AWSResourceReferenceWrapper `json:"lambdaSuccessFeedbackRoleRef,omitempty"`
 	LambdaSuccessFeedbackSampleRate   *string                                  `json:"lambdaSuccessFeedbackSampleRate,omitempty"`
+	MaximumMessageSize                *string                                  `json:"maximumMessageSize,omitempty"`
 	// The name of the topic you want to create.
 	//
 	// Constraints: Topic names must be made up of only uppercase and lowercase

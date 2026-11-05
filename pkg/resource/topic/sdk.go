@@ -203,46 +203,52 @@ func (rm *resourceManager) sdkFind(
 	} else {
 		ko.Spec.LambdaSuccessFeedbackSampleRate = nil
 	}
+	f19, ok := resp.Attributes["MaximumMessageSize"]
+	if ok {
+		ko.Spec.MaximumMessageSize = &f19
+	} else {
+		ko.Spec.MaximumMessageSize = nil
+	}
 	if ko.Status.ACKResourceMetadata == nil {
 		ko.Status.ACKResourceMetadata = &ackv1alpha1.ResourceMetadata{}
 	}
 	tmpOwnerID := ackv1alpha1.AWSAccountID(resp.Attributes["Owner"])
 	ko.Status.ACKResourceMetadata.OwnerAccountID = &tmpOwnerID
-	f20, ok := resp.Attributes["Policy"]
+	f21, ok := resp.Attributes["Policy"]
 	if ok {
-		ko.Spec.Policy = &f20
+		ko.Spec.Policy = &f21
 	} else {
 		ko.Spec.Policy = nil
 	}
-	f21, ok := resp.Attributes["SQSFailureFeedbackRoleArn"]
+	f22, ok := resp.Attributes["SQSFailureFeedbackRoleArn"]
 	if ok {
-		ko.Spec.SQSFailureFeedbackRoleARN = &f21
+		ko.Spec.SQSFailureFeedbackRoleARN = &f22
 	} else {
 		ko.Spec.SQSFailureFeedbackRoleARN = nil
 	}
-	f22, ok := resp.Attributes["SQSSuccessFeedbackRoleArn"]
+	f23, ok := resp.Attributes["SQSSuccessFeedbackRoleArn"]
 	if ok {
-		ko.Spec.SQSSuccessFeedbackRoleARN = &f22
+		ko.Spec.SQSSuccessFeedbackRoleARN = &f23
 	} else {
 		ko.Spec.SQSSuccessFeedbackRoleARN = nil
 	}
-	f23, ok := resp.Attributes["SQSSuccessFeedbackSampleRate"]
+	f24, ok := resp.Attributes["SQSSuccessFeedbackSampleRate"]
 	if ok {
-		ko.Spec.SQSSuccessFeedbackSampleRate = &f23
+		ko.Spec.SQSSuccessFeedbackSampleRate = &f24
 	} else {
 		ko.Spec.SQSSuccessFeedbackSampleRate = nil
 	}
-	f24, ok := resp.Attributes["SignatureVersion"]
+	f25, ok := resp.Attributes["SignatureVersion"]
 	if ok {
-		ko.Spec.SignatureVersion = &f24
+		ko.Spec.SignatureVersion = &f25
 	} else {
 		ko.Spec.SignatureVersion = nil
 	}
 	tmpARN := ackv1alpha1.AWSResourceName(resp.Attributes["TopicArn"])
 	ko.Status.ACKResourceMetadata.ARN = &tmpARN
-	f26, ok := resp.Attributes["TracingConfig"]
+	f27, ok := resp.Attributes["TracingConfig"]
 	if ok {
-		ko.Spec.TracingConfig = &f26
+		ko.Spec.TracingConfig = &f27
 	} else {
 		ko.Spec.TracingConfig = nil
 	}
@@ -408,6 +414,9 @@ func (rm *resourceManager) newCreateRequestPayload(
 	}
 	if r.ko.Spec.LambdaSuccessFeedbackSampleRate != nil {
 		attrMap["LambdaSuccessFeedbackSampleRate"] = *r.ko.Spec.LambdaSuccessFeedbackSampleRate
+	}
+	if r.ko.Spec.MaximumMessageSize != nil {
+		attrMap["MaximumMessageSize"] = *r.ko.Spec.MaximumMessageSize
 	}
 	if r.ko.Spec.Policy != nil {
 		attrMap["Policy"] = *r.ko.Spec.Policy

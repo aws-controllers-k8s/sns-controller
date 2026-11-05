@@ -998,6 +998,11 @@ func (in *TopicSpec) DeepCopyInto(out *TopicSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.MaximumMessageSize != nil {
+		in, out := &in.MaximumMessageSize, &out.MaximumMessageSize
+		*out = new(string)
+		**out = **in
+	}
 	if in.Name != nil {
 		in, out := &in.Name, &out.Name
 		*out = new(string)

@@ -183,3 +183,95 @@ func TestCompareTags(t *testing.T) {
 		})
 	}
 }
+
+func TestCustomUpdateMaximumMessageSize(t *testing.T) {
+	tests := []struct {
+		name         string
+		desired      *string
+		latest       *string
+		expectUpdate bool
+	}{
+		{
+			name:         "set a previously omitted attribute",
+			desired:      strPtr("1048576"),
+			expectUpdate: true,
+		},
+		{
+			name:         "increase the maximum message size",
+			desired:      strPtr("1048576"),
+			latest:       strPtr("262144"),
+			expectUpdate: true,
+		},
+		{
+			name:         "explicitly reset to the default",
+			desired:      strPtr("262144"),
+			latest:       strPtr("1048576"),
+			expectUpdate: true,
+		},
+		{
+			name:    "unchanged value makes no API calls",
+			desired: strPtr("1048576"),
+			latest:  strPtr("1048576"),
+		},
+		{
+			name: "omitted attribute makes no API calls",
+		},
+		{
+			name:   "removed field leaves the observed value unchanged",
+			latest: strPtr("1048576"),
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			httpClient := &recordingHTTPClient{}
+			rm := newTagsTestManager(httpClient)
+			desired := newTopicWithTags(nil)
+			desired.ko.Spec.MaximumMessageSize = tc.desired
+			latest := newTopicWithTags(nil)
+			latest.ko.Spec.MaximumMessageSize = tc.latest
+
+			updated, err := rm.customUpdate(
+				context.Background(),
+				desired,
+				latest,
+				newResourceDelta(desired, latest),
+			)
+			require.NoError(t, err)
+			require.NotNil(t, updated)
+			assert.Equal(t, tc.desired, updated.ko.Spec.MaximumMessageSize)
+
+			if !tc.expectUpdate {
+				assert.Empty(t, httpClient.calls)
+				return
+			}
+			require.Len(t, httpClient.calls, 1)
+			call := httpClient.calls[0]
+			assert.Equal(t, "SetTopicAttributes", call.Get("Action"))
+			assert.Equal(t, "MaximumMessageSize", call.Get("AttributeName"))
+			assert.Equal(t, *tc.desired, call.Get("AttributeValue"))
+			assert.Equal(t, string(*desired.ko.Status.ACKResourceMetadata.ARN), call.Get("TopicArn"))
+		})
+	}
+}
+
+func TestCustomUpdateMaximumMessageSizeOmittedWithOtherAttributeChange(t *testing.T) {
+	httpClient := &recordingHTTPClient{}
+	rm := newTagsTestManager(httpClient)
+	desired := newTopicWithTags(nil)
+	desired.ko.Spec.DisplayName = strPtr("updated-name")
+	latest := newTopicWithTags(nil)
+	latest.ko.Spec.DisplayName = strPtr("old-name")
+	latest.ko.Spec.MaximumMessageSize = strPtr("1048576")
+
+	_, err := rm.customUpdate(
+		context.Background(),
+		desired,
+		latest,
+		newResourceDelta(desired, latest),
+	)
+	require.NoError(t, err)
+	require.Len(t, httpClient.calls, 1)
+	assert.Equal(t, "SetTopicAttributes", httpClient.calls[0].Get("Action"))
+	assert.Equal(t, "DisplayName", httpClient.calls[0].Get("AttributeName"))
+	assert.Equal(t, "updated-name", httpClient.calls[0].Get("AttributeValue"))
+}

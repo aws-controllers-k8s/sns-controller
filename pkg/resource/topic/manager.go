@@ -50,7 +50,7 @@ var (
 // +kubebuilder:rbac:groups=sns.services.k8s.aws,resources=topics,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=sns.services.k8s.aws,resources=topics/status,verbs=get;update;patch
 
-var lateInitializeFieldNames = []string{"Policy"}
+var lateInitializeFieldNames = []string{"MaximumMessageSize", "Policy"}
 
 // resourceManager is responsible for providing a consistent way to perform
 // CRUD operations in a backend AWS service API for Book custom resources.
@@ -266,6 +266,9 @@ func (rm *resourceManager) lateInitializeFromReadOneOutput(
 ) acktypes.AWSResource {
 	observedKo := rm.concreteResource(observed).ko.DeepCopy()
 	latestKo := rm.concreteResource(latest).ko.DeepCopy()
+	if observedKo.Spec.MaximumMessageSize != nil && latestKo.Spec.MaximumMessageSize == nil {
+		latestKo.Spec.MaximumMessageSize = observedKo.Spec.MaximumMessageSize
+	}
 	if observedKo.Spec.Policy != nil && latestKo.Spec.Policy == nil {
 		latestKo.Spec.Policy = observedKo.Spec.Policy
 	}
